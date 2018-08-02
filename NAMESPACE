@@ -1,0 +1,23 @@
+export(checkG)
+export(getResiduals)
+export(pcgen)
+export(pcgenFast)
+export(pcgenTest)
+export(pcRes)
+
+import("pcalg", "graph", "Matrix")
+
+importFrom( "stats", "lm", "as.formula", "cor.test", "resid", "pchisq",
+            "anova", "model.frame", "terms", "model.matrix", "contrasts",
+            "manova", "residuals", "cor", "coefficients")
+importFrom( "MASS", "ginv")
+importFrom( "utils", "combn")
+importFrom( "Hmisc", "%nin%")
+importFrom("methods", "as", "new")
+importFrom("lme4", "lmer", "VarCorr")
+importFrom("sommer", "mmer2")
+importFrom("ggm", "msep")
+
+
+
+
