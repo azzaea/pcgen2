@@ -4,7 +4,7 @@
 \usage{ getResiduals(suffStat, covariates = NULL, cov.method = "uni", K = NULL) }
 
 \arguments{
-\item{suffStat}{A data.frame, of which the first column is the factor genotype,  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be genotype. }
+\item{suffStat}{A data.frame, of which the first column is the factor G (genotype),  and subsequent columns contain the traits. The name of the first column should be G. }
 
 \item{covariates}{A data.frame containing covariates, that should always be used in each conditional independence test. Should be either \code{NULL} (default) or a data.frame with the same number of rows as suffStat. An intercept is already included for each trait in suffStat; covariates should not contain a column of ones.}
 

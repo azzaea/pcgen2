@@ -21,6 +21,9 @@
 #'
 #' @param use.GBLUP Use the GBLUP itself, instead of the residuals (as in Topner et al)
 #'
+#'                
+#' @param return.pvalues   
+#' 
 #' @return A graph (an object with S3 class \code{"pcgen"})
 #'
 #' @author Willem Kruijer and Pariya Behrouzi.
@@ -34,7 +37,7 @@
 pcRes <-
   function (suffStat, alpha= 0.01, K = NULL, m.max = Inf,
             verbose = FALSE, covariates=NULL, QTLs=integer(),
-            cov.method = 'uni', use.GBLUP = FALSE)
+            cov.method = 'uni', use.GBLUP = FALSE, return.pvalues = FALSE)
   {
     NAdelete <- TRUE
     if (is.null(alpha)) alpha = 0.01
@@ -69,5 +72,10 @@ pcRes <-
                          u2pd = "relaxed", conservative = FALSE, maj.rule = TRUE,
                          solve.confl = TRUE)
 
-  return(pc.res)
-  }
+    if (return.pvalues == TRUE) {
+      return(list(gr = pc.res, pMax = pc.res@pMax))
+    } else {
+      return(pc.res)
+    }    
+    
+}

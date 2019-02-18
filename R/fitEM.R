@@ -3,7 +3,7 @@
 fitEM <- function(y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL,
                                 cov.error = TRUE, stop.if.significant = FALSE,
                                 null.dev = NULL, alpha = 0.01, max.iter = 100,
-                                Vg.start = NULL, Ve.start = NULL) {
+                                Vg.start = NULL, Ve.start = NULL, cov.gen = TRUE) {
 
 #y = em.vec; K = NULL; null.dev = NULL; Vg.start = as.numeric(Vg.manova)[c(1,4,2)]; stop.if.significant= F; Vg = NULL; Ve = NULL; Ve.start = c(as.numeric(Ve.manova)[c(1,4)], 0); cov.error = FALSE; max.iter = 5
 
@@ -19,6 +19,16 @@ fitEM <- function(y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL,
     Ve <- NULL
   }
 
+  ####################################################
+  # Remove missing data: according to y, X.t and Z.t
+  ####################################################
+  na.X <- apply(X.t, 1, function(x) any(is.na(x)))
+  na.Z <- apply(Z.t, 1, function(z) any(is.na(z)))
+  is.na <- is.na(y[1:nrow(X.t)]) | is.na(y[(nrow(X.t)+1):(2*nrow(X.t))]) | na.X | na.Z
+  y <- y[rep(!is.na,2)]
+  X.t <- X.t[!is.na,]
+  Z.t <- Z.t[!is.na,]
+  
 	Ve.aux <- Ve
 	Vg.aux <- Vg
 
@@ -181,24 +191,6 @@ fitEM <- function(y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL,
 			# EM algorithm
 			#########################################################
 			Ak <- Hinv[-(1:np[1]),-(1:np[1])]
-			#if(est.Vg.var) {
-				# First trait
-				#A <- Ak[1:ngeno, 1:ngeno]
-				#tau1 <- (1/ngeno)*(sum(diag(A)) + t(b.random[1:ngeno])%*%b.random[1:ngeno])
-				#tau1 <- (1/ngeno)*(sum(diag(A)) + sum(b.random[1:ngeno]*b.random[1:ngeno]))
-
-				# Second trait
-				#A <- Ak[(ngeno+1):(2*ngeno), (ngeno+1):(2*ngeno)]
-				#tau2 <- (1/ngeno)*(sum(diag(A)) + t(b.random[(ngeno+1):(2*ngeno)])%*%b.random[(ngeno+1):(2*ngeno)])
-				#tau2 <- (1/ngeno)*(sum(diag(A)) + sum(b.random[(ngeno+1):(2*ngeno)]*b.random[(ngeno+1):(2*ngeno)]))
-			#} else{
-			#	tau1 <- Vg[1]
-			#	tau2 <- Vg[2]
-			#}
-			# Covariance
-			A <- Ak[1:ngeno, (ngeno+1):(2*ngeno)]
-			#tau3 <- (1/ngeno)*(sum(diag(A)) + t(b.random[1:ngeno])%*%b.random[(ngeno+1):(2*ngeno)])
-			tau3 <- (1/ngeno)*(sum(diag(A)) + sum(b.random[1:ngeno]*b.random[(ngeno+1):(2*ngeno)]))
 			#########################################################
 			# Schall: only for the variances (apparently faster)
 			#########################################################
@@ -219,6 +211,15 @@ fitEM <- function(y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL,
 				tau1 <- Vg[1]
 				tau2 <- Vg[2]
 			}
+			# covariance
+			if (cov.gen) {
+			  A <- Ak[1:ngeno, (ngeno+1):(2*ngeno)]
+			  tau3 <- (1/ngeno)*(sum(diag(A)) + sum(b.random[1:ngeno]*b.random[(ngeno+1):(2*ngeno)]))
+			} else {
+			  tau3 <- 0
+			}
+			
+			
 			Vg.new <- c(tau1, tau2, tau3)
 		} else {
 			Vg.new = Vg

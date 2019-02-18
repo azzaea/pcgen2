@@ -61,13 +61,13 @@ pcgenTest <- function(x,y,S,suffStat, QTLs=integer(), covariates=NULL,
   #### First, some checking...
 
   if (class(QTLs)!='integer') {stop('QTLs should be a vector of integers')}
-  if (1 %in% QTLs) {stop('QTLs should not contain the genotype column')}
+  if (1 %in% QTLs) {stop('QTLs should not contain the genotype column (G)')}
 
-  # stop if the first column in suffStat does not have the name genotype
-  stopifnot(names(suffStat)[1] == 'genotype')
+  # stop if the first column in suffStat does not have the name G
+  stopifnot(names(suffStat)[1] == 'G')
   # stop if the same variables occurs more than once
   stopifnot(length(unique(c(x,y,S)))==length(c(x,y,S)))
-  # 1 should always be the genotype factor; stop if it is in the QTL vector
+  # 1 should always be the genotype factor (G); stop if it is in the QTL vector
   if (1 %in% QTLs) {stop()}
   # stop if both x and y are QTLs (cond. indep. of two QTLs is not tested)
   if (x %in% QTLs & y %in% QTLs) {stop()}

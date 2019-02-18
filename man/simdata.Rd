@@ -11,7 +11,7 @@ defined by Y1 -> Y2 -> Y3, and direct genetic effects on Y1 and Y3.
 
 \usage{data(simdata)}
 \format{
-  A data frame of dimension \eqn{ 4 \times 400 }. The first column is the factor genotype; the subsequent columns contain \eqn{y_1, y_2} and \eqn{y_3}.
+  A data frame of dimension \eqn{ 4 \times 400 }. The first column is the factor G (genotype); the subsequent columns contain \eqn{y_1, y_2} and \eqn{y_3}.
 }
 
 \examples{

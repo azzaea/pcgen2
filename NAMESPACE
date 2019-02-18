@@ -3,6 +3,7 @@ export(getResiduals)
 export(pcgen)
 export(pcgenFast)
 export(pcgenTest)
+export(gencovTest)
 export(pcRes)
 
 import("pcalg", "graph", "Matrix")
@@ -15,7 +16,7 @@ importFrom( "utils", "combn")
 importFrom( "Hmisc", "%nin%")
 importFrom("methods", "as", "new")
 importFrom("lme4", "lmer", "VarCorr")
-importFrom("sommer", "mmer2")
+importFrom("sommer", "mmer","vs","unsm")
 importFrom("ggm", "msep")
 
 

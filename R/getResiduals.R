@@ -38,13 +38,13 @@ getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
 # to do: * further (i.e. nongenetic) covariates
 #        * incorporate K
 
-# suffStat = d; cov.method = 'uni'; covariates = NULL
+# suffStat = d; cov.method = 'us'; covariates = NULL
 
     stopifnot(cov.method %in% c('uni','us'))
 
-    names(suffStat)[1] <- 'genotype'
+    names(suffStat)[1] <- 'G'
 
-    max.rep <- max(table(suffStat$genotype))
+    max.rep <- max(table(suffStat$G))
 
     if (max.rep==1 & is.null(K)) {
       if (!is.null(covariates)) {
@@ -83,16 +83,16 @@ getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
 
     if (cov.method != 'uni' | !is.null(K)) {
 
-      Z.t <- make.Z.matrix(suffStat$genotype)
+      Z.t <- as.matrix(make.Z.matrix(suffStat$G))
 
       # define Ks, the kinship to be used by sommer
       if (is.null(K)) {
-        Ks <- round(as.matrix(Z.t %*% t(Z.t)))
+        Ks <- round(Z.t %*% t(Z.t))
       } else {
-        Ks <- as.matrix(Z.t %*% K %*% t(Z.t))
+        Ks <- Z.t %*% as.matrix(K) %*% t(Z.t)
       }
 
-      rownames(Ks) <- colnames(Ks) <- rownames(suffStat) <- paste0(suffStat$genotype,'_', 1:nrow(suffStat))
+      rownames(Ks) <- colnames(Ks) <- rownames(suffStat) <- paste0(suffStat$G,'_', 1:nrow(suffStat))
 
       suffStat$id <- rownames(suffStat)
 
@@ -102,12 +102,24 @@ getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
 
     if (cov.method=='us') {
 
-      out <- mmer2(fixed = as.formula(cv3), random=~us(trait):g(id),
-                           rcov=~us(trait):units, data=suffStat, draw = F,
-                           silent = T, G = list(id = Ks))
+      #out <- mmer2(fixed = as.formula(cv3), random=~us(trait):g(id),
+      #                     rcov=~us(trait):units, data=suffStat, draw = F,
+      #                     silent = T, G = list(id = Ks))
 
+      out <- mmer(fixed  = as.formula(cv3), 
+                  random = ~ vs(id, Gu = Ks, Gtc = unsm(ncol(suffStat) -2) ),
+                  rcov   = ~ vs(units, Gtc = unsm(ncol(suffStat) -2)), 
+                  data   =  suffStat)
+      
       if (out$convergence == TRUE) {
-        res <- out$cond.residuals
+        
+        gb <- matrix(NA, nrow(suffStat), p-1)
+        for (j in 2:p) {
+          gb[,j-1] <- out$U[[1]][[j-1]][suffStat$id]
+        }
+        
+        #res <- out$residuals - gb
+        res <- suffStat[,2:p] - gb
       } else {
         cov.method <- 'uni'
         cat('Warning: no convergence. cov.method is set to uni','\n')
@@ -118,7 +130,7 @@ getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
 
       if (is.null(K)) {
 
-        lmer.cv <- paste(cv, '(1|genotype)')
+        lmer.cv <- paste(cv, '(1|G)')
 
         for (j in 2:p) {
 
@@ -133,13 +145,17 @@ getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
 
         for (j in 2:p) {
 
-          out <- mmer2(fixed = as.formula(paste0(names(suffStat)[j], cv2)),
-                       random = ~ g(id),
-                       data = suffStat, draw = F,
-                       silent = T, G = list(id = Ks))
+          #out <- mmer2(fixed = as.formula(paste0(names(suffStat)[j], cv2)),
+          #             random = ~ g(id),
+          #             data = suffStat, draw = F,
+          #             silent = T, G = list(id = Ks))
 
-          res[which(!is.na(suffStat[,j])), j - 1] <- as.numeric(out$cond.residuals)
-
+          out <- mmer(fixed  = as.formula(paste0(names(suffStat)[j], cv2)), 
+                      random = ~vs(id, Gu = Ks),
+                      rcov   = ~vs(units), data=suffStat)
+          
+          #res[which(!is.na(suffStat[,j])), j - 1] <- as.numeric(out$residuals) - out$U[[1]][[1]][suffStat$id] 
+          res[which(!is.na(suffStat[,j])), j - 1] <-  suffStat[,j]- out$U[[1]][[1]][suffStat$id] 
         }
       }
       rownames(res) <- rownames(suffStat)
@@ -155,14 +171,14 @@ return(as.data.frame(res))
 #   Vg <- Ve <- matrix(0, p - 1, p - 1)
 #
 #   if (is.null(covariates)) {
-#     cv <- '~ (1|genotype)'
+#     cv <- '~ (1|G)'
 #     X.t <- Matrix(rep(1, nrow(suffStat)))
 #   } else {
 #     stopifnot(nrow(suffStat)==nrow(covariates))
 #     covariates        <- as.data.frame(covariates)
 #     names(covariates) <- paste0('covariate_', 1:ncol(covariates))
 #     suffStat          <- cbind(suffStat, covariates)
-#     cv <- paste('~',paste(names(covariates), collapse ='+'), '+ (1|genotype)')
+#     cv <- paste('~',paste(names(covariates), collapse ='+'), '+ (1|G)')
 #     X.t <- Matrix(cbind(rep(1, nrow(suffStat)), as.matrix(covariates)))
 #   }
 #
@@ -183,7 +199,7 @@ return(as.data.frame(res))
 #     for (k in (j+1):(p-1)) {
 #
 #       em.vec        <- c(suffStat[,j+1], suffStat[,k+1])
-#       names(em.vec) <- rep(as.character(suffStat$genotype), 2)
+#       names(em.vec) <- rep(as.character(suffStat$G), 2)
 #
 #       out <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t, max.iter = 300)
 #
@@ -206,7 +222,7 @@ return(as.data.frame(res))
 #     cv.sommer <- paste0('cbind(',paste(names(suffStat)[2:p], collapse=','),')~ 1')
 #   }
 #
-#   out <- mmer2(fixed = as.formula(cv.sommer), random = ~ genotype, data=suffStat,
+#   out <- mmer2(fixed = as.formula(cv.sommer), random = ~ G, data=suffStat,
 #                draw = F, silent = T, forced = list(`g(id)` = Vg, units = Ve))
 #
 #   res <- out$cond.residuals

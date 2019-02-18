@@ -11,7 +11,7 @@ pcgenTest(x, y, S, suffStat, QTLs = integer(), covariates = NULL, alpha = 0.01,
 
 \item{S}{vector of integers defining the conditioning set, where the integers refer to column numbers in \code{suffStat}. May be numeric(), i.e. the empty set.}
 
-\item{suffStat}{A data.frame, of which the first column is the factor genotype,  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be genotype. It should not contain covariates.}
+\item{suffStat}{A data.frame, of which the first column is the factor G(genotype),  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be G. It should not contain covariates.}
 
 \item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These may be partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.}
 
@@ -40,7 +40,7 @@ This performs the conditional independence test used in the pcgen algorithm, ass
 
 \details{\code{pcgenTest} tests for conditional independence between \eqn{x} and \eqn{y} given \eqn{S}.
 It distinguishes 2 situations:
-(i) if one of \eqn{x} and \eqn{y} (say \eqn{x}) is the factor genotype, \code{pcgenTest} will test if the genetic variance in \eqn{y} is zero, given the traits in S. (ii) if \eqn{x} and \eqn{y} are both traits, \code{pcgenTest} tests if the residual covariance between them is zero, given the traits in \eqn{S} and the factor genotype. The factor genotype is automatically included in the conditioning set \eqn{S} (\eqn{S} does not need to contain the integer 1). This test is either based on a bivariate mixed model (when \code{use.res=FALSE}), or on residuals from GBLUP (\code{use.res=T}), obtained with the getResiduals function. In the latter case, \code{res.cor} must be provided.
+(i) if one of \eqn{x} and \eqn{y} (say \eqn{x}) is the factor G, \code{pcgenTest} will test if the genetic variance in \eqn{y} is zero, given the traits in S. (ii) if \eqn{x} and \eqn{y} are both traits, \code{pcgenTest} tests if the residual covariance between them is zero, given the traits in \eqn{S} and the factor G. The factor G is automatically included in the conditioning set \eqn{S} (\eqn{S} does not need to contain the integer 1). This test is either based on a bivariate mixed model (when \code{use.res=FALSE}), or on residuals from GBLUP (\code{use.res=T}), obtained with the getResiduals function. In the latter case, \code{res.cor} must be provided.
 }
 
 \references{

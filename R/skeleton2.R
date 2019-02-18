@@ -188,7 +188,9 @@ function (suffStat, alpha, labels, p, method = c("stable",
                         # Modified the original skeleton function: if an edge is removed,
                         # mark this with <<<<<<<<<< >>>>>>>>>>>>>>>>
                         if (pval >= alpha) {cat('<<<<<<< ',pval,' >>>>>>>>>', "\n")} else {cat(pval, "\n")}
-                        #
+
+                        #if (pval > 1.68 * 10^(-4) & pval < 1.7 * 10^(-4)) {cat('!!!!!!!!!!!!', "\n"); stop()} 
+                                                #
                         #cat("x=", x, " y=", y, " S=", nbrs[S],": pval =", pval, "\n")
                       }
 

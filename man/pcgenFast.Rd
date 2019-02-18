@@ -4,10 +4,11 @@
 \usage{
 pcgenFast(suffStat, alpha = 0.01, m.max = Inf, res.m.max = Inf, verbose = FALSE, 
           covariates = NULL, fixedEdges = NULL, QTLs = integer(), max.iter = 50,
-          stop.if.significant = TRUE, cov.method = 'uni', use.res = FALSE)
+          stop.if.significant = TRUE, cov.method = 'uni', use.res = FALSE, 
+          return.pvalues = FALSE)
 }
 \arguments{
-\item{suffStat}{A data.frame, of which the first column is the factor  genotype,  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be genotype.}
+\item{suffStat}{A data.frame, of which the first column is the factor  G (genotype),  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be G.}
 
 \item{alpha}{The significance level used in each conditional independence test. Default is 0.01. }
 
@@ -19,7 +20,7 @@ pcgenFast(suffStat, alpha = 0.01, m.max = Inf, res.m.max = Inf, verbose = FALSE,
 
 \item{covariates}{A data.frame containing covariates, to be used in each conditional independence test. Cannot contain factors. Should be either \code{NULL} (default) or a data.frame with the same number of rows as suffStat. An intercept is already included for each trait in suffStat; covariates should not contain a column of ones.}
 
-\item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)}, where \eqn{p} is the number of traits. The first row and column refer to the node genotype, and subsequent rows and columns to the traits. As in the \code{pcalg} package, the edge \eqn{i - j} is never considered for removal if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that case, the edge is guaranteed to be present in the resulting graph.}
+\item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)}, where \eqn{p} is the number of traits. The first row and column refer to the node G, and subsequent rows and columns to the traits. As in the \code{pcalg} package, the edge \eqn{i - j} is never considered for removal if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that case, the edge is guaranteed to be present in the resulting graph.}
 
 \item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs.}
 
@@ -31,10 +32,12 @@ pcgenFast(suffStat, alpha = 0.01, m.max = Inf, res.m.max = Inf, verbose = FALSE,
 
 \item{use.res}{If \code{FALSE}, residuals from GBLUP are only used for screening with the standard pc algotihm. After that, the standard pcgen algorithm is run on the remaining edges; the test for conditional independence of 2 traits given a set of other traits and G is based on bivariate mixed models. If \code{TRUE}, this test is
 based on the residuals. In this case, no further edges between traits are removed after screening and \code{pcgen} will only infer the orientation, and the direct genetic effects. }
+
+\item{return.pvalues}{If \code{TRUE}, the maximal p-value for each edge is returned.}
 }
 
 \value{
-A graph (an object with S3 class \code{"pcgen"})
+If \code{return.pvalues = FALSE}, the output is a graph (an object with S3 class \code{"pcgen"}). If \code{return.pvalues = TRUE}, the output is a list with elements \code{gr} (the graph) and \code{pMax} (a matrix with the p-values).
 }
 
 \description{

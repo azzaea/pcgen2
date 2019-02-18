@@ -6,9 +6,9 @@ checkG(pcgen.output, suffStat, alpha = 0.01, covariates = NULL)
 }
 
 \arguments{
-\item{pcgen.output}{A graph with nodes genotype and a number of traits. Typically output from \code{pcgen} or \code{pcgenFast}.}
+\item{pcgen.output}{A graph with nodes G (genotype) and a number of traits. Typically output from \code{pcgen} or \code{pcgenFast}.}
 
-\item{suffStat}{A data.frame, of which the first column is the factor genotype,  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be genotype.}
+\item{suffStat}{A data.frame, of which the first column is the factor G (genotype),  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be G.}
 
 \item{alpha}{The significance level used in each conditional independence test. Default is 0.01. }
 

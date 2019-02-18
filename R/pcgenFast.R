@@ -28,6 +28,9 @@
 #'                  computation of residuals in the first step. Options are 'us' (unstructured multi-trait model fitted
 #'                  using sommer), and uni' (based on univariate GBLUPs).
 #'
+#'                
+#' @param return.pvalues   
+#' 
 #' @return A graph (an object with S3 class \code{"pcgen"})
 #'
 #' @author Willem Kruijer and Pariya Behrouzi.
@@ -43,7 +46,7 @@ function (suffStat, alpha = 0.01, m.max = Inf,
           res.m.max = Inf, verbose = FALSE, covariates = NULL,
           fixedEdges = NULL, QTLs = integer(), max.iter = 50,
           stop.if.significant = TRUE,
-          cov.method = 'uni', use.res = FALSE)
+          cov.method = 'uni', use.res = FALSE, return.pvalues = FALSE)
 {
 
   # suffStat=d; alpha=.01; K = NULL; NAdelete = TRUE; m.max = 3;
@@ -83,21 +86,42 @@ function (suffStat, alpha = 0.01, m.max = Inf,
 
   gapMatrix <- (as.matrix(as(skel.res, "amat")) == 0)
   gapMatrix <- rbind(rep(FALSE, ncol(res) + 1), cbind(rep(FALSE, ncol(res)), gapMatrix))
-  rownames(gapMatrix)[1] <- colnames(gapMatrix)[1] <- 'genotype'
+  rownames(gapMatrix)[1] <- colnames(gapMatrix)[1] <- 'G'
 
 
   fixMatrix <- fixedEdges
 
   res.cor <- cor(res)
 
-  ## estimate CPDAG
-  pcgen.fit <- pcgen(suffStat = suffStat, alpha=alpha, verbose = verbose,
-                    fixedGaps = gapMatrix, fixedEdges = fixMatrix,
-                    covariates = covariates, QTLs = QTLs, m.max = m.max,
-                    max.iter = max.iter,
-                    stop.if.significant = stop.if.significant,
-                    use.res = use.res, res.cor = res.cor)
 
-
-  return(pcgen.fit)
+  if (return.pvalues == TRUE) {
+    ## estimate CPDAG
+    pcgen.fit <- pcgen(suffStat = suffStat, alpha=alpha, verbose = verbose,
+                       fixedGaps = gapMatrix, fixedEdges = fixMatrix,
+                       covariates = covariates, QTLs = QTLs, m.max = m.max,
+                       max.iter = max.iter,
+                       stop.if.significant = stop.if.significant,
+                       use.res = use.res, res.cor = res.cor,
+                       return.pvalues = TRUE)
+    pMax <- pcgen.fit[[2]]
+    
+    #pMax[-1, -1] <- pmax(pMax[-1, -1], skel.res@pMax)
+    inf.select <- which(pMax[-1, -1] == -Inf, arr.ind = T)
+    
+    pMax[-1, -1][inf.select] <- skel.res@pMax[inf.select]
+    
+    return(list(gr = pcgen.fit[[1]], pMax = pMax))
+    
+  } else {
+    
+    pcgen.fit <- pcgen(suffStat = suffStat, alpha=alpha, verbose = verbose,
+                       fixedGaps = gapMatrix, fixedEdges = fixMatrix,
+                       covariates = covariates, QTLs = QTLs, m.max = m.max,
+                       max.iter = max.iter,
+                       stop.if.significant = stop.if.significant,
+                       use.res = use.res, res.cor = res.cor,
+                       return.pvalues = FALSE)
+    return(pcgen.fit)
+  }
+  
 }

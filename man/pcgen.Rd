@@ -4,11 +4,11 @@
 \usage{
 pcgen(suffStat, covariates = NULL, QTLs = integer(), alpha = 0.01, m.max = Inf,
 fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE, use.res = FALSE, 
-res.cor = NULL, max.iter = 50, stop.if.significant = TRUE)
+res.cor = NULL, max.iter = 50, stop.if.significant = TRUE, return.pvalues = FALSE)
 }
 
 \arguments{
-\item{suffStat}{A data.frame, of which the first column is the factor genotype,  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be genotype. Should not contain covariates.}
+\item{suffStat}{A data.frame, of which the first column is the factor G (genotype),  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be G. Should not contain covariates.}
 
 \item{covariates}{A data.frame containing covariates, that should always be used in each conditional independence test Should be either \code{NULL} (default) or a data.frame with the same number of rows as \code{suffStat}. An intercept is already included for each trait in suffStat; covariates should not contain a column of ones.}
 
@@ -18,9 +18,9 @@ res.cor = NULL, max.iter = 50, stop.if.significant = TRUE)
 
 \item{m.max}{Maximum size of the conditioning sets}
 
-\item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)}, where \eqn{p} is the number of traits. The first row and column refer to the node genotype, and subsequent rows and columns to the traits. As in the pcalg package, the edge \eqn{i - j} is never considered for removal if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that case, the edge is guaranteed to be present in the resulting graph.}
+\item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)}, where \eqn{p} is the number of traits. The first row and column refer to the node G, and subsequent rows and columns to the traits. As in the pcalg package, the edge \eqn{i - j} is never considered for removal if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that case, the edge is guaranteed to be present in the resulting graph.}
 
-\item{fixedGaps}{A logical matrix of dimension \eqn{(p+1) \times (p+1)}, where \eqn{p} is the number of traits. The first row and column refer to the node genotype, and subsequent rows and columns to the traits. As in the pcalg package, the edge \eqn{i - j} is removed before starting the algorithm if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that case, the edge is guaranteed to be absent in the resulting graph.}
+\item{fixedGaps}{A logical matrix of dimension \eqn{(p+1) \times (p+1)}, where \eqn{p} is the number of traits. The first row and column refer to the node G, and subsequent rows and columns to the traits. As in the pcalg package, the edge \eqn{i - j} is removed before starting the algorithm if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that case, the edge is guaranteed to be absent in the resulting graph.}
 
 \item{verbose}{If \code{TRUE}, p-values for the conditional independence tests are printed}
 
@@ -33,10 +33,12 @@ res.cor = NULL, max.iter = 50, stop.if.significant = TRUE)
 \item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit the bivariate mixed model (when \code{use.res = FALSE)}. }
 
 \item{stop.if.significant}{If \code{TRUE}, the EM-algorithm used in some of the conditional independence tests (when \code{use.res = FALSE}) will be stopped whenever the p-value becomes significant, i.e. below \code{alpha}. This will speed up calculations, and can be done because (1) the PC algorithm only needs an accept/reject decision (2) In EM the likelihood is nondecreasing. Should be put to \code{FALSE} if the precise p-values are of interest.}
+
+\item{return.pvalues}{If \code{TRUE}, the maximal p-value for each edge is returned.}
 }
 
 \value{
-a graph (an object with S3 class \code{"pcgen"})
+If \code{return.pvalues = FALSE}, the output is a graph (an object with S3 class \code{"pcgen"}). If \code{return.pvalues = TRUE}, the output is a list with elements \code{gr} (the graph) and \code{pMax} (a matrix with the p-values).
 }
 \description{
 Reconstruction of directed networks with random genetic effects, based on phenotypic observations. The pcgen algorithm is a modification of the pc-stable algorithm of Colombo & Maathuis (2014) . It is assumed that there are replicates, and independent genetic effects.

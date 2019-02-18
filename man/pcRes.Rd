@@ -4,11 +4,11 @@
 \usage{
 pcRes(suffStat, alpha= 0.01, K = NULL, m.max = Inf, verbose = FALSE,
   covariates = NULL, QTLs = integer(), cov.method = "uni",
-  use.GBLUP = FALSE)
+  use.GBLUP = FALSE, return.pvalues = FALSE)
 }
 
 \arguments{
-\item{suffStat}{A data.frame, of which the first column is the factor genotype,  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be genotype. }
+\item{suffStat}{A data.frame, of which the first column is the factor G (genotype),  and subsequent columns contain the traits, and optionally some QTLs. The name of the first column should be G. }
 
 \item{alpha}{The significance level used in the test. Default is 0.01.}
 
@@ -25,10 +25,12 @@ pcRes(suffStat, alpha= 0.01, K = NULL, m.max = Inf, verbose = FALSE,
 \item{cov.method}{ A string, specifying which method should be used to compute the GBLUP. Options are \code{'us'} (unstructured multi-trait model fitted using sommer) and \code{'uni'} (based on univariate GBLUPs).}
 
 \item{use.GBLUP}{Use the GBLUP itself, instead of the residuals}
+
+\item{return.pvalues}{If \code{TRUE}, the maximal p-value for each edge is returned.}
 }
 
 \value{
-A graph (an object with S3 class \code{"pcgen"})
+If \code{return.pvalues = FALSE}, the output is a graph (an object with S3 class \code{"pcgen"}). If \code{return.pvalues = TRUE}, the output is a list with elements \code{gr} (the graph) and \code{pMax} (a matrix with the p-values).
 }
 
 \description{

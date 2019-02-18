@@ -9,7 +9,7 @@
 #'
 #' @inheritParams pcgen
 #'
-#' @param pcgen.output a graph with nodes genotype and a number of
+#' @param pcgen.output a graph with nodes G (genotype) and a number of
 #'                     traits. Typically output from pcgen or pcgenFast
 #'
 #' @return A logical matrix of dimension (p+1) x (p+1), p being the number of traits.
@@ -64,7 +64,7 @@ checkG <- function(pcgen.output, suffStat, alpha = 0.01,
     stopifnot(nrow(covariates)==nrow(suffStat))
   }
 
-  if (colnames(suffStat)[1]!='genotype') {stop('The first column of suffStat should be genotype')}
+  if (colnames(suffStat)[1]!='G') {stop('The first column of suffStat should be G (genotype)')}
 
   labels <- colnames(suffStat)
   p      <- ncol(suffStat)
@@ -86,10 +86,10 @@ checkG <- function(pcgen.output, suffStat, alpha = 0.01,
 
   for (j in 2:p) {
 
-    genVarGraph[j-1] <- !msep(alpha='genotype', beta=names(suffStat)[j],
+    genVarGraph[j-1] <- !msep(alpha='G', beta=names(suffStat)[j],
                               a = pcgen.output@graph)
 
-    directGeffect[j-1] <- isAdjacent(object=pcgen.output@graph, from='genotype', to=names(suffStat)[j])
+    directGeffect[j-1] <- isAdjacent(object=pcgen.output@graph, from='G', to=names(suffStat)[j])
 
   }
 

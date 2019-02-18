@@ -77,6 +77,8 @@
 #'                on partial correlations among the residuals, tested using
 #'                the gaussCItest function from pcalg. The residuals can be
 #'                obtained using the function getResiduals
+#'                
+#' @param return.pvalues                
 #'
 #' @return a graph (an object with S3 class \code{"pcgen"})
 #'
@@ -91,7 +93,8 @@
 pcgen <-
 function (suffStat, covariates = NULL, QTLs = integer(), alpha = 0.01, 
           m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE, 
-          use.res = FALSE, res.cor = NULL, max.iter = 50, stop.if.significant = TRUE)
+          use.res = FALSE, res.cor = NULL, max.iter = 50, stop.if.significant = TRUE,
+          return.pvalues = FALSE)
 {
     NAdelete <- TRUE
     u2pd <- c("relaxed", "rand", "retry")[1]
@@ -107,9 +110,9 @@ function (suffStat, covariates = NULL, QTLs = integer(), alpha = 0.01,
       stopifnot(nrow(covariates)==nrow(suffStat))
     }
 
-    if (colnames(suffStat)[1]!='genotype') {stop('The first column of suffStat should be genotype')}
+    if (colnames(suffStat)[1]!='G') {stop('The first column of suffStat should be G (genotype)')}
     if (class(QTLs)!='integer') {stop('QTLs should be a vector of integers')}
-    if (1 %in% QTLs) {stop('QTLs should not contain the genotype column')}
+    if (1 %in% QTLs) {stop('QTLs should not contain the genotype column (G)')}
 
     if (length(QTLs) > 0) {
       non.collider.nodes <- c(1,sort(QTLs))
@@ -206,7 +209,11 @@ function (suffStat, covariates = NULL, QTLs = integer(), alpha = 0.01,
                                 non.collider.nodes = non.collider.nodes)
 
     }
-
-    return(gr)
+    
+    if (return.pvalues == TRUE) {
+      return(list(gr = gr, pMax = skel@pMax))
+    } else {
+      return(gr)
+    }
 }
 
