@@ -32,6 +32,9 @@
 #' @param QTLs column numbers in suffStat data.frame that correspond to QTLs.
 #'             These may be partly in S and x and y, but x and y cannot be both QTLs.
 #'                             
+#' @param K The genetic relatedness matrix. If NULL (the default), independent 
+#'          genetic effects are assumed.
+#' 
 #' @param alpha (Default 0.01) The significance level used in each conditional 
 #'              independence test.
 #' 
@@ -97,7 +100,7 @@
 #' @export
 
 pcgen <-
-function (suffStat, covariates = NULL, QTLs = integer(), alpha = 0.01, 
+function (suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha = 0.01, 
           m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE, 
           use.res = FALSE, res.cor = NULL, max.iter = 50, stop.if.significant = TRUE,
           return.pvalues = FALSE)
