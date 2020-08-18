@@ -20,18 +20,22 @@
 #' In the latter case, res.cor should be the correlation matrix of the
 #' residuals, obtained with getResiduals.
 #'
+#' @param suffStat data.frame, of which the first column is the factor genotype 
+#'                 (i.e samples' IDs) and subsequent columns contain the traits.
+#'                 The name of the first column should be G 
+#'                 Should not contain covariates.
+#'
+#' @param covariates data.frame containing covariates, that should always be used
+#'                   in each conditional independence test. Should be either NULL (default)
+#'                   or a data.frame with the same number of rows as suffStat
+#'   
+#' @param QTLs column numbers in suffStat data.frame that correspond to QTLs.
+#'             These may be partly in S and x and y, but x and y cannot be both QTLs.
+#'                             
+#' @param alpha (Default 0.01) The significance level used in each conditional 
+#'              independence test.
+#' 
 #' @param m.max Maximum size of the conditioning sets.
-#'
-#' @param max.iter Maximum number of iterations in the EM-algorithm.
-#'
-#' @param fixedGaps  A logical matrix of dimension (p+1) * (p+1), where
-#'                   p is the number of traits. The first row and column
-#'                   refer to the node genotype, and subsequent rows and
-#'                   columns to the traits. As in the pcalg package,
-#'                   the edge i-j is removed before starting the algorithm
-#'                   if the entry [i,j] or [j,i] (or both) are TRUE.
-#'                   In that case, the edge is guaranteed to be absent
-#'                   in the resulting graph.
 #'
 #' @param fixedEdges A logical matrix of dimension (p+1) * (p+1), where
 #'                   p is the number of traits. The first row and column
@@ -42,21 +46,32 @@
 #'                   In that case, the edge is guaranteed to be present
 #'                   in the resulting graph.
 #'
+#' @param fixedGaps  A logical matrix of dimension (p+1) * (p+1), where
+#'                   p is the number of traits. The first row and column
+#'                   refer to the node genotype, and subsequent rows and
+#'                   columns to the traits. As in the pcalg package,
+#'                   the edge i-j is removed before starting the algorithm
+#'                   if the entry [i,j] or [j,i] (or both) are TRUE.
+#'                   In that case, the edge is guaranteed to be absent
+#'                   in the resulting graph.
+#'
 #' @param verbose If TRUE, p-values for the conditional independence
 #'                tests are printed
 #'
-#' @param suffStat data.frame, of which the first column is the factor genotype,
-#'                  and subsequent columns contain the traits. The name of the
-#'                 first column should be genotype. Should not contain covariates.
+#' @param use.res If TRUE, the test for conditional independence of 2 traits given
+#'                a set of other traits and G is based on residuals from GBLUP. 
+#'                If FALSE (the default), it is based on bivariate mixed models.
 #'
-#' @param alpha (Default 0.01) The significance level used in each conditional independence test.
+#' @param res.cor Correlation matrix of the residuals of the GBLUP. In case
+#'                it is NULL (default), the test for conditional independence
+#'                between Yj and Yk given a set of traits YS is based on a
+#'                bivariate mixed model. If res.cor is provided, it is based
+#'                on partial correlations among the residuals, tested using
+#'                the gaussCItest function from pcalg. The residuals can be
+#'                obtained using the function getResiduals
 #'
-#' @param QTLs column numbers in suffStat that correspond to QTLs
-#'             These may be partly in S and x and y, but x and y cannot be both QTLs.
-#'
-#' @param covariates data.frame containing covariates, that should always be used
-#'                   in each conditional independence test. Should be either NULL (default)
-#'                   or a data.frame with the same number of rows as suffStat
+#' @param max.iter Maximum number of iterations in the EM-algorithm.
+#'                
 #'
 #' @param stop.if.significant If TRUE, the EM-algorithm used in some
 #'              of the conditional independence tests will be stopped
@@ -66,23 +81,18 @@
 #'              decision (2) In EM the likelihood is nondecreasing. Should
 #'              be put to FALSE if the precise p-values are of interest.
 #'
-#' @param res.cor Correlation matrix of the residuals of the GBLUP. In case
-#'                it is NULL (default), the test for conditional independence
-#'                between Yj and Yk given a set of traits YS is based on a
-#'                bivariate mixed model. If res.cor is provided, it is based
-#'                on partial correlations among the residuals, tested using
-#'                the gaussCItest function from pcalg. The residuals can be
-#'                obtained using the function getResiduals
-#'                
-#' @param return.pvalues                
+#' @param return.pvalues If FALSE, the output is a graph (an object with S3 class
+#'                        \code{"pcgen"}). If TRUE, the output is a list with 
+#'                        elements \code{gr} (the graph) and \code{pMax} (a matrix 
+#'                        with the the maximal p-value for each edge).             
 #'
 #' @return a graph (an object with S3 class \code{"pcgen"})
 #'
 #' @author Willem Kruijer and Pariya Behrouzi.
 #'         Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
-#'        Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
+#'         Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
 #'
-#' @references Kruijer et al. (2018, in preparation) Reconstruction of networks with direct and indirect genetic effects
+#' @references Kruijer et al. (2020) Reconstruction of networks with direct and indirect genetic effects
 #'
 #' @export
 
