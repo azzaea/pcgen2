@@ -10,7 +10,7 @@
 #' NAdelete = TRUE. labels (defining the names of the nodes of the
 #' graph) is derived from the data-frame suffStat, containing the data
 #' (3) pcgen requires phenotypic observations on multiple traits,
-#' measured on the same plants. The current implementation
+#' measured on the same samples. The current implementation
 #' assumes independent genetic effects, i.e. the genetic relatedness matrix
 #' for the different plants is K = Z Z^t, Z being the incidence matrix
 #' assigning plants to genotypes. Consequently, the phenotypic data contained
