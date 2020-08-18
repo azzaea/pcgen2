@@ -33,9 +33,10 @@ skeleton2  <-
     #            and Uk (a matrix with eigenvectors). Obtained as follows:
     #            K <- Z %*% t(Z); w   <- eigen(K); Dk  <- diag(w$values); Uk  <- w$vectors; dec <- list(Dk = Dk, Uk = Uk)
     #    
-    #' param Vg, Ve (Default NULL) Genetic and residual covariance matrices of
-    #        dimension (ncol(suffStat)-1) x (ncol(suffStat)-1). Required if
-    #        cov.means equals 'exact'.
+# These options are not active. Do they need to still be here?    
+#    #' param Vg, Ve (Default NULL) Genetic and residual covariance matrices of
+#    #        dimension (ncol(suffStat)-1) x (ncol(suffStat)-1). Required if
+#    #        cov.means equals 'exact'.
 
     #if (method == "stable.fast") {stop('The stable.fast option is not yet implemented.')}
     
@@ -47,8 +48,7 @@ skeleton2  <-
     }
     
     if (!missing(p))
-      stopifnot(is.numeric(p), length(p <- as.integer(p)) ==
-                  1, p >= 2)
+      stopifnot(is.numeric(p), length(p <- as.integer(p)) == 1, p >= 2)
     if (missing(labels)) {
       if (missing(p))
         stop("need to specify 'labels' or 'p'")
@@ -98,11 +98,11 @@ skeleton2  <-
     
     if (any(is.null(fixedEdges))) {
       fixedEdges <- matrix(rep(FALSE, p * p), nrow = p, ncol = p)
-    }
-    else if (!identical(dim(fixedEdges), c(p, p)))
-      stop("Dimensions of the dataset and fixedEdges do not agree.")
-    else if (!identical(fixedEdges, t(fixedEdges)))
-      stop("fixedEdges must be symmetric")
+    } else 
+      if (!identical(dim(fixedEdges), c(p, p))) {
+        stop("Dimensions of the dataset and fixedEdges do not agree.")
+      } else if (!identical(fixedEdges, t(fixedEdges)))
+        stop("fixedEdges must be symmetric")
     
     # We have inactivated for this version because the stable.fast option is not yet implemented.
     #if (method == "stable.fast") {
@@ -152,9 +152,7 @@ skeleton2  <-
         x <- ind[i, 1]
         y <- ind[i, 2]
         if (G[y, x] && !fixedEdges[y, x]) {
-          nbrsBool <- if (method == "stable")
-            G.l[[x]]
-          else G[, x]
+          nbrsBool <- if (method == "stable")  G.l[[x]] else G[, x]
           nbrsBool[y] <- FALSE
           nbrs <- seq_p[nbrsBool]
           length_nbrs <- length(nbrs)
@@ -165,7 +163,6 @@ skeleton2  <-
             repeat {
               n.edgetests[ord1] <- n.edgetests[ord1] + 1
               #pval <- indepTest(x, y, nbrs[S], suffStat)
-              
               
               if (verbose) {
                 #cat("x=", labels[x], " y=", labels[y], " S=", labels[nbrs[S]],": pval =")
