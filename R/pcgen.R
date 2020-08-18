@@ -25,9 +25,10 @@
 #'                 The name of the first column should be G 
 #'                 Should not contain covariates.
 #'
-#' @param covariates data.frame containing covariates, that should always be used
-#'                   in each conditional independence test. Should be either NULL (default)
-#'                   or a data.frame with the same number of rows as suffStat
+#' @param covariates data.frame containing covariates that should always be used
+#'                   in each conditional independence test. Should be either NULL 
+#'                   (default) or a data.frame with the same number of rows as 
+#'                   suffStat
 #'   
 #' @param QTLs column numbers in suffStat data.frame that correspond to QTLs.
 #'             These may be partly in S and x and y, but x and y cannot be both QTLs.
@@ -95,16 +96,18 @@
 #'         Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
 #'         Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
 #'
-#' @references Kruijer et al. (2020) Reconstruction of networks with direct and indirect genetic effects
+#' @references Kruijer et al. (2020) Reconstruction of networks with direct and 
+#'             indirect genetic effects
 #'
 #' @export
 
 pcgen <-
   function (suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha = 0.01, 
             m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE, 
-            use.res = FALSE, res.cor = NULL, max.iter = 50, stop.if.significant = TRUE,
-            return.pvalues = FALSE)
+            use.res = FALSE, res.cor = NULL, max.iter = 50, 
+            stop.if.significant = TRUE, return.pvalues = FALSE)
   {
+    # pcalg::pc options for order-independt network construction
     NAdelete <- TRUE
     u2pd <- c("relaxed", "rand", "retry")[1]
     skel.method <- c("stable", "original", "stable.fast")[1]
@@ -119,9 +122,12 @@ pcgen <-
       stopifnot(nrow(covariates)==nrow(suffStat))
     }
     
-    if (colnames(suffStat)[1]!='G') {stop('The first column of suffStat should be G (genotype)')}
-    if (class(QTLs)!='integer') {stop('QTLs should be a vector of integers')}
-    if (1 %in% QTLs) {stop('QTLs should not contain the genotype column (G)')}
+    if (colnames(suffStat)[1]!='G') 
+      stop('The first column of suffStat should be named G (genotype)')
+    if (class(QTLs)!='integer') 
+      stop('QTLs should be a vector of integers')
+    if (1 %in% QTLs) 
+      stop('QTLs should not contain the genotype column (G)')
     
     if (length(QTLs) > 0) {
       non.collider.nodes <- c(1,sort(QTLs))
