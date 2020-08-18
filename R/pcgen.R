@@ -147,6 +147,7 @@ pcgen <-
     #u2pd <- match.arg(u2pd)
     #skel.method <- match.arg(skel.method)
     
+    # Was there a version were these options were allowed to vary? They are set now!
     if (u2pd != "relaxed") {
       if (conservative || maj.rule)
         stop("Conservative PC and majority rule PC can only be run with 'u2pd = relaxed'")
