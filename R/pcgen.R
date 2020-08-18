@@ -5,7 +5,7 @@
 #' (1) This is an adaptation of the pc function from pcalg, with a
 #' different conditional independence test (see pcgenTest), as well as
 #' modified orientation rules  (2) Some parameters from the original
-#' pc function are fixed here: skel.method = "stable", u2pd = "stable",
+#' pc function are fixed here: skel.method = "stable", u2pd = "relaxed",
 #' conservative = FALSE, maj.rule = TRUE, solve.confl = TRUE and
 #' NAdelete = TRUE. labels (defining the names of the nodes of the
 #' graph) is derived from the data-frame suffStat, containing the data
