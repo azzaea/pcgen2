@@ -10,14 +10,10 @@
 #' NAdelete = TRUE. labels (defining the names of the nodes of the
 #' graph) is derived from the data-frame suffStat, containing the data
 #' (3) pcgen requires phenotypic observations on multiple traits,
-#' measured on the same samples. The current implementation
-#' assumes independent genetic effects, i.e. the genetic relatedness matrix
-#' for the different plants is K = Z Z^t, Z being the incidence matrix
-#' assigning plants to genotypes. Consequently, the phenotypic data contained
-#' in the data-frame suffStat need to contain (genetically idental) replicates
-#' for at least some of the genotypes. In future version we plan to also
-#' incorporate a marker-based relatedness matrix. This is already possible in
-#' the functions getResiduals and pcRes.
+#' measured on the same samples. The current implementation extends the genetic
+#' relatedness matrix definition from K = Z Z^t, Z being the incidence matrix
+#' assigning plants to genotypes (as is common in plants data) to a 
+#' a marker-based relatedness matrix definition (appropriate for human data).
 #' (4) the test for conditional independence between Yj and Yk given
 #' a set of traits YS can be based either on a bivariate mixed model
 #' (put res.cor = NULL) or on partial correlations among the residuals.
