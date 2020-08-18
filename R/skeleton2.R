@@ -1,42 +1,42 @@
 skeleton2  <-
-  function (suffStat, alpha, labels, p, method = c("stable",
-                                                   "original"), m.max = Inf, fixedGaps = NULL,
-            fixedEdges = NULL, NAdelete = TRUE, verbose = FALSE,
-            covariates=NULL, QTLs = integer(), dec = NULL,
+  function (suffStat, alpha, labels, p, method = c("stable", "original"), 
+            m.max = Inf, fixedGaps = NULL, fixedEdges = NULL, NAdelete = TRUE, 
+            verbose = FALSE, covariates=NULL, QTLs = integer(), dec = NULL,
             max.iter = 50, stop.if.significant = TRUE,
             use.res = FALSE, res.cor = NULL)
   {
     ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
     
-    
-    #' param labels, p, method, m.max, fixedGaps, fixedEdges, NAdelete, verbose: as in the original skeleton function
-    #
     #' param suffStat data.frame, of which the first column is the factor genotype,
     #                 and subsequent columns contain the traits. The name of the
     #                 first column should be genotype
+    #
     #' param alpha (Default 0.01) The significance level used in the test. The test
     #              itself of course does not depend on this, but it is used in the
     #              EM-algorithm to speed up calculations. More precisely, the
     #              EM-algorithm is stopped once the P value is below the
     #              significance level. This can be done because the PC algorithm
     #              only needs an accept/ reject decision.
-    #' param QTLs column numbers in suffStat that correspond to QTLs
-    #             These may be partly in S and x and y, but not x and y both in QTLs!
-    #             Note: the factor genotype (column number 1) may occur in S, as well as x and y
+    #
+    #' param labels, p, method, m.max, fixedGaps, fixedEdges, NAdelete, verbose: as in the original skeleton function
+    #
     #' param covariates data.frame containing covariates, that should always be used
     #                   in each conditional independence test. Should be either NULL (default)
     #                   or a data.frame with the same number of rows as suffStat
     #
-    #' param Vg, Ve (Default NULL) Genetic and residual covariance matrices of
-    #        dimension (ncol(suffStat)-1) x (ncol(suffStat)-1). Required if
-    #        cov.means equals 'exact'.
+    #' param QTLs column numbers in suffStat that correspond to QTLs
+    #             These may be partly in S and x and y, but not x and y both in QTLs!
+    #             Note: the factor genotype (column number 1) may occur in S, as well as x and y
     #
     #' param dec (Default NULL) Contains a spectral decomposition of K = Z Z^t.
     #            Should be a list with components Dk (a vector with the eigenvalues)
     #            and Uk (a matrix with eigenvectors). Obtained as follows:
     #            K <- Z %*% t(Z); w   <- eigen(K); Dk  <- diag(w$values); Uk  <- w$vectors; dec <- list(Dk = Dk, Uk = Uk)
-    
-    
+    #    
+    #' param Vg, Ve (Default NULL) Genetic and residual covariance matrices of
+    #        dimension (ncol(suffStat)-1) x (ncol(suffStat)-1). Required if
+    #        cov.means equals 'exact'.
+
     #if (method == "stable.fast") {stop('The stable.fast option is not yet implemented.')}
     
     cl <- match.call()
