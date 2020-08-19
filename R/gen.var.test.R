@@ -1,27 +1,26 @@
-gen.var.test <- function(y,X=data.frame(),G, return.fitted = FALSE) {
-  # y=d[,2]; X=d[,3:4]; G=d[,1]
-  
-  X <- as.data.frame(X)
-  if (ncol(X) > 0) {
-    a <- data.frame(y = y, X, G = G)
-    names(a) <- c('y',paste0('C',1:ncol(X)),'G')
-  } else {
-    a <- data.frame(y = y, G = G)
+gen.var.test <- function(y, X = data.frame(), G, K = NULL, return.fitted = FALSE) {
+  # y=d[,2]; X=d[,3]; G=d[,1] # previous set up
+  # y = dm[, 2]; X = dm[,3]; G=dm[,1]; K = K # new contribution
+
+  X <- as.matrix(X)
+  if (ncol(X) == 0) { # Y_S = \phi
+    X <-  matrix(1, nrow = length(y))
+  } else {  # Y_S \ne \phi    
+    X <- cbind(1, X)
   }
-  a <- a[!is.na(a$y),]
-  G <- factor(as.character(G))
   
-  lm.obj <- lm(as.formula(paste("y~", paste(names(a)[-1],collapse = "+"))), data=a)
+  lm.obj <- lmm.aireml(Y = y , X = X, K = K, verbose = F)
   
-  av <- anova(lm.obj)
+  lrt <- 2*(lm.obj$logL - lm.obj$logL0) # lrt statistic
+  pvalue <- pchisq(lrt, df = 1, lower.tail = F) 
   
   if (return.fitted == TRUE) {
-    fitted.values <- as.numeric(as.matrix(X) %*% matrix(as.numeric(coefficients(lm.obj))[2:(ncol(X)+1)]))
-    return(list(av[[5]][1+ncol(X)], fitted.values))
+    # fitted.values <- as.numeric(   #I don't know how to produce this from gaston output
+    #   as.matrix(X) %*% matrix(as.numeric(coefficients(lm.obj))[2:(ncol(X)+1)]))
+    fitted.values <- NULL
+    return(list(pvalue, fitted.values))
   } else {
-    return(av[[5]][1+ncol(X)])
+    return(pvalue)
   }
   
 }
-
-

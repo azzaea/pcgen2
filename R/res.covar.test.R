@@ -1,4 +1,4 @@
-res.covar.test <- function(x, y, G, Z.t = NULL,
+res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
                            X=as.data.frame(matrix(0,length(x),0)),
                            alpha = 0.01, use.manova = TRUE,
                            max.iter = 50, stop.if.significant = TRUE) {

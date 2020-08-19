@@ -88,18 +88,11 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
     names(X) <- paste0('covariate_', 1:ncol(covariates))
   }
   
-  ##########################################################################
-  
-  
-  ## Case 1: Trait \perp Trait | {Traits + QTLs} ---------------------------
-  # x and y both represent real traits (no QTLs), and 1
-  # (direct genetic effects) is not in S. S may contain QTLs 
-  
-  if (!(1 %in% c(x,y,S)) & !(any(c(x,y) %in% QTLs))) {S <- c(1, S)}
+
   
   #########################################################################
   
-  ## Case 2: Trait \perp G | {Traits + QTLs} ------------------------------
+  ## Case 2: Trait \perp G | {Traits + QTLs}: Type A test -----------------
   # The case where one of x and y is the number 1 (direct genetic effects).
   # S may also contain QTLs 
   
@@ -107,12 +100,12 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
     if (x==1) {
       if (length(S)!=0) 
         X <- as.data.frame(cbind(X, suffStat[,S]))
-      return(gen.var.test(y = suffStat[,y], X = X, G = suffStat[,1]))
+      return(gen.var.test(y = suffStat[,y], X = X, G = suffStat[,1], K))
     }
     if (y==1) {
       if (length(S)!=0) 
         X <- as.data.frame(cbind(X, suffStat[,S]))
-      return(gen.var.test(y = suffStat[,x], X = X, G=suffStat[,1]))
+      return(gen.var.test(y = suffStat[,x], X = X, G=suffStat[,1], K))
     }
   }
   
@@ -157,13 +150,19 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
     return(pval)
   }
   
-  ###################################################################
-  ## Case 1*: Trait \perp Trait | {G, QTL and Traits} ----------------------
+  ##########################################################################
+  
+  ## Case 1: Trait \perp Trait | {Traits + QTLs} ---------------------------
+  # x and y both represent real traits (no QTLs), and 1
+  # (direct genetic effects) is not in S. S may contain QTLs 
+  
+  if (!(1 %in% c(x,y,S)) & !(any(c(x,y) %in% QTLs))) {S <- c(1, S)}
+  
+  ## Case 1*: Trait \perp Trait | {G, QTL and Traits}: Type B tests --------
   # The case where x and y both represent real traits (no QTLs), and 1
   # (direct genetic effects: G) IS contained in S. S may also contain QTLs.
   # We do not skip any tests here.
   # Note that G will account for QTLs that may not be contained in S.
-  
   
   if (use.res == TRUE) {
     out <- gaussCItest(x = x - 1, y = y - 1, S = (setdiff(S, 1) - 1),
