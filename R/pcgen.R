@@ -183,15 +183,12 @@ pcgen <-
     ##########################
     
     #skel.out <-
-    skel <- skeleton2(suffStat = suffStat, alpha = alpha, labels = labels,
-                      method = skel.method, fixedGaps = fixedGaps, fixedEdges = fixedEdges,
-                      NAdelete = NAdelete, m.max = m.max, verbose = verbose,
-                      covariates=covariates,
-                      QTLs = QTLs,
-                      max.iter = max.iter,
-                      stop.if.significant = stop.if.significant,
-                      use.res = use.res,
-                      res.cor = res.cor)
+    skel <- skeleton2(suffStat = suffStat, alpha = alpha, labels = labels, p = p,
+                      method = skel.method, m.max = m.max, fixedGaps = fixedGaps, 
+                      fixedEdges = fixedEdges, NAdelete = NAdelete,  
+                      verbose = verbose, covariates=covariates, QTLs = QTLs, K = K, #dec?
+                      max.iter = max.iter, stop.if.significant = stop.if.significant,
+                      use.res = use.res, res.cor = res.cor)
     ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
     
     

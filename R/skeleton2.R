@@ -1,9 +1,9 @@
 skeleton2  <-
   function (suffStat, alpha, labels, p, method = c("stable", "original"), 
             m.max = Inf, fixedGaps = NULL, fixedEdges = NULL, NAdelete = TRUE, 
-            verbose = FALSE, covariates=NULL, QTLs = integer(), dec = NULL,
-            max.iter = 50, stop.if.significant = TRUE,
-            use.res = FALSE, res.cor = NULL)
+            verbose = FALSE, covariates=NULL, QTLs = integer(), K = NULL, dec = NULL,
+            max.iter = 50, stop.if.significant = TRUE, use.res = FALSE, 
+            res.cor = NULL)
   {
     ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
     
@@ -28,6 +28,8 @@ skeleton2  <-
     #             These may be partly in S and x and y, but not x and y both in QTLs!
     #             Note: the factor genotype (column number 1) may occur in S, as well as x and y
     #
+    #' param K (Default NULL) The kinship (i.e Genetic Relationship Matrix)
+    #    
     #' param dec (Default NULL) Contains a spectral decomposition of K = Z Z^t.
     #            Should be a list with components Dk (a vector with the eigenvalues)
     #            and Uk (a matrix with eigenvectors). Obtained as follows:
