@@ -3,8 +3,7 @@ skeleton2  <-
             m.max = Inf, fixedGaps = NULL, fixedEdges = NULL, NAdelete = TRUE, 
             verbose = FALSE, covariates=NULL, QTLs = integer(), K = NULL, dec = NULL,
             max.iter = 50, stop.if.significant = TRUE, use.res = FALSE, 
-            res.cor = NULL)
-  {
+            res.cor = NULL) {
     ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
     
     #' param suffStat data.frame, of which the first column is the factor genotype,

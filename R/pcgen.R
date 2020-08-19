@@ -105,8 +105,7 @@ pcgen <-
   function (suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha = 0.01, 
             m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE, 
             use.res = FALSE, res.cor = NULL, max.iter = 50, 
-            stop.if.significant = TRUE, return.pvalues = FALSE)
-  {
+            stop.if.significant = TRUE, return.pvalues = FALSE) {
     # pcalg::pc options for order-independt network construction
     NAdelete <- TRUE
     u2pd <- c("relaxed", "rand", "retry")[1]
