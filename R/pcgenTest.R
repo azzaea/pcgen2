@@ -1,11 +1,8 @@
 #' The conditional independence test in pcgen
 #'
 #' This will perform the conditional independence test used in pcgen algorithm,
-#' assuming there are replicates, and K = Z Z^t
+#' assuming replicates and K = Z Z^t; or no replicates with a generic kinship matrix K = A
 #'
-#' Here we
-#' put a lot
-#' of details
 #' COMMENT on Vg and Ve, which should be either both NULL or positive definite matrices
 #'
 #' @inheritParams pcgen
@@ -42,11 +39,10 @@
 #'
 #' @export
 #'
-pcgenTest <- function(x,y,S,suffStat, QTLs=integer(), covariates=NULL,
-                          alpha = 0.01, max.iter = 50,
-                          stop.if.significant = TRUE,
-                          use.res = FALSE, res.cor = NULL)
-{
+pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K = NULL,
+                          alpha = 0.01, max.iter = 50, stop.if.significant = TRUE,
+                          use.res = FALSE, res.cor = NULL) {
+
   # suffStat = d; x = 2; y = 8; S = c(1,11)
   # QTLs=integer(); covariates=NULL;
   # skip.nongenetic=1; genVar=rep(TRUE, ncol(suffStat));
@@ -56,7 +52,10 @@ pcgenTest <- function(x,y,S,suffStat, QTLs=integer(), covariates=NULL,
   # max.iter = 50; stop.if.significant = TRUE;
   # return.cond.mean = FALSE
 
-  #suffStat = dr[, c(1, 26:36)]; covariates = dr[, 37:38]; x = 6; y = 7; S = 8:9; QTLs=integer(); covariates=NULL; alpha = 0.01; mean.adj = 'none'; Vg = NULL; Ve = NULL; dec = NULL; max.iter = 50;stop.if.significant = TRUE; return.cond.mean = FALSE
+  #suffStat = dr[, c(1, 26:36)]; covariates = dr[, 37:38]; x = 6; y = 7;
+  #S = 8:9; QTLs=integer(); covariates=NULL; alpha = 0.01; mean.adj = 'none'; 
+  #Vg = NULL; Ve = NULL; dec = NULL; max.iter = 50;stop.if.significant = TRUE; 
+  #return.cond.mean = FALSE
 
   #### First, some checking...
 
@@ -92,8 +91,8 @@ pcgenTest <- function(x,y,S,suffStat, QTLs=integer(), covariates=NULL,
   ######################################
 
 
-  ###################################################################
-  # The case x and y both represent real traits (no QTLs), and 1
+  ### Case 1: ------------------------------------------------------------
+  # x and y both represent real traits (no QTLs), and 1
   # (direct genetic effects) is not in S. S may contain QTLs
 
   if (!(1 %in% c(x,y,S)) & !(any(c(x,y) %in% QTLs))) {S <- c(1, S)}
@@ -155,19 +154,27 @@ pcgenTest <- function(x,y,S,suffStat, QTLs=integer(), covariates=NULL,
 
     if (1 %in% S) {
 
-      # Because of the 'hierarchy' (G would 'eat up' all QTL variance), drop 1 from S (in this case only)
+      # Because of the 'hierarchy' (G would 'eat up' all QTL variance), drop 1 from S 
+      # (in this case only)
       if (is.null(covariates)) {
-        pval <- summary(lm(as.formula(paste(sns[y],'~',paste(sns[c(setdiff(S,1),x)], collapse='+'))), data=suffStat))$coefficients[length(S)+1,4]
+        pval <- summary(lm(as.formula(paste(sns[y], '~', 
+                                            paste(sns[c(setdiff(S,1), x)],  collapse='+'))),
+                           data = suffStat))$coefficients[length(S)+1,4]
       } else {
-        pval <- summary(lm(as.formula(paste(sns[y],'~',paste(names(X), collapse='+'),'+',paste(sns[c(setdiff(S,1),x)], collapse='+'))), data=cbind(suffStat,X)))$coefficients[ncol(X) + length(S)+1,4]
+        pval <- summary(lm(as.formula(paste(sns[y], '~', paste(names(X), collapse='+'), 
+                                            '+', paste(sns[c(setdiff(S,1), x)], collapse='+'))),
+                           data = cbind(suffStat, X)))$coefficients[ncol(X) + length(S) + 1, 4]
       }
 
     } else {
 
       if (is.null(covariates)) {
-        pval <- summary(lm(as.formula(paste(sns[y],'~',paste(sns[c(S,x)], collapse='+'))), data=suffStat))$coefficients[length(S)+2,4]
+        pval <- summary(lm(as.formula(paste(sns[y], '~', paste(sns[c(S,x)], collapse='+'))), 
+                           data = suffStat))$coefficients[length(S)+2,4]
       } else {
-        pval <- summary(lm(as.formula(paste(sns[y],'~',paste(names(X), collapse='+'),'+',paste(sns[c(S,x)], collapse='+'))), data=cbind(suffStat,X)))$coefficients[ncol(X) + length(S)+2,4]
+        pval <- summary(lm(as.formula(paste(sns[y], '~', paste(names(X), collapse='+'),
+                                            '+', paste(sns[c(S,x)], collapse = '+'))),
+                           data = cbind(suffStat, X)))$coefficients[ncol(X) + length(S)+2,4]
       }
 
     }

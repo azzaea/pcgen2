@@ -178,14 +178,10 @@ skeleton2  <-
               ##!##
               # Modified the original skeleton function: pcgenTest instead of 
               # indepTest:
-              pval <- pcgenTest(x, y, S=nbrs[S], suffStat,
-                                covariates=covariates,
-                                QTLs = QTLs,
-                                alpha = alpha,
-                                max.iter = max.iter,
+              pval <- pcgenTest(x, y, S = nbrs[S], suffStat, covariates = covariates,
+                                QTLs = QTLs, K = K, alpha = alpha, max.iter = max.iter, 
                                 stop.if.significant = stop.if.significant,
-                                use.res = use.res,
-                                res.cor = res.cor)
+                                use.res = use.res, res.cor = res.cor)
               ##16-1-18## : addedd Vg = Vg, Ve = Ve, dec = dec
               
               if (verbose) {
