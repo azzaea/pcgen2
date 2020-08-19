@@ -18,29 +18,33 @@ skeleton2  <-
     #              significance level. This can be done because the PC algorithm
     #              only needs an accept/ reject decision.
     #
-    #' param labels, p, method, m.max, fixedGaps, fixedEdges, NAdelete, verbose: as in the original skeleton function
+    #' param labels, p, method, m.max, fixedGaps, fixedEdges, NAdelete, verbose: as
+    #'                                            in the original skeleton function
     #
     #' param covariates data.frame containing covariates, that should always be used
     #                   in each conditional independence test. Should be either NULL (default)
     #                   or a data.frame with the same number of rows as suffStat
     #
     #' param QTLs column numbers in suffStat that correspond to QTLs
-    #             These may be partly in S and x and y, but not x and y both in QTLs!
-    #             Note: the factor genotype (column number 1) may occur in S, as well as x and y
+    #             These may be partly in S, x and y, but not x and y both in QTLs!
+    #             Note: the factor genotype (column number 1) may occur in S, 
+    #                   as well as x and y
     #
     #' param K (Default NULL) The kinship (i.e Genetic Relationship Matrix)
     #    
     #' param dec (Default NULL) Contains a spectral decomposition of K = Z Z^t.
     #            Should be a list with components Dk (a vector with the eigenvalues)
     #            and Uk (a matrix with eigenvectors). Obtained as follows:
-    #            K <- Z %*% t(Z); w   <- eigen(K); Dk  <- diag(w$values); Uk  <- w$vectors; dec <- list(Dk = Dk, Uk = Uk)
+    #            K <- Z %*% t(Z); w   <- eigen(K); Dk  <- diag(w$values); 
+    #            Uk  <- w$vectors; dec <- list(Dk = Dk, Uk = Uk)
     #    
 # These options are not active. Do they need to still be here?    
 #    #' param Vg, Ve (Default NULL) Genetic and residual covariance matrices of
 #    #        dimension (ncol(suffStat)-1) x (ncol(suffStat)-1). Required if
 #    #        cov.means equals 'exact'.
 
-    #if (method == "stable.fast") {stop('The stable.fast option is not yet implemented.')}
+    #if (method == "stable.fast") 
+    # {stop('The stable.fast option is not yet implemented.')}
     
     cl <- match.call()
     
@@ -49,6 +53,7 @@ skeleton2  <-
       stopifnot(nrow(covariates)==nrow(suffStat))
     }
     
+    # Not REALLY needed. skeleton2 is only called from pcgen******** Azza
     if (!missing(p))
       stopifnot(is.numeric(p), length(p <- as.integer(p)) == 1, p >= 2)
     if (missing(labels)) {
@@ -171,7 +176,8 @@ skeleton2  <-
                 cat("x=", x, " y=", y, " S=", nbrs[S],": pval =")
               }
               ##!##
-              # Modified the original skeleton function: pcgenTest instead of indepTest:
+              # Modified the original skeleton function: pcgenTest instead of 
+              # indepTest:
               pval <- pcgenTest(x, y, S=nbrs[S], suffStat,
                                 covariates=covariates,
                                 QTLs = QTLs,
@@ -205,8 +211,7 @@ skeleton2  <-
                 break
               }
               else {
-                nextSet <- getNextSet(length_nbrs, ord,
-                                      S)
+                nextSet <- getNextSet(length_nbrs, ord, S)
                 if (nextSet$wasLast)
                   break
                 S <- nextSet$nextSet
@@ -224,8 +229,7 @@ skeleton2  <-
     #}
     Gobject <- if (sum(G) == 0) {
       new("graphNEL", nodes = labels)
-    }
-    else {
+    } else {
       colnames(G) <- rownames(G) <- labels
       as(G, "graphNEL")
     }
