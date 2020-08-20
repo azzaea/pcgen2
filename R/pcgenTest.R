@@ -43,6 +43,18 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
                       alpha = 0.01, max.iter = 50, stop.if.significant = TRUE,
                       use.res = FALSE, res.cor = NULL) {
   
+  ### Example (no replicates and generic K): suffStat = dm[,1:3]; K = K
+  ## case 1; Trait \perp Trait | {Traits, G, Q}
+  # x = 2; y = 3; S = 1;  
+  # pcgenTest(x, y, S, suffStat, K = K) # Y1 \perp Y2 | G (No, low p)
+  #
+  # case 2; Trait \perp G | Traits
+  # x = 2; y = 1; S = 3;
+  # pcgenTest(x, y, S, suffStat, K = K) # Y1 \pepr G | Y2 (No, low p)
+  # x = 3; y = 1; S = 2;
+  # pcgenTest(x, y, S, suffStat, K = K) # Y1 \pepr G | Y2 (Yes, high p)
+  # 
+  # Old examples (I think safe to delete?)
   # suffStat = d; x = 2; y = 8; S = c(1,11)
   # QTLs=integer(); covariates=NULL;
   # skip.nongenetic=1; genVar=rep(TRUE, ncol(suffStat));

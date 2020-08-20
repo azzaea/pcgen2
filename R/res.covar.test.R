@@ -1,6 +1,6 @@
 res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
                            X=as.data.frame(matrix(0,length(x),0)),
-                           alpha = 0.01, use.manova = TRUE,
+                           alpha = 0.01, use.manova = FALSE,
                            max.iter = 50, stop.if.significant = TRUE) {
   # EXACT test for residual correlation, based on a bivariate mixed model
   # x,y : trait vectors whose independence is to be tested, conditional on 
