@@ -17,12 +17,9 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
   names(em.vec) <- rep(as.character(G), 2)
   
   if (!use.manova) {
-    
-    fit.reduced <- fitEM(em.vec, X.t, Z.t, cov.error = FALSE,
+    fit.reduced <- fitEM(em.vec, X.t, Z.t, K, cov.error = FALSE,
                          max.iter = 500)
-    
   } else {
-    
     X  <- as.data.frame(X)
     dd <- data.frame(genotype = G, x = x, y = y, X)
     if (ncol(X) > 0) {names(dd)[-(1:3)] <- paste0('cov', 1:(ncol(X)))}
@@ -37,9 +34,7 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
     summary.out <-  tryCatch(summary(manova.out), error = function(e) e)
     
     if (any(class(summary.out) == "error")) {
-      
       Vg.manova <- Ve.manova <- matrix(0, 2, 2)
-      
       aov.x <- anova(lm(as.formula(paste('x~',paste(c(names(X), 'genotype'), collapse='+'))), data = dd))
       aov.y <- anova(lm(as.formula(paste('y~',paste(c(names(X), 'genotype'), collapse='+'))), data = dd))
       
@@ -52,15 +47,12 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
       Vg.manova[2,2] <- (MS.gen.y - MS.res.y) / n.rep
       Ve.manova[1,1] <- MS.res.x
       Ve.manova[2,2] <- MS.res.y
-      
     } else {
-      
       d.f         <- as.numeric(summary.out[['stats']][,'Df'][c('genotype','Residuals')])
       MS.gen      <- summary.out[['SS']][['genotype']] / d.f[1]
       MS.res      <- summary.out[['SS']][['Residuals']] / d.f[2]
       Vg.manova   <- (MS.gen - MS.res) / n.rep
       Ve.manova   <- MS.res
-      
     }
     
     # Negative estimates of genetic variance are set to zero
@@ -72,19 +64,13 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
       if (Vg.manova[2,2]==0) {Vg.manova[2,2] <- 0.01 * Ve.manova[2,2]}
     }
     
-    # removed on 20-09-2017:
-    #fit.reduced <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t,
-    #                     Vg = as.numeric(Vg.manova)[c(1,4,2)],
-    #                     Ve = c(as.numeric(Ve.manova)[c(1,4)], 0))
-    
-    fit.reduced <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t,
+    fit.reduced <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t, K = K, 
                          Vg.start = as.numeric(Vg.manova)[c(1,4,2)],
                          Ve.start = c(as.numeric(Ve.manova)[c(1,4)], 0),
                          cov.error = FALSE, max.iter = 5)
-    
   }
   
-  fit.full    <- fitEM(em.vec, X.t, Z.t, cov.error = TRUE, alpha = alpha,
+  fit.full    <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = TRUE, alpha = alpha,
                        stop.if.significant = TRUE, max.iter = max.iter,
                        null.dev = fit.reduced$deviance,
                        Vg.start = fit.reduced$variances$Vg,
