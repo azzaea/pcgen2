@@ -1,6 +1,6 @@
 res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
                            X=as.data.frame(matrix(0,length(x),0)),
-                           alpha = 0.01, use.manova = FALSE,
+                           alpha = 0.01, use.manova = TRUE,
                            max.iter = 50, stop.if.significant = TRUE) {
   # EXACT test for residual correlation, based on a bivariate mixed model
   # x,y : trait vectors whose independence is to be tested, conditional on 
@@ -18,6 +18,8 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
   X.t           <- Matrix(cbind(rep(1, length(G)), as.matrix(X)))
   em.vec        <- c(x, y)
   names(em.vec) <- rep(as.character(G), 2)
+  
+  if (!is.null(K)) use.manova <- FALSE # seems MANOVA not suitable for generic K
   
   if (!use.manova) {
     fit.reduced <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = TRUE,
