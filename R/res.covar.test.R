@@ -6,6 +6,9 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
   # x,y : trait vectors whose independence is to be tested, conditional on 
   #       G (genotype) and possible covariates in X
   #
+  # Example: x = dm$Y1; y = dm$Y2; G = G; K = K; 
+  # res.covar.test(y1, y2, G, K = K, use.manova = F)
+  #
   # id  : a factor indicating which (complete) block each observation is in
   #       Always needed in asreml, to identify the units. May also be present
   #       in X, as covariate. ---------> I don't understand this- Azza
@@ -17,8 +20,8 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
   names(em.vec) <- rep(as.character(G), 2)
   
   if (!use.manova) {
-    fit.reduced <- fitEM(em.vec, X.t, Z.t, K, cov.error = FALSE,
-                         max.iter = 500)
+    fit.reduced <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = TRUE,
+                         cov.gen = FALSE, max.iter = 500)
   } else {
     X  <- as.data.frame(X)
     dd <- data.frame(genotype = G, x = x, y = y, X)
@@ -64,10 +67,10 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
       if (Vg.manova[2,2]==0) {Vg.manova[2,2] <- 0.01 * Ve.manova[2,2]}
     }
     
-    fit.reduced <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t, K = K, 
+    fit.reduced <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t, K = K,
                          Vg.start = as.numeric(Vg.manova)[c(1,4,2)],
                          Ve.start = c(as.numeric(Ve.manova)[c(1,4)], 0),
-                         cov.error = FALSE, max.iter = 5)
+                         cov.error = TRUE, cov.gen = FALSE, max.iter = 5)
   }
   
   fit.full    <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = TRUE, alpha = alpha,

@@ -81,22 +81,18 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	  est.Vg.var <- TRUE
 	  if (is.null(Vg.start)) {
 	    Vg <- c(1, 1, 0.1)
-	  }
-	  else {
+	  } else {
 	    Vg <- Vg.start
 	  }
-	}
-	else {
+	} else {
 	  if (length(Vg.aux) == 2) {
 	    est.Vg <- TRUE
 	    est.Vg.var <- FALSE
 	    Vg <- c(Vg.aux[1], Vg.aux[2], 0.1)
-	  }
-	  else {
+	  } else {
 	    if (length(Vg.aux) == 3) {
 	      est.Vg <- FALSE
-	    }
-	    else {
+	    } else {
 	      stop("The specified variance/covariance matrix for the error component is not correct")
 	    }
 	  }
@@ -113,28 +109,23 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	    else {
 	      Ve <- Ve.start
 	    }
-	  }
-	  else {
+	  } else {
 	    if (is.null(Ve.start)) {
 	      Ve <- c(1, 1, 0)
-	    }
-	    else {
+	    } else {
 	      Ve <- Ve.start
 	      Ve[3] <- 0
 	    }
 	  }
-	}
-	else {
+	} else {
 	  if (length(Ve.aux) == 2) {
 	    est.Ve <- TRUE
 	    cov.error <- TRUE
 	    est.Ve.var <- FALSE
 	    Ve <- c(Ve.aux[1], Ve.aux[2], 0.1)
-	  }
-	  else if (length(Ve.aux) == 3) {
+	  } else if (length(Ve.aux) == 3) {
 	    est.Ve <- FALSE
-	  }
-	  else {
+	  } else {
 	    stop("The specified variance/covariance matrix for the error component is not correct")
 	  }
 	}
