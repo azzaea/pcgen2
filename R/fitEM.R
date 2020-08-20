@@ -1,9 +1,6 @@
-# taken from EM_function_v6.R , and adapted
-
-fitEM <- function(y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL,
-                                cov.error = TRUE, stop.if.significant = FALSE,
-                                null.dev = NULL, alpha = 0.01, max.iter = 100,
-                                Vg.start = NULL, Ve.start = NULL, cov.gen = TRUE) {
+fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE, 
+                   stop.if.significant = FALSE, null.dev = NULL, alpha = 0.01, 
+                   max.iter = 100, Vg.start = NULL, Ve.start = NULL, cov.gen = TRUE) {
 
 #y = em.vec; K = NULL; null.dev = NULL; Vg.start = as.numeric(Vg.manova)[c(1,4,2)]; stop.if.significant= F; Vg = NULL; Ve = NULL; Ve.start = c(as.numeric(Ve.manova)[c(1,4)], 0); cov.error = FALSE; max.iter = 5
 
@@ -35,13 +32,20 @@ fitEM <- function(y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL,
 	#start  <-  proc.time()[3]
 	X.t <- Matrix(X.t)
 
-	if(!is.null(K)) {
-		eig <- eigen(K)
-		U <- eig$vectors
-		d <- eig$values
-		K.trans <- U %*% diag(1/sqrt(d)) 
-		Z.t <- Matrix(Z.t%*% K.trans)
-		#Z.t <- Matrix(Z.t%*%U%*%diag(1/sqrt(d)))
+	if (!is.null(K)) {
+	  #eig <- eigen(K)
+	  #U <- eig$vectors
+	  #d <- eig$values
+	  ##K.trans <- U %*% diag(1/sqrt(d))
+	  #K.trans <- U %*% diag(sqrt(d))
+	  #Z.t <- Matrix(Z.t %*% K.trans)
+	  
+	  eig <- svd(K)
+	  U <- eig$u
+	  d <- eig$d
+	  #K.trans <- U %*% diag(1/sqrt(d))
+	  K.trans <- U %*% diag(sqrt(d))
+	  Z.t <- Matrix(Z.t %*% K.trans)
 	} else {
 		Z.t <- Matrix(Z.t)
 	}
@@ -73,56 +77,66 @@ fitEM <- function(y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL,
 
   ###########################
 	if (is.null(Vg)) {
-		est.Vg <- TRUE
-		est.Vg.var <- TRUE
-    if (is.null(Vg.start)) {
-  	  Vg <- c(1,1,0.1)
-    } else {
-      Vg <- Vg.start
-    }
-	} else {
-		if (length(Vg.aux) == 2) {
-			est.Vg <- TRUE
-			est.Vg.var <- FALSE
-			Vg <- c(Vg.aux[1], Vg.aux[2], 0.1)
-		} else {
-      if (length(Vg.aux) == 3) {
-			  est.Vg <- FALSE
-		  } else {
-			  stop('The specified variance/covariance matrix for the error component is not correct')
-		  }
-    }
+	  est.Vg <- TRUE
+	  est.Vg.var <- TRUE
+	  if (is.null(Vg.start)) {
+	    Vg <- c(1, 1, 0.1)
+	  }
+	  else {
+	    Vg <- Vg.start
+	  }
+	}
+	else {
+	  if (length(Vg.aux) == 2) {
+	    est.Vg <- TRUE
+	    est.Vg.var <- FALSE
+	    Vg <- c(Vg.aux[1], Vg.aux[2], 0.1)
+	  }
+	  else {
+	    if (length(Vg.aux) == 3) {
+	      est.Vg <- FALSE
+	    }
+	    else {
+	      stop("The specified variance/covariance matrix for the error component is not correct")
+	    }
+	  }
 	}
 
   ###########################
 	if (is.null(Ve)) {
-		est.Ve <- TRUE
-		est.Ve.var <- TRUE
-		if (cov.error) {
-      if (is.null(Ve.start)) {
-  			Ve <- c(1,1,0.1)
-      } else {
-        Ve <- Ve.start
-      }
-		} else {
-      if (is.null(Ve.start)) {
-  			Ve <- c(1,1,0)
-      } else {
-        Ve    <- Ve.start
-        Ve[3] <- 0
-      }
-		}
-	} else {
-		if (length(Ve.aux) == 2) {
-			est.Ve <- TRUE
-			cov.error <- TRUE
-			est.Ve.var <- FALSE
-			Ve <- c(Ve.aux[1], Ve.aux[2], 0.1)
-		} else if (length(Ve.aux) == 3) {
-			est.Ve <- FALSE
-		} else {
-			stop('The specified variance/covariance matrix for the error component is not correct')
-		}
+	  est.Ve <- TRUE
+	  est.Ve.var <- TRUE
+	  if (cov.error) {
+	    if (is.null(Ve.start)) {
+	      Ve <- c(1, 1, 0.1)
+	    }
+	    else {
+	      Ve <- Ve.start
+	    }
+	  }
+	  else {
+	    if (is.null(Ve.start)) {
+	      Ve <- c(1, 1, 0)
+	    }
+	    else {
+	      Ve <- Ve.start
+	      Ve[3] <- 0
+	    }
+	  }
+	}
+	else {
+	  if (length(Ve.aux) == 2) {
+	    est.Ve <- TRUE
+	    cov.error <- TRUE
+	    est.Ve.var <- FALSE
+	    Ve <- c(Ve.aux[1], Ve.aux[2], 0.1)
+	  }
+	  else if (length(Ve.aux) == 3) {
+	    est.Ve <- FALSE
+	  }
+	  else {
+	    stop("The specified variance/covariance matrix for the error component is not correct")
+	  }
 	}
 
 	# Precision matrices for the genetic variances (needed for SAP/Schall algorithm)
