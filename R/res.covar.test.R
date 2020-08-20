@@ -2,15 +2,13 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
                            X=as.data.frame(matrix(0,length(x),0)),
                            alpha = 0.01, use.manova = TRUE,
                            max.iter = 50, stop.if.significant = TRUE) {
-  
   # EXACT test for residual correlation, based on a bivariate mixed model
-  
-  
-  # x,y : vectors whose independence is to be tested, conditional on G (genotype)
-  #       and possible covariates in X
+  # x,y : trait vectors whose independence is to be tested, conditional on 
+  #       G (genotype) and possible covariates in X
   #
   # id  : a factor indicating which (complete) block each observation is in
-  #       Always needed in asreml, to identify the units. May also be present in X, as covariate.
+  #       Always needed in asreml, to identify the units. May also be present
+  #       in X, as covariate. ---------> I don't understand this- Azza
   
   if (is.null(Z.t)) {Z.t <- make.Z.matrix(G)}
   

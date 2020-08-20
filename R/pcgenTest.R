@@ -85,7 +85,7 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
     X <- as.data.frame(matrix(0,nrow(suffStat),0))
   } else {
     X <- as.data.frame(covariates)
-    names(X) <- paste0('covariate_', 1:ncol(covariates))
+    names(X) <- paste0('covariate_', 1:ncol(covariates)) # I don't see how this is useful- Azza
   }
   
 
@@ -169,12 +169,12 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
                        suffStat = list(C = res.cor, n = nrow(suffStat)))
   } else { # No residuals
     if (length(S)==1) {
-      out <- res.covar.test(x = suffStat[,x], y=suffStat[,y], X = X,
-                            G = suffStat[,1], alpha = alpha)
+      out <- res.covar.test(x = suffStat[,x], y = suffStat[,y],
+                            G = suffStat[,1], K = K, X = X, alpha = alpha)
     } else {
       X <- as.data.frame(cbind(X,suffStat[,setdiff(S,1)]))
-      out <- res.covar.test(x = suffStat[,x], y = suffStat[,y],
-                            X = X, G = suffStat[,1], alpha = alpha,
+      out <- res.covar.test(x = suffStat[,x], y = suffStat[,y], 
+                            G = suffStat[,1], K = K, X = X, alpha = alpha,
                             max.iter = max.iter, stop.if.significant = stop.if.significant)
     }
   }
