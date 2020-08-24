@@ -91,6 +91,6 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
   
   #cat('\n\nDiff:',pvalue - fit.full$pvalue, '\n\n')
   
-  return(c(pvalue, TRUE))
+  return(c(pvalue, TRUE)) # TRUE is never actually used. Was there a purpose? Could we omit it? Azza
   
 }
