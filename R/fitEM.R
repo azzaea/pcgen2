@@ -283,14 +283,16 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 		Vg <- Vg.new
 		devold <- dev
 
+		# Taking loglikelihood calculations outside the `stop.if.significant` block
+		# These numbers are useful for debugging, and the cacluations are not expensive
+		loglik_Full    <- -0.5 * dev
+		loglik_Reduced <- -0.5 * null.dev
+		
+		REMLLRT <- 2 * max(loglik_Full - loglik_Reduced, 0)
+		pvalue  <- (1 - pchisq(REMLLRT, df = 1))
+		
 		if (stop.if.significant) {
-			loglik_Full    <- -0.5 * dev
-			loglik_Reduced <- -0.5 * null.dev
-
-			REMLLRT <- 2 * max(loglik_Full - loglik_Reduced, 0)
-			pvalue  <- (1 - pchisq(REMLLRT, df = 1))
-
-		 if (pvalue < alpha) break
+			if (pvalue < alpha) break
 		  if (it > 20 & pvalue > 0.1) break
 		} 
 	
@@ -307,8 +309,9 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	res$coeff     <- list(fixed = b.fixed, random = b.random)
 	res$variances <- list(Ve = Ve, Vg = Vg)
 	res$deviance  <- dev
-    res$it        <- it
-    if (stop.if.significant) {res$pvalue    <- pvalue}
+  res$it        <- it
+  # if (stop.if.significant) 
+      res$pvalue    <- pvalue
 
 	res
 }
