@@ -6,8 +6,9 @@
 #' different conditional independence test (see pcgenTest), as well as
 #' modified orientation rules  (2) Some parameters from the original
 #' pc function are fixed here: skel.method = "stable", u2pd = "relaxed",
-#' conservative = FALSE, maj.rule = TRUE, solve.confl = TRUE and
-#' NAdelete = TRUE. labels (defining the names of the nodes of the
+#' conservative = FALSE, maj.rule = TRUE and solve.confl = TRUE, while the user
+#' can set the "NAdelete" parameter (defaults to FALSE).
+#' Labels (defining the names of the nodes of the
 #' graph) is derived from the data-frame suffStat, containing the data
 #' (3) pcgen requires phenotypic observations on multiple traits,
 #' measured on the same samples. The current implementation extends the genetic
@@ -84,6 +85,10 @@
 #'              because (1) the PC algorithm only needs an accept/reject
 #'              decision (2) In EM the likelihood is nondecreasing. Should
 #'              be put to FALSE if the precise p-values are of interest.
+#'              
+#' @param NAdelete Logical, and is the NAdelete option in pcalg::pc function: TRUE
+#'                 deletes the edge corresponding to the conditional independence 
+#'                 test when it returns NA. Default is FALSE               
 #'
 #' @param return.pvalues If FALSE, the output is a graph (an object with S3 class
 #'                        \code{"pcgen"}). If TRUE, the output is a list with 
@@ -105,9 +110,9 @@ pcgen <-
   function (suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha = 0.01, 
             m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE, 
             use.res = FALSE, res.cor = NULL, max.iter = 50, 
-            stop.if.significant = TRUE, return.pvalues = FALSE) {
+            stop.if.significant = TRUE, NAdelet = FALSE, return.pvalues = FALSE) {
     # pcalg::pc options for order-independt network construction
-    NAdelete <- TRUE
+    
     u2pd <- c("relaxed", "rand", "retry")[1]
     skel.method <- c("stable", "original", "stable.fast")[1]
     conservative <- FALSE
