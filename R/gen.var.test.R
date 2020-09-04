@@ -25,9 +25,7 @@ gen.var.test <- function(y, X = data.frame(), G, K = NULL, return.fitted = FALSE
       X <- cbind(1, X)
     }
     lm.obj <- lmm.aireml(Y = y , X = X, K = K, verbose = F) 
-    lrt <- max(2*(lm.obj$logL - lm.obj$logL0), 0, na.rm = T) # to avoid lrts=NaN
-                                                             # this generates pvalue = 1
-                                                             # so G-->trait_i edge is removed
+    lrt <- max(2*(lm.obj$logL - lm.obj$logL0), 0) 
     pvalue <- pchisq(lrt, df = 1, lower.tail = F) 
     if (return.fitted == TRUE)
       fitted.values <- NULL #Not sure how to calculate it here

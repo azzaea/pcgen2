@@ -169,25 +169,24 @@ skeleton2  <-
             repeat {
               n.edgetests[ord1] <- n.edgetests[ord1] + 1
               #pval <- indepTest(x, y, nbrs[S], suffStat)
-              
-              if (verbose) {
-                #cat("x=", labels[x], " y=", labels[y], " S=", labels[nbrs[S]],": pval =")
-                cat("x=", x, " y=", y, " S=", nbrs[S],": pval =")
-              }
-              ##!##
+               ##!##
               # Modified the original skeleton function: pcgenTest instead of 
               # indepTest:
               pval <- pcgenTest(x, y, S = nbrs[S], suffStat, covariates = covariates,
                                 QTLs = QTLs, K = K, alpha = alpha, max.iter = max.iter, 
                                 stop.if.significant = stop.if.significant,
                                 use.res = use.res, res.cor = res.cor)
-              ##16-1-18## : addedd Vg = Vg, Ve = Ve, dec = dec
-              
               if (verbose) {
+                #cat("x=", labels[x], " y=", labels[y], " S=", labels[nbrs[S]],": pval =")
+                cat("x=", x, " y=", y, " S=", nbrs[S],": pval =")
+            
                 ##!##
                 # Modified the original skeleton function: if an edge is removed,
                 # mark this with <<<<<<<<<< >>>>>>>>>>>>>>>>
-                if (pval >= alpha) {cat('<<<<<<< ',pval,' >>>>>>>>>', "\n")} else {cat(pval, "\n")}
+                if (!(is.na(pval)) & pval >= alpha) {
+                  cat('<<<<<<< ',pval,' >>>>>>>>>', "\n")
+                } else 
+                    cat(pval, "\n")
                 
                 #if (pval > 1.68 * 10^(-4) & pval < 1.7 * 10^(-4)) {cat('!!!!!!!!!!!!', "\n"); stop()} 
                 #
