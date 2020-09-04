@@ -4,8 +4,7 @@ skeleton2  <-
             verbose = FALSE, covariates=NULL, QTLs = integer(), K = NULL, dec = NULL,
             max.iter = 50, stop.if.significant = TRUE, use.res = FALSE, 
             res.cor = NULL) {
-    ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
-    
+
     #' param suffStat data.frame, of which the first column is the factor genotype,
     #                 and subsequent columns contain the traits. The name of the
     #                 first column should be genotype
@@ -30,17 +29,6 @@ skeleton2  <-
     #                   as well as x and y
     #
     #' param K (Default NULL) The kinship (i.e Genetic Relationship Matrix)
-    #    
-    #' param dec (Default NULL) Contains a spectral decomposition of K = Z Z^t.
-    #            Should be a list with components Dk (a vector with the eigenvalues)
-    #            and Uk (a matrix with eigenvectors). Obtained as follows:
-    #            K <- Z %*% t(Z); w   <- eigen(K); Dk  <- diag(w$values); 
-    #            Uk  <- w$vectors; dec <- list(Dk = Dk, Uk = Uk)
-    #    
-# These options are not active. Do they need to still be here?    
-#    #' param Vg, Ve (Default NULL) Genetic and residual covariance matrices of
-#    #        dimension (ncol(suffStat)-1) x (ncol(suffStat)-1). Required if
-#    #        cov.means equals 'exact'.
 
     #if (method == "stable.fast") 
     # {stop('The stable.fast option is not yet implemented.')}
@@ -52,7 +40,9 @@ skeleton2  <-
       stopifnot(nrow(covariates)==nrow(suffStat))
     }
     
-    # Not REALLY needed. skeleton2 is only called from pcgen******** Azza
+    # Not REALLY needed. skeleton2 is only called from pcgen with appropriate
+    # parameters ******** Azza
+    
     if (!missing(p))
       stopifnot(is.numeric(p), length(p <- as.integer(p)) == 1, p >= 2)
     if (missing(labels)) {
@@ -71,8 +61,8 @@ skeleton2  <-
     method   <- match.arg(method)
     
     ##!##
-    # Modified the original skeleton function, by replacing the chunk below (commented out)
-    # by the following lines:
+    # Modified the original skeleton function, so that regardless of the value of fixedGaps,
+    # there should never be edges between QTLs, or between QTLs and genotype :
     
     if (is.null(fixedGaps)) {
       G <- matrix(TRUE, p, p)
@@ -81,25 +71,11 @@ skeleton2  <-
       stopifnot(identical(fixedGaps, t(fixedGaps)))
       G <- !fixedGaps
     }
-    
     diag(G) <- FALSE
-    
-    # The main point of the modification: regardless of the value of fixedGaps,
-    # there should never be edges between QTLs, or between QTLs and genotype :
     if (length(QTLs) > 0) {
       G[c(1,QTLs),c(1,QTLs)] <- FALSE
     }
-    
-    # The original pcalg chunk of code :
-    #if (is.null(fixedGaps)) {
-    #    G <- matrix(TRUE, nrow = p, ncol = p)
-    #}
-    #else if (!identical(dim(fixedGaps), c(p, p)))
-    #    stop("Dimensions of the dataset and fixedGaps do not agree.")
-    #else if (!identical(fixedGaps, t(fixedGaps)))
-    #    stop("fixedGaps must be symmetric")
-    #else G <- !fixedGaps
-    #diag(G) <- FALSE
+
     #########################
     
     if (any(is.null(fixedEdges))) {
@@ -110,7 +86,13 @@ skeleton2  <-
       } else if (!identical(fixedEdges, t(fixedEdges)))
         stop("fixedEdges must be symmetric")
     
+    ##!##
     # We have inactivated for this version because the stable.fast option is not yet implemented.
+    # stopifnot((is.integer(numCores) || is.numeric(numCores)) && 
+    #             numCores > 0)
+    # if (numCores > 1 && method != "stable.fast") {
+    #   warning("Argument numCores ignored: parallelization only available for method = 'stable.fast'")
+    # }
     #if (method == "stable.fast") {
     #    if (identical(indepTest, gaussCItest))
     #        indepTestName <- "gauss"
@@ -128,6 +110,7 @@ skeleton2  <-
     #    ord <- length(n.edgetests) - 1L
     #}
     #else {
+    
     pval <- NULL
     sepset <- lapply(seq_p, function(.) vector("list", p))
     pMax <- matrix(-Inf, nrow = p, ncol = p)
@@ -136,16 +119,12 @@ skeleton2  <-
     ord <- 0L
     n.edgetests <- numeric(1)
     
-    
-    #browser()
-    
     while (!done && any(G) && ord <= m.max) {
       n.edgetests[ord1 <- ord + 1L] <- 0
       done <- TRUE
       ind <- which(G, arr.ind = TRUE)
       ind <- ind[order(ind[, 1]), ]
       remEdges <- nrow(ind)
-      #print(ind)
       if (verbose)
         cat("Order=", ord, "; remaining edges:", remEdges,
             "\n", sep = "")
@@ -168,8 +147,7 @@ skeleton2  <-
             S <- seq_len(ord)
             repeat {
               n.edgetests[ord1] <- n.edgetests[ord1] + 1
-              #pval <- indepTest(x, y, nbrs[S], suffStat)
-               ##!##
+              ##!##
               # Modified the original skeleton function: pcgenTest instead of 
               # indepTest:
               pval <- pcgenTest(x, y, S = nbrs[S], suffStat, covariates = covariates,
@@ -177,23 +155,20 @@ skeleton2  <-
                                 stop.if.significant = stop.if.significant,
                                 use.res = use.res, res.cor = res.cor)
               if (verbose) {
-                #cat("x=", labels[x], " y=", labels[y], " S=", labels[nbrs[S]],": pval =")
-                cat("x=", x, " y=", y, " S=", nbrs[S],": pval =")
-            
                 ##!##
-                # Modified the original skeleton function: if an edge is removed,
-                # mark this with <<<<<<<<<< >>>>>>>>>>>>>>>>
-                if (!(is.na(pval)) & pval >= alpha) {
-                  cat('<<<<<<< ',pval,' >>>>>>>>>', "\n")
-                } else 
-                    cat(pval, "\n")
+                # Modified the original skeleton function: 
+                # 1. Print labels of variables (not their indices in the suffStat dataframe)
+                cat("x=", labels[x], " y=", labels[y], " S=", labels[nbrs[S]],": pval =")
                 
+                # 2. if an edge is removed, mark this with <<<<<<<<<< >>>>>>>>>>>>>>>>
+                if (!(is.na(pval)) & pval >= alpha) {
+                  cat('<<<<<<< ', pval, ' >>>>>>>>>', "\n")
+                } else 
+                  cat(pval, "\n")
+                #***** Azza: what is special about this p-value example?
                 #if (pval > 1.68 * 10^(-4) & pval < 1.7 * 10^(-4)) {cat('!!!!!!!!!!!!', "\n"); stop()} 
-                #
-                #cat("x=", x, " y=", y, " S=", nbrs[S],": pval =", pval, "\n")
               }
-              
-              ################################
+              #########################
               
               if (is.na(pval))
                 pval <- as.numeric(NAdelete)
@@ -220,7 +195,7 @@ skeleton2  <-
       for (j in 2:p) pMax[i, j] <- pMax[j, i] <- max(pMax[i,
                                                           j], pMax[j, i])
     }
-    #}
+    
     Gobject <- if (sum(G) == 0) {
       new("graphNEL", nodes = labels)
     } else {
@@ -228,9 +203,6 @@ skeleton2  <-
       as(G, "graphNEL")
     }
     
-    ##!##
-    # Modified the original skeleton function: we do not only return the skeleton
-    # and separating sets, but also genVar and qtlVar
     out1 <- new("pcAlgo", graph = Gobject, call = cl, n = integer(0),
                 max.ord = as.integer(ord - 1), n.edgetests = n.edgetests,
                 sepset = sepset, pMax = pMax, zMin = matrix(NA, 1, 1))
