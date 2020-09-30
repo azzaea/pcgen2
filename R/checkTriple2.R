@@ -1,7 +1,7 @@
 checkTriple2 <- function (a, b, c, nbrsA, nbrsC, sepsetA, sepsetC, suffStat,
                           alpha, version.unf = c(NA, NA),
                           maj.rule = FALSE,verbose = FALSE,
-                          covariates=NULL, QTLs = integer(),
+                          covariates=NULL, QTLs = integer(), K = NULL,
                           max.iter = 50, stop.if.significant = TRUE,
                           use.res = FALSE, res.cor = NULL)
 {
@@ -22,6 +22,7 @@ checkTriple2 <- function (a, b, c, nbrsA, nbrsC, sepsetA, sepsetC, suffStat,
 #' param QTLs column numbers in suffStat that correspond to QTLs
 #             These may be partly in S and x and y, but not x and y both in QTLs!
 #             Note: the factor genotype (column number 1) may occur in S, as well as x and y
+#' param K (Default NULL) The kinship (i.e Genetic Relationship Matrix)
 #' param covariates data.frame containing covariates, that should always be used
 #        in each conditional independence test. Should be either NULL (default)
 #        or a data.frame with the same number of rows as suffStat
@@ -59,7 +60,7 @@ checkTriple2 <- function (a, b, c, nbrsA, nbrsC, sepsetA, sepsetC, suffStat,
             #cat("===> x=", a, " y=", c, " S=", S,"\n")
             pval <- pcgenTest(x=a, y=c, S=S, suffStat,
                                             covariates=covariates,
-                                            QTLs = QTLs,
+                                            QTLs = QTLs, K = K,
                                             alpha = alpha,
                                             max.iter = max.iter,
                                             stop.if.significant = stop.if.significant,
