@@ -128,9 +128,8 @@ skeleton2  <-
       if (verbose)
         cat("Order=", ord, "; remaining edges:", remEdges,
             "\n", sep = "")
-      if (method == "stable") {
-        G.l <- split(G, gl(p, p))
-      }
+      if (method == "stable") G.l <- split(G, gl(p, p))
+      
       for (i in 1:remEdges) {
         if (verbose && (verbose >= 2 || i%%100 == 0))
           cat("|i=", i, "|iMax=", remEdges, "\n")
@@ -142,8 +141,7 @@ skeleton2  <-
           nbrs <- seq_p[nbrsBool]
           length_nbrs <- length(nbrs)
           if (length_nbrs >= ord) {
-            if (length_nbrs > ord)
-              done <- FALSE
+            if (length_nbrs > ord) done <- FALSE
             S <- seq_len(ord)
             repeat {
               n.edgetests[ord1] <- n.edgetests[ord1] + 1
@@ -167,7 +165,7 @@ skeleton2  <-
                   cat(pval, "\n")
                 #***** Azza: what is special about this p-value example?
                 #if (pval > 1.68 * 10^(-4) & pval < 1.7 * 10^(-4)) {cat('!!!!!!!!!!!!', "\n"); stop()} 
-              }
+              } # End if (verbose)
               #########################
               
               if (is.na(pval))
@@ -178,23 +176,22 @@ skeleton2  <-
                 G[x, y] <- G[y, x] <- FALSE
                 sepset[[x]][[y]] <- nbrs[S]
                 break
-              }
+              } # End if (pval >= alpha)
               else {
                 nextSet <- getNextSet(length_nbrs, ord, S)
                 if (nextSet$wasLast)
                   break
                 S <- nextSet$nextSet
-              }
-            }
-          }
-        }
-      }
+              } # End else
+            } #End repeat
+          } # End if (length_nbrs >= ord) 
+        } # End if (G[y, x] && !fixedEdges[y, x])
+      } # End for (i in 1:remEdges) loop
       ord <- ord + 1L
-    }
-    for (i in 1:(p - 1)) {
-      for (j in 2:p) pMax[i, j] <- pMax[j, i] <- max(pMax[i,
-                                                          j], pMax[j, i])
-    }
+    } # End while (!done && any(G) && ord <= m.max)
+    for (i in 1:(p - 1)) 
+      for (j in 2:p) 
+        pMax[i, j] <- pMax[j, i] <- max(pMax[i, j], pMax[j, i])
     
     Gobject <- if (sum(G) == 0) {
       new("graphNEL", nodes = labels)
