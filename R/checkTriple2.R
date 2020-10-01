@@ -89,7 +89,7 @@ checkTriple2 <- function (a, b, c, nbrsA, nbrsC, sepsetA, sepsetC, suffStat,
             #cat("===> x=", a, " y=", c, " S=", S,"\n")
             pval <- pcgenTest(x=a, y=c, S=S, suffStat,
                                             covariates=covariates,
-                                            QTLs = QTLs,
+                                            QTLs = QTLs, K = K,
                                             alpha = alpha,
                                             max.iter = max.iter,
                                             stop.if.significant = stop.if.significant,
