@@ -143,10 +143,6 @@ pcgen <-
     
     labels <- colnames(suffStat)
     p      <- ncol(suffStat)
-    #
-    #       dec  <- NULL
-    #       Vg   <- NULL # just in case the user accidentally specifies Vg, Ve
-    #       Ve   <- NULL
     
     #u2pd <- match.arg(u2pd)
     #skel.method <- match.arg(skel.method)
