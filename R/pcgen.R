@@ -211,7 +211,7 @@ pcgen <-
       pc. <- pc.cons.intern2(skel, suffStat = suffStat, alpha = alpha,
                              version.unf = c(2, 1), maj.rule = maj.rule,
                              verbose = verbose,
-                             covariates = covariates,
+                             covariates = covariates, K = K,
                              QTLs = QTLs, max.iter = max.iter,
                              stop.if.significant = stop.if.significant,
                              use.res = use.res, res.cor = res.cor)
