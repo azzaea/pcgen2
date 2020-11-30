@@ -1,20 +1,30 @@
-Package: pcgen
-Type: Package
-Title: Reconstruction of Causal Networks for Data with Random Genetic
-        Effects
-Version: 0.2.0
-Author: Willem Kruijer, Pariya Behrouzi, Maria Xose Rodriguez-Alvarez
-Maintainer: Pariya Behrouzi <pariya.behrouzi@gmail.com>
-Depends: R (>= 3.1.0)
-Imports: pcalg, graph, Matrix, stats, MASS, utils, Hmisc, methods,
-        lme4, sommer, ggm
+Package: pcgen2
+Title: Reconstruction of Causal Networks for Data with Random Genetic Effects
+Version: 0.3.0
+Authors@R: 
+    person(given = "First",
+           family = "Last",
+           role = c("aut", "cre"),
+           email = "first.last@example.com",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
 Description: Implements the pcgen algorithm, which is a modified version of the standard pc-algorithm,
-             with specific conditional independence tests and modified orientation rules. pcgen extends 
-			 the approach of Valente et al. (2010) <doi:10.1534/genetics.109.112979> with reconstruction of 
-			 direct genetic effects.
+             with specific conditional independence tests and modified orientation rules. pcgen extends
+             the approach of Valente et al. (2010) <doi:10.1534/genetics.109.112979> with reconstruction of 
+             direct genetic effects.
 License: GPL-3
-Date: 2019-02-18
-NeedsCompilation: no
-Packaged: 2019-02-18 13:27:37 UTC; behro001
-Repository: CRAN
-Date/Publication: 2019-02-18 14:50:03 UTC
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports: 
+    pcalg,
+    graph,
+    Matrix,
+    stats,
+    MASS,
+    utils,
+    Hmisc,
+    methods,
+    lme4,
+    sommer,
+    ggm

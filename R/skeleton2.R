@@ -123,6 +123,7 @@ skeleton2  <-
       n.edgetests[ord1 <- ord + 1L] <- 0
       done <- TRUE
       ind <- which(G, arr.ind = TRUE)
+      # ind <- which((G*upper.tri(G))>0, arr.ind = TRUE)
       ind <- ind[order(ind[, 1]), ]
       remEdges <- nrow(ind)
       if (verbose)
@@ -133,8 +134,7 @@ skeleton2  <-
       for (i in 1:remEdges) {
         if (verbose && (verbose >= 2 || i%%100 == 0))
           cat("|i=", i, "|iMax=", remEdges, "\n")
-        x <- ind[i, 1]
-        y <- ind[i, 2]
+        x <- ind[i, 1]; y <- ind[i, 2]
         if (G[y, x] && !fixedEdges[y, x]) {
           nbrsBool <- if (method == "stable")  G.l[[x]] else G[, x]
           nbrsBool[y] <- FALSE
@@ -145,28 +145,20 @@ skeleton2  <-
             S <- seq_len(ord)
             repeat {
               n.edgetests[ord1] <- n.edgetests[ord1] + 1
-              ##!##
-              # Modified the original skeleton function: pcgenTest instead of 
-              # indepTest:
+              ##!##: pcgenTest instead of indepTest:
               pval <- pcgenTest(x, y, S = nbrs[S], suffStat, covariates = covariates,
                                 QTLs = QTLs, K = K, alpha = alpha, max.iter = max.iter, 
                                 stop.if.significant = stop.if.significant,
                                 use.res = use.res, res.cor = res.cor)
               if (verbose) {
-                ##!##
-                # Modified the original skeleton function: 
-                # 1. Print labels of variables (not their indices in the suffStat dataframe)
+                ##!## 1. Print labels of variables (not their indices in the suffStat dataframe)
                 cat("x=", labels[x], " y=", labels[y], " S=", labels[nbrs[S]],": pval =")
-                
-                # 2. if an edge is removed, mark this with <<<<<<<<<< >>>>>>>>>>>>>>>>
+                ##!## 2. if an edge is removed, mark this with <<<<<<<<<< >>>>>>>>>>>>>>>>
                 if (!(is.na(pval)) & pval >= alpha) {
                   cat('<<<<<<< ', pval, ' >>>>>>>>>', "\n")
                 } else 
                   cat(pval, "\n")
-                #***** Azza: what is special about this p-value example?
-                #if (pval > 1.68 * 10^(-4) & pval < 1.7 * 10^(-4)) {cat('!!!!!!!!!!!!', "\n"); stop()} 
               } # End if (verbose)
-              #########################
               
               if (is.na(pval))
                 pval <- as.numeric(NAdelete)
@@ -176,13 +168,12 @@ skeleton2  <-
                 G[x, y] <- G[y, x] <- FALSE
                 sepset[[x]][[y]] <- nbrs[S]
                 break
-              } # End if (pval >= alpha)
-              else {
+              } else { # if (pval < alpha)
                 nextSet <- getNextSet(length_nbrs, ord, S)
                 if (nextSet$wasLast)
                   break
                 S <- nextSet$nextSet
-              } # End else
+              } # End pval (?) alpha comparison
             } #End repeat
           } # End if (length_nbrs >= ord) 
         } # End if (G[y, x] && !fixedEdges[y, x])
