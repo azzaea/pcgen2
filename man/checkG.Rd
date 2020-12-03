@@ -10,18 +10,19 @@ checkG(pcgen.output, suffStat, alpha = 0.01, covariates = NULL)
 \item{pcgen.output}{a graph with nodes G (genotype) and a number of
 traits. Typically output from pcgen or pcgenFast}
 
-\item{suffStat}{data.frame, of which the first column is the factor genotype
-(i.e samples' IDs) and subsequent columns contain the traits.
-The name of the first column should be G
-Should not contain covariates.}
+\item{suffStat}{A data.frame, of which the first column is the factor G
+(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
+optionally some QTLs. The name of the first column should be G. Should not
+contain covariates.}
 
-\item{alpha}{(Default 0.01) The significance level used in each conditional
-independence test.}
+\item{alpha}{The significance level used in each conditional independence
+test. Default is 0.01}
 
-\item{covariates}{data.frame containing covariates that should always be used
-in each conditional independence test. Should be either NULL
-(default) or a data.frame with the same number of rows as
-suffStat}
+\item{covariates}{A data.frame containing covariates that should always be
+used in each conditional independence test. Should be either \code{NULL}
+(default) or a data.frame with the same number of rows as \code{suffStat}.
+An intercept is already included for each trait in suffStat; covariates
+should not contain a column of ones.}
 }
 \value{
 A logical matrix of dimension (p+1) x (p+1), p being the number of traits.

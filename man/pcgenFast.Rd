@@ -21,47 +21,47 @@ pcgenFast(
 )
 }
 \arguments{
-\item{suffStat}{data.frame, of which the first column is the factor genotype
-(i.e samples' IDs) and subsequent columns contain the traits.
-The name of the first column should be G
-Should not contain covariates.}
+\item{suffStat}{A data.frame, of which the first column is the factor G
+(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
+optionally some QTLs. The name of the first column should be G. Should not
+contain covariates.}
 
-\item{alpha}{(Default 0.01) The significance level used in each conditional
-independence test.}
+\item{alpha}{The significance level used in each conditional independence
+test. Default is 0.01}
 
 \item{m.max}{maximum size of the conditioning set, in pcgen}
 
 \item{res.m.max}{maximum size of the conditioning set, in the pc-algorithm on the residuals}
 
-\item{verbose}{If TRUE, p-values for the conditional independence
+\item{verbose}{If \code{TRUE}, p-values for the conditional independence
 tests are printed}
 
-\item{covariates}{data.frame containing covariates that should always be used
-in each conditional independence test. Should be either NULL
-(default) or a data.frame with the same number of rows as
-suffStat}
+\item{covariates}{A data.frame containing covariates that should always be
+used in each conditional independence test. Should be either \code{NULL}
+(default) or a data.frame with the same number of rows as \code{suffStat}.
+An intercept is already included for each trait in suffStat; covariates
+should not contain a column of ones.}
 
-\item{fixedEdges}{A logical matrix of dimension (p+1) * (p+1), where
-p is the number of traits. The first row and column
-refer to the node genotype, and subsequent rows and
-columns to the traits. As in the pcalg package,
-the edge i-j is never considered for removal
-if the entry \link{i,j} or \link{j,i} (or both) are TRUE.
-In that case, the edge is guaranteed to be present
-in the resulting graph.}
+\item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
+where \eqn{p} is the number of traits. The first row and column refer to
+the genotype node G, and subsequent rows and columns to the traits. As in
+the pcalg package, the edge \eqn{i - j} is never considered for removal if
+the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
+case, the edge is guaranteed to be present in the resulting graph.}
 
-\item{QTLs}{column numbers in suffStat data.frame that correspond to QTLs.
-These may be partly in S and x and y, but x and y cannot be both QTLs.}
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
+may be partly in S and x and y, but x and y cannot be both QTLs.}
 
-\item{max.iter}{Maximum number of iterations in the EM-algorithm.}
+\item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
+the bivariate mixed model (when \code{use.res = FALSE)}.}
 
-\item{stop.if.significant}{If TRUE, the EM-algorithm used in some
-of the conditional independence tests will be stopped
-whenever the p-value becomes significant, i.e. below
-alpha. This will speed up calculations, and can be done
-because (1) the PC algorithm only needs an accept/reject
-decision (2) In EM the likelihood is nondecreasing. Should
-be put to FALSE if the precise p-values are of interest.}
+\item{stop.if.significant}{If \code{TRUE}, the EM-algorithm used in some of
+the conditional independence tests (when \code{use.res = FALSE}) will be
+stopped whenever the p-value becomes significant, i.e. below \code{alpha}.
+This will speed up calculations, and can be done because (1) the PC
+algorithm only needs an accept/reject decision (2) In EM the likelihood is
+nondecreasing. Should be put to \code{FALSE} if the precise p-values are of
+interest.}
 
 \item{cov.method}{(Default 'uni') A string, specifying which method should be
 used to estimate the covariance structure required for the

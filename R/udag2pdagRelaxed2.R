@@ -3,7 +3,7 @@ udag2pdagRelaxed2 <- function(gInput, verbose = FALSE, unfVect = NULL,
                               rules = rep(TRUE, 3), non.collider.nodes=1) {
 
 
-#' param non.collider.nodes (Default 1) A vector of integers
+# param non.collider.nodes (Default 1) A vector of integers
 #        indicating which nodes are genetic, ie at which position are G and the QTLs.
 #        G has to be in the first column, so if there are no qtls, we should haven
 #        non.collider.nodes=1 (the default).  They are called non.collider.nodes because

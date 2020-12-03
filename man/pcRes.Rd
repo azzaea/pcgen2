@@ -18,28 +18,29 @@ pcRes(
 )
 }
 \arguments{
-\item{suffStat}{data.frame, of which the first column is the factor genotype
-(i.e samples' IDs) and subsequent columns contain the traits.
-The name of the first column should be G
-Should not contain covariates.}
+\item{suffStat}{A data.frame, of which the first column is the factor G
+(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
+optionally some QTLs. The name of the first column should be G. Should not
+contain covariates.}
 
-\item{alpha}{(Default 0.01) The significance level used in each conditional
-independence test.}
+\item{alpha}{The significance level used in each conditional independence
+test. Default is 0.01}
 
 \item{K}{kinship}
 
 \item{m.max}{maximum size of the conditioning set, in the pc-algorithm on the residuals}
 
-\item{verbose}{If TRUE, p-values for the conditional independence
+\item{verbose}{If \code{TRUE}, p-values for the conditional independence
 tests are printed}
 
-\item{covariates}{data.frame containing covariates that should always be used
-in each conditional independence test. Should be either NULL
-(default) or a data.frame with the same number of rows as
-suffStat}
+\item{covariates}{A data.frame containing covariates that should always be
+used in each conditional independence test. Should be either \code{NULL}
+(default) or a data.frame with the same number of rows as \code{suffStat}.
+An intercept is already included for each trait in suffStat; covariates
+should not contain a column of ones.}
 
-\item{QTLs}{column numbers in suffStat data.frame that correspond to QTLs.
-These may be partly in S and x and y, but x and y cannot be both QTLs.}
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
+may be partly in S and x and y, but x and y cannot be both QTLs.}
 
 \item{cov.method}{(Default 'fe') A string, specifying which method should be
 used to compute the G-BLUP. Options are 'us'
