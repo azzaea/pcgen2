@@ -1,51 +1,51 @@
 #' The conditional independence test in pcgen
 #'
 #' This will perform the conditional independence test used in pcgen algorithm,
-#' assuming replicates and K = Z Z^t; or no replicates with a generic kinship matrix K = A
+#' assuming replicates and K = Z Z^t; or no replicates with a generic kinship
+#' matrix K = A
 #'
-#' COMMENT on Vg and Ve, which should be either both NULL or positive definite matrices
+#' COMMENT on Vg and Ve, which should be either both NULL or positive definite
+#' matrices
 #'
 #' @inheritParams pcgen
 #'
 #' @param x,y column numbers in suffStat that should be tested for conditional
-#'            independence given the variables in S
+#'   independence given the variables in S
 #'
-#' @param S vector of integers defining the conditioning set,
-#'          where the integers refer to column numbers in suffStat.
-#'          May be numeric(), i.e. the empty set.
+#' @param S vector of integers defining the conditioning set, where the integers
+#'   refer to column numbers in suffStat. May be numeric(), i.e. the empty set.
 #'
 #' @param alpha (Default 0.01) The significance level used in the test. The test
-#'              itself of course does not depend on this, but it is used in the
-#'              EM-algorithm to speed up calculations. More precisely, the
-#'              EM-algorithm is stopped once the p-value is below the
-#'              significance level. This can be done because the PC-algorithm
-#'              only needs an accept/reject decision.
+#'   itself of course does not depend on this, but it is used in the
+#'   EM-algorithm to speed up calculations. More precisely, the EM-algorithm is
+#'   stopped once the p-value is below the significance level. This can be done
+#'   because the PC-algorithm only needs an accept/reject decision.
 #'
-#' @param stop.if.significant If TRUE, the EM-algorithm used in some
-#'              of the conditional independence tests will be stopped
-#'              whenever the p-value becomes significant, i.e. below
-#'              alpha. This will speed up calculations, and can be done
-#'              because (1) the PC algorithm only needs an accept/reject
-#'              decision (2) In EM the likelihood is nondecreasing. Should
-#'              be put to FALSE if the precise p-values are of interest.
+#' @param stop.if.significant If TRUE, the EM-algorithm used in some of the
+#'   conditional independence tests will be stopped whenever the p-value becomes
+#'   significant, i.e. below alpha. This will speed up calculations, and can be
+#'   done because (1) the PC algorithm only needs an accept/reject decision (2)
+#'   In EM the likelihood is nondecreasing. Should be put to FALSE if the
+#'   precise p-values are of interest.
 #'
 #' @return a p-value
 #'
-#' @author Willem Kruijer and Pariya Behrouzi.
-#'         Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
-#'        Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
+#' @author Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+#'   \email{willem.kruijer@wur.nl} and Pariya Behrouzi
+#'   \email{pariya.behrouzi@gmail.com}
 #'
 #' @references A paper on arxiv
 #'
 #' @export
-#'
+#' @seealso \code{\link[pcalg]{gaussCItest}}, \code{\link[pcalg]{disCItest}},
+#'   \code{\link[pcalg]{binCItest}}
 pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K = NULL,
                       alpha = 0.01, max.iter = 50, stop.if.significant = TRUE,
                       use.res = FALSE, res.cor = NULL) {
-  
+
   ### Example (no replicates and generic K): suffStat = dm[,1:3]; K = K
   ## case 1; Trait \perp Trait | {Traits, G, Q}
-  # x = 2; y = 3; S = 1;  
+  # x = 2; y = 3; S = 1;
   # pcgenTest(x, y, S, suffStat, K = K) # Y1 \perp Y2 | G (No, low p)
   #
   # case 2; Trait \perp G | Traits
@@ -53,7 +53,7 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
   # pcgenTest(x, y, S, suffStat, K = K) # Y1 \pepr G | Y2 (No, low p)
   # x = 3; y = 1; S = 2;
   # pcgenTest(x, y, S, suffStat, K = K) # Y1 \pepr G | Y2 (Yes, high p)
-  # 
+  #
   # Old examples (I think safe to delete?)
   # suffStat = d; x = 2; y = 8; S = c(1,11)
   # QTLs=integer(); covariates=NULL;
@@ -63,17 +63,17 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
   # mean.adj = 'none'; Vg = NULL; Ve = NULL; dec = NULL;
   # max.iter = 50; stop.if.significant = TRUE;
   # return.cond.mean = FALSE
-  
+
   #suffStat = dr[, c(1, 26:36)]; covariates = dr[, 37:38]; x = 6; y = 7;
-  #S = 8:9; QTLs=integer(); covariates=NULL; alpha = 0.01; mean.adj = 'none'; 
-  #Vg = NULL; Ve = NULL; dec = NULL; max.iter = 50;stop.if.significant = TRUE; 
+  #S = 8:9; QTLs=integer(); covariates=NULL; alpha = 0.01; mean.adj = 'none';
+  #Vg = NULL; Ve = NULL; dec = NULL; max.iter = 50;stop.if.significant = TRUE;
   #return.cond.mean = FALSE
-  
+
   ## First, some checking ------------------------------------------------
-  
+
   if (class(QTLs)!='integer') {stop('QTLs should be a vector of integers')}
   if (1 %in% QTLs) {stop('QTLs should not contain the genotype column (G)')}
-  
+
   # stop if the first column in suffStat does not have the name G
   stopifnot(names(suffStat)[1] == 'G')
   # stop if the same variables occurs more than once
@@ -85,49 +85,49 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
   # Neither we test cond. indep. of a QTL and genotype
   if (x %in% QTLs & y==1) {stop()}
   if (y %in% QTLs & x==1) {stop()}
-  
+
   # put the QTL column numbers in ascending order
   QTLs <- sort(QTLs)
-  
+
   ###################################################################
   # Define a data.frame X, containing the covariates. It is also defined when
   # there are no covariates, in which case it will have zero columns.
-  
+
   if (is.null(covariates)) {
     X <- as.data.frame(matrix(0,nrow(suffStat),0))
   } else {
     X <- as.data.frame(covariates)
     names(X) <- paste0('covariate_', 1:ncol(covariates)) # I don't see how this is useful- Azza
   }
-  
 
-  
+
+
   #########################################################################
-  
+
   ## Case 2: Trait \perp G | {Traits + QTLs}: Type A test -----------------
   # The case where one of x and y is the number 1 (direct genetic effects).
-  # S may also contain QTLs 
-  
+  # S may also contain QTLs
+
   if (x==1 | y==1) {
     if (x==1) {
-      if (length(S)!=0) 
+      if (length(S)!=0)
         X <- as.data.frame(cbind(X, suffStat[,S]))
       return(gen.var.test(y = suffStat[,y], X = X, G = suffStat[,1], K))
     }
     if (y==1) {
-      if (length(S)!=0) 
+      if (length(S)!=0)
         X <- as.data.frame(cbind(X, suffStat[,S]))
       return(gen.var.test(y = suffStat[,x], X = X, G=suffStat[,1], K))
     }
   }
-  
+
   ########################################################################
-  
+
   ## Case 3: Trait \perp QTL | {Traits + G + QTL} -----------------------
   # The case where one of x and y is a QTL;
   # the number 1 (direct genetic effects) may or may not be in S.
   # S may also contain additional QTLs
-  
+
   if (any(QTLs %in% c(x,y))) {
     if (y %in% QTLs) { # make x the QTL, not y (just to simplify the code)
       temp.x <- x
@@ -135,22 +135,22 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
       y <- temp.x
     }
     sns  <- names(suffStat)
-    
+
     if (1 %in% S) {
-      # Because of the 'hierarchy' (G would 'eat up' all QTL variance), drop 1 from S 
+      # Because of the 'hierarchy' (G would 'eat up' all QTL variance), drop 1 from S
       # (in this case only)
       if (is.null(covariates)) {
-        pval <- summary(lm(as.formula(paste(sns[y], '~', 
+        pval <- summary(lm(as.formula(paste(sns[y], '~',
                                             paste(sns[c(setdiff(S,1), x)],  collapse='+'))),
                            data = suffStat))$coefficients[length(S)+1,4]
       } else {
-        pval <- summary(lm(as.formula(paste(sns[y], '~', paste(names(X), collapse='+'), 
+        pval <- summary(lm(as.formula(paste(sns[y], '~', paste(names(X), collapse='+'),
                                             '+', paste(sns[c(setdiff(S,1), x)], collapse='+'))),
                            data = cbind(suffStat, X)))$coefficients[ncol(X) + length(S) + 1, 4]
       }
     } else { # G is not in S
       if (is.null(covariates)) {
-        pval <- summary(lm(as.formula(paste(sns[y], '~', paste(sns[c(S,x)], collapse='+'))), 
+        pval <- summary(lm(as.formula(paste(sns[y], '~', paste(sns[c(S,x)], collapse='+'))),
                            data = suffStat))$coefficients[length(S)+2,4]
       } else {
         pval <- summary(lm(as.formula(paste(sns[y], '~', paste(names(X), collapse='+'),
@@ -158,24 +158,24 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
                            data = cbind(suffStat, X)))$coefficients[ncol(X) + length(S)+2,4]
       }
     }
-    
+
     return(pval)
   }
-  
+
   ##########################################################################
-  
+
   ## Case 1: Trait \perp Trait | {Traits + QTLs} ---------------------------
   # x and y both represent real traits (no QTLs), and 1
-  # (direct genetic effects) is not in S. S may contain QTLs 
-  
+  # (direct genetic effects) is not in S. S may contain QTLs
+
   if (!(1 %in% c(x,y,S)) & !(any(c(x,y) %in% QTLs))) {S <- c(1, S)}
-  
+
   ## Case 1*: Trait \perp Trait | {G, QTL and Traits}: Type B tests --------
   # The case where x and y both represent real traits (no QTLs), and 1
   # (direct genetic effects: G) IS contained in S. S may also contain QTLs.
   # We do not skip any tests here.
   # Note that G will account for QTLs that may not be contained in S.
-  
+
   if (use.res == TRUE) {
     out <- gaussCItest(x = x - 1, y = y - 1, S = (setdiff(S, 1) - 1),
                        suffStat = list(C = res.cor, n = nrow(suffStat)))
@@ -185,7 +185,7 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
                             G = suffStat[,1], K = K, X = X, alpha = alpha)
     } else {
       X <- as.data.frame(cbind(X,suffStat[,setdiff(S,1)]))
-      out <- res.covar.test(x = suffStat[,x], y = suffStat[,y], 
+      out <- res.covar.test(x = suffStat[,x], y = suffStat[,y],
                             G = suffStat[,1], K = K, X = X, alpha = alpha,
                             max.iter = max.iter, stop.if.significant = stop.if.significant)
     }
