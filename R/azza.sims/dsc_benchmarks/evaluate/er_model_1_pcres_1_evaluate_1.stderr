@@ -1,0 +1,13 @@
+Error in `colnames<-`(`*tmp*`, value = c("tpr", "fpr", "tdr", "shd")) : 
+  attempt to set 'colnames' on an object with less than two dimensions
+Calls: colnames<- -> colnames<-
+Execution halted
+Error in `colnames<-`(`*tmp*`, value = c("tpr", "fpr", "tdr", "shd")) : 
+  attempt to set 'colnames' on an object with less than two dimensions
+Calls: colnames<- -> colnames<-
+Execution halted
+Error in names(dag.results) <- c("tpr", "fpr", "tdr", "shd") : 
+  'names' attribute [4] must be the same length as the vector [1]
+Execution halted
+Error in vector(4) : vector: cannot make a vector of mode '4'.
+Execution halted

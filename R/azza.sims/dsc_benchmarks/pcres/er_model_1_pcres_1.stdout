@@ -1,0 +1,274 @@
+iteration    LogLik     wall    cpu(sec)   restrained
+    1      -268.794   23:25:43      1           0
+    2      -174.736   23:25:44      2           0
+    3      -165.131   23:25:45      3           0
+    4      -164.576   23:25:46      4           0
+    5      -164.572   23:25:46      4           0
+    6      -164.572   23:25:47      5           0
+iteration    LogLik     wall    cpu(sec)   restrained
+    1      -378.489   23:25:50      1           0
+    2      -318.99   23:25:51      2           0
+    3      -311.644   23:25:52      3           0
+    4      -311.19   23:25:53      4           0
+    5      -311.186   23:25:53      4           0
+    6      -311.186   23:25:54      5           0
+iteration    LogLik     wall    cpu(sec)   restrained
+    1      -347.656   23:25:57      1           0
+    2      -274.681   23:25:57      1           0
+    3      -266.342   23:25:58      2           0
+    4      -265.846   23:25:59      3           0
+    5      -265.842   23:26:0      4           0
+    6      -265.842   23:26:1      5           0
+iteration    LogLik     wall    cpu(sec)   restrained
+    1      -390.491   23:26:3      1           0
+    2      -341.749   23:26:4      2           0
+    3      -335.083   23:26:5      3           0
+    4      -334.63   23:26:6      4           0
+    5      -334.625   23:26:6      4           0
+    6      -334.625   23:26:7      5           0
+iteration    LogLik     wall    cpu(sec)   restrained
+    1      -390.2   23:26:9      1           0
+    2      -339.555   23:26:10      2           0
+    3      -332.422   23:26:11      3           0
+    4      -331.931   23:26:12      4           0
+    5      -331.926   23:26:13      5           0
+    6      -331.926   23:26:13      5           0
+iteration    LogLik     wall    cpu(sec)   restrained
+    1      -276.883   23:26:15      1           0
+    2      -190.784   23:26:16      2           0
+    3      -182.079   23:26:17      3           0
+    4      -181.586   23:26:18      4           0
+    5      -181.582   23:26:19      5           0
+    6      -181.582   23:26:20      6           0
+Order=0; remaining edges:30
+x= 1  y= 2  S=  : pval = 0.001029146 
+x= 1  y= 3  S=  : pval = 0.0006736864 
+x= 1  y= 4  S=  : pval = 0.009839247 
+x= 1  y= 5  S=  : pval = 0.0005793477 
+x= 1  y= 6  S=  : pval = 3.862034e-82 
+x= 2  y= 1  S=  : pval = 0.001029146 
+x= 2  y= 3  S=  : pval = 7.647474e-41 
+x= 2  y= 4  S=  : pval = 0.2903796 
+x= 2  y= 5  S=  : pval = 0.1514786 
+x= 2  y= 6  S=  : pval = 5.323365e-07 
+x= 3  y= 1  S=  : pval = 0.0006736864 
+x= 3  y= 2  S=  : pval = 7.647474e-41 
+x= 3  y= 4  S=  : pval = 0.0004048714 
+x= 3  y= 5  S=  : pval = 0.001292024 
+x= 3  y= 6  S=  : pval = 0.01614959 
+x= 4  y= 1  S=  : pval = 0.009839247 
+x= 4  y= 3  S=  : pval = 0.0004048714 
+x= 4  y= 5  S=  : pval = 5.467952e-05 
+x= 4  y= 6  S=  : pval = 2.200666e-30 
+x= 5  y= 1  S=  : pval = 0.0005793477 
+x= 5  y= 3  S=  : pval = 0.001292024 
+x= 5  y= 4  S=  : pval = 5.467952e-05 
+x= 5  y= 6  S=  : pval = 0.5692982 
+x= 6  y= 1  S=  : pval = 3.862034e-82 
+x= 6  y= 2  S=  : pval = 5.323365e-07 
+x= 6  y= 4  S=  : pval = 2.200666e-30 
+Order=1; remaining edges:22
+x= 1  y= 2  S= 3 : pval = 1.33699e-06 
+x= 1  y= 2  S= 4 : pval = 0.0007590777 
+x= 1  y= 2  S= 5 : pval = 0.0005885225 
+x= 1  y= 2  S= 6 : pval = 0.3266121 
+x= 1  y= 3  S= 2 : pval = 8.87809e-07 
+x= 1  y= 3  S= 4 : pval = 0.001532381 
+x= 1  y= 3  S= 5 : pval = 0.001820638 
+x= 1  y= 3  S= 6 : pval = 0.01072743 
+x= 1  y= 4  S= 2 : pval = 0.007166891 
+x= 1  y= 4  S= 3 : pval = 0.02327041 
+x= 1  y= 5  S= 2 : pval = 0.0003324302 
+x= 1  y= 5  S= 3 : pval = 0.001563291 
+x= 1  y= 5  S= 4 : pval = 0.001479417 
+x= 1  y= 5  S= 6 : pval = 0.0002931691 
+x= 1  y= 6  S= 2 : pval = 9.422998e-80 
+x= 1  y= 6  S= 3 : pval = 6.984623e-81 
+x= 1  y= 6  S= 4 : pval = 2.214927e-103 
+x= 1  y= 6  S= 5 : pval = 2.210361e-82 
+x= 2  y= 3  S= 1 : pval = 1.110001e-43 
+x= 2  y= 3  S= 6 : pval = 3.718553e-44 
+x= 2  y= 6  S= 1 : pval = 9.249764e-05 
+x= 2  y= 6  S= 3 : pval = 2.717235e-10 
+x= 3  y= 2  S= 1 : pval = 1.110001e-43 
+x= 3  y= 2  S= 4 : pval = 1.440791e-40 
+x= 3  y= 2  S= 5 : pval = 2.28821e-40 
+x= 3  y= 4  S= 1 : pval = 0.0009173952 
+x= 3  y= 4  S= 2 : pval = 0.0007254878 
+x= 3  y= 4  S= 5 : pval = 0.001335716 
+x= 3  y= 5  S= 1 : pval = 0.003518414 
+x= 3  y= 5  S= 2 : pval = 0.003779307 
+x= 3  y= 5  S= 4 : pval = 0.004330696 
+x= 4  y= 3  S= 1 : pval = 0.0009173952 
+x= 4  y= 3  S= 5 : pval = 0.001335716 
+x= 4  y= 3  S= 6 : pval = 6.454763e-06 
+x= 4  y= 5  S= 1 : pval = 0.0001375009 
+x= 4  y= 5  S= 3 : pval = 0.0001774026 
+x= 4  y= 5  S= 6 : pval = 9.585411e-06 
+x= 4  y= 6  S= 1 : pval = 1.391219e-50 
+x= 4  y= 6  S= 3 : pval = 3.947733e-32 
+x= 4  y= 6  S= 5 : pval = 4.128543e-31 
+x= 5  y= 1  S= 3 : pval = 0.001563291 
+x= 5  y= 1  S= 4 : pval = 0.001479417 
+x= 5  y= 3  S= 1 : pval = 0.003518414 
+x= 5  y= 3  S= 4 : pval = 0.004330696 
+x= 5  y= 4  S= 1 : pval = 0.0001375009 
+x= 5  y= 4  S= 3 : pval = 0.0001774026 
+x= 6  y= 1  S= 2 : pval = 9.422998e-80 
+x= 6  y= 1  S= 4 : pval = 2.214927e-103 
+x= 6  y= 2  S= 1 : pval = 9.249764e-05 
+x= 6  y= 2  S= 4 : pval = 8.449313e-07 
+x= 6  y= 4  S= 1 : pval = 1.391219e-50 
+x= 6  y= 4  S= 2 : pval = 3.632837e-30 
+Order=2; remaining edges:16
+x= 3  y= 2  S= 4 5 : pval = 3.64745e-40 
+x= 3  y= 4  S= 2 5 : pval = 0.002026864 
+x= 3  y= 5  S= 2 4 : pval = 0.01083018 
+x= 4  y= 3  S= 5 6 : pval = 3.132332e-05 
+x= 4  y= 5  S= 3 6 : pval = 4.6619e-05 
+x= 4  y= 6  S= 3 5 : pval = 1.116325e-32 
+x= 5  y= 1  S= 3 4 : pval = 0.003208069 
+x= 5  y= 4  S= 1 3 : pval = 0.0003589326 
+x= 6  y= 1  S= 2 4 : pval = 9.572238e-101 
+x= 6  y= 2  S= 1 4 : pval = 0.0002211712 
+x= 6  y= 4  S= 1 2 : pval = 3.589768e-50 
+
+Triple: 5 1 6 and sepset by skelet:  
+a: S =   - pval = 0.5692982 
+a: S = 1  - pval = 0.2057217 
+a: S = 4  - pval = 0.05653031 
+a: S = 1 4  - pval = 0.8059663 
+c: S =   - pval = 0.5692982 
+c: S = 1  - pval = 0.2057217 
+c: S = 2  - pval = 0.4385355 
+c: S = 1 2  - pval = 0.278971 
+c: S = 4  - pval = 0.05653031 
+c: S = 1 4  - pval = 0.8059663 
+c: S = 2 4  - pval = 0.03510555 
+c: S = 1 2 4  - pval = 0.6784831 
+Triple ambiguous
+
+Triple: 3 2 6 and sepset by skelet:  
+a: S =   - pval = 0.01614959 
+a: S = 2  - pval = 6.108041e-06 
+a: S = 4  - pval = 0.0002241408 
+a: S = 2 4  - pval = 4.00658e-09 
+c: S =   - pval = 0.01614959 
+c: S = 1  - pval = 0.3871733 
+c: S = 2  - pval = 6.108041e-06 
+c: S = 1 2  - pval = 0.01318462 
+c: S = 4  - pval = 0.0002241408 
+c: S = 1 4  - pval = 0.01820353 
+c: S = 2 4  - pval = 4.00658e-09 
+c: S = 1 2 4  - pval = 6.087585e-05 
+
+Triple: 2 3 4 and sepset by skelet:  
+a: S =   - pval = 0.2903796 
+a: S = 3  - pval = 0.8358532 
+a: S = 6  - pval = 0.6162103 
+a: S = 3 6  - pval = 0.01950972 
+c: S =   - pval = 0.2903796 
+c: S = 3  - pval = 0.8358532 
+c: S = 5  - pval = 0.3661864 
+c: S = 3 5  - pval = 0.8093401 
+c: S = 6  - pval = 0.6162103 
+c: S = 3 6  - pval = 0.01950972 
+c: S = 5 6  - pval = 0.4882873 
+c: S = 3 5 6  - pval = 0.01668674 
+Triple ambiguous
+
+Triple: 3 4 5 and sepset by skelet: 2 4 
+a: S =   - pval = 0.001292024 
+a: S = 2  - pval = 0.003779307 
+a: S = 4  - pval = 0.004330696 
+a: S = 2 4  - pval = 0.01083018 
+c: S =   - pval = 0.001292024 
+c: S = 1  - pval = 0.003518414 
+c: S = 4  - pval = 0.004330696 
+c: S = 1 4  - pval = 0.009517728 
+
+Triple: 3 4 6 and sepset by skelet:  
+a: S =   - pval = 0.01614959 
+a: S = 2  - pval = 6.108041e-06 
+a: S = 4  - pval = 0.0002241408 
+a: S = 2 4  - pval = 4.00658e-09 
+c: S =   - pval = 0.01614959 
+c: S = 1  - pval = 0.3871733 
+c: S = 2  - pval = 6.108041e-06 
+c: S = 1 2  - pval = 0.01318462 
+c: S = 4  - pval = 0.0002241408 
+c: S = 1 4  - pval = 0.01820353 
+c: S = 2 4  - pval = 4.00658e-09 
+c: S = 1 2 4  - pval = 6.087585e-05 
+
+Triple: 5 4 6 and sepset by skelet:  
+a: S =   - pval = 0.5692982 
+a: S = 1  - pval = 0.2057217 
+a: S = 4  - pval = 0.05653031 
+a: S = 1 4  - pval = 0.8059663 
+c: S =   - pval = 0.5692982 
+c: S = 1  - pval = 0.2057217 
+c: S = 2  - pval = 0.4385355 
+c: S = 1 2  - pval = 0.278971 
+c: S = 4  - pval = 0.05653031 
+c: S = 1 4  - pval = 0.8059663 
+c: S = 2 4  - pval = 0.03510555 
+c: S = 1 2 4  - pval = 0.6784831 
+Triple ambiguous
+
+Triple: 1 5 4 and sepset by skelet: 3 
+a: S =   - pval = 0.009839247 
+a: S = 5  - pval = 0.02634998 
+a: S = 6  - pval = 9.236711e-23 
+a: S = 5 6  - pval = 2.867874e-21 
+c: S =   - pval = 0.009839247 
+c: S = 3  - pval = 0.02327041 
+c: S = 5  - pval = 0.02634998 
+c: S = 3 5  - pval = 0.05015551 
+c: S = 6  - pval = 9.236711e-23 
+c: S = 3 6  - pval = 9.790388e-22 
+c: S = 5 6  - pval = 2.867874e-21 
+c: S = 3 5 6  - pval = 1.849296e-20 
+
+Triple: 1 6 2 and sepset by skelet: 6 
+a: S =   - pval = 0.001029146 
+a: S = 5  - pval = 0.0005885225 
+a: S = 6  - pval = 0.3266121 
+a: S = 5 6  - pval = 0.2542887 
+c: S =   - pval = 0.001029146 
+c: S = 3  - pval = 1.33699e-06 
+c: S = 6  - pval = 0.3266121 
+c: S = 3 6  - pval = 0.03849527 
+
+Triple: 1 6 4 and sepset by skelet: 3 5 
+a: S =   - pval = 0.009839247 
+a: S = 5  - pval = 0.02634998 
+a: S = 6  - pval = 9.236711e-23 
+a: S = 5 6  - pval = 2.867874e-21 
+c: S =   - pval = 0.009839247 
+c: S = 3  - pval = 0.02327041 
+c: S = 5  - pval = 0.02634998 
+c: S = 3 5  - pval = 0.05015551 
+c: S = 6  - pval = 9.236711e-23 
+c: S = 3 6  - pval = 9.790388e-22 
+c: S = 5 6  - pval = 2.867874e-21 
+c: S = 3 5 6  - pval = 1.849296e-20 
+
+Triple: 2 6 4 and sepset by skelet:  
+a: S =   - pval = 0.2903796 
+a: S = 3  - pval = 0.8358532 
+a: S = 6  - pval = 0.6162103 
+a: S = 3 6  - pval = 0.01950972 
+c: S =   - pval = 0.2903796 
+c: S = 3  - pval = 0.8358532 
+c: S = 5  - pval = 0.3661864 
+c: S = 3 5  - pval = 0.8093401 
+c: S = 6  - pval = 0.6162103 
+c: S = 3 6  - pval = 0.01950972 
+c: S = 5 6  - pval = 0.4882873 
+c: S = 3 5 6  - pval = 0.01668674 
+Triple ambiguous
+
+Rule 1': 3 -> 4  and  4 - 5  where  3  and  5  not connected and  3 4 5  faithful triple:  4 -> 5 
+
+Rule 1': 4 -> 5  and  5 - 1  where  4  and  1  not connected and  4 5 1  faithful triple:  5 -> 1 
