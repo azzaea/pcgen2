@@ -27,7 +27,11 @@ optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
 
 \item{alpha}{The significance level used in each conditional independence
-test. Default is 0.01}
+test. Default is 0.01. The test itself of course does not depend on this,
+but it is used in the EM-algorithm to speed up calculations. More
+precisely, the EM-algorithm is stopped once the P value is below the
+significance level. This can be done because the PC algorithm only needs an
+accept/ reject decision.}
 
 \item{m.max}{maximum size of the conditioning set, in pcgen}
 
@@ -50,7 +54,8 @@ the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
 case, the edge is guaranteed to be present in the resulting graph.}
 
 \item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
-may be partly in S and x and y, but x and y cannot be both QTLs.}
+may be partly in S and x and y, but x and y cannot be both QTLs.
+Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
 \item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
 the bivariate mixed model (when \code{use.res = FALSE)}.}

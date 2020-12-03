@@ -42,14 +42,14 @@
 #'   acyclic graphs. Journal of Machine Learning Research, 13(Aug),
 #'   pp.2409-2464.
 #'
+#' @author Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+#'   \email{willem.kruijer@wur.nl} and Pariya Behrouzi
+#'   \email{pariya.behrouzi@gmail.com}
+#'
 #' @param suffStat A data.frame, of which the first column is the factor G
 #'   (genotype, i.e samples' IDs) and subsequent columns contain the traits, and
 #'   optionally some QTLs. The name of the first column should be G. Should not
 #'   contain covariates.
-#'
-#' @author Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
-#'   \email{willem.kruijer@wur.nl} and Pariya Behrouzi
-#'   \email{pariya.behrouzi@gmail.com}
 #'
 #' @param covariates A data.frame containing covariates that should always be
 #'   used in each conditional independence test. Should be either \code{NULL}
@@ -59,12 +59,18 @@
 #'
 #' @param QTLs Column numbers in \code{suffStat} that correspond to QTLs. These
 #'   may be partly in S and x and y, but x and y cannot be both QTLs.
+#'   Note: the factor genotype (column number 1) may occur in S, as well as x and y
 #'
-#' @param K The genetic relatedness matrix. If NULL (the default), independent
+#' @param K The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
 #'   genetic effects are assumed.
 #'
 #' @param alpha The significance level used in each conditional independence
-#'   test. Default is 0.01
+#'   test. Default is 0.01. The test itself of course does not depend on this,
+#'   but it is used in the EM-algorithm to speed up calculations. More
+#'   precisely, the EM-algorithm is stopped once the P value is below the
+#'   significance level. This can be done because the PC algorithm only needs an
+#'   accept/ reject decision.
+#
 #'
 #' @param m.max Maximum size of the conditioning sets.
 #'
@@ -122,7 +128,7 @@
 #'   is a list with elements \code{gr} (the graph) and \code{pMax} (a matrix
 #'   with the p-values).
 #'
-#' @seealso \code{\link{getResiduals}}
+#' @seealso \code{\link[pcalg]{pc}}
 #'
 #' @examples
 #' \dontrun{

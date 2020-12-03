@@ -24,7 +24,11 @@ optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
 
 \item{alpha}{The significance level used in each conditional independence
-test. Default is 0.01}
+test. Default is 0.01. The test itself of course does not depend on this,
+but it is used in the EM-algorithm to speed up calculations. More
+precisely, the EM-algorithm is stopped once the P value is below the
+significance level. This can be done because the PC algorithm only needs an
+accept/ reject decision.}
 
 \item{K}{kinship}
 
@@ -40,7 +44,8 @@ An intercept is already included for each trait in suffStat; covariates
 should not contain a column of ones.}
 
 \item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
-may be partly in S and x and y, but x and y cannot be both QTLs.}
+may be partly in S and x and y, but x and y cannot be both QTLs.
+Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
 \item{cov.method}{(Default 'fe') A string, specifying which method should be
 used to compute the G-BLUP. Options are 'us'

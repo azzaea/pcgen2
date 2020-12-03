@@ -16,7 +16,11 @@ optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
 
 \item{alpha}{The significance level used in each conditional independence
-test. Default is 0.01}
+test. Default is 0.01. The test itself of course does not depend on this,
+but it is used in the EM-algorithm to speed up calculations. More
+precisely, the EM-algorithm is stopped once the P value is below the
+significance level. This can be done because the PC algorithm only needs an
+accept/ reject decision.}
 
 \item{covariates}{A data.frame containing covariates that should always be
 used in each conditional independence test. Should be either \code{NULL}

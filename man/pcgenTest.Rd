@@ -38,9 +38,10 @@ An intercept is already included for each trait in suffStat; covariates
 should not contain a column of ones.}
 
 \item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
-may be partly in S and x and y, but x and y cannot be both QTLs.}
+may be partly in S and x and y, but x and y cannot be both QTLs.
+Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{K}{The genetic relatedness matrix. If NULL (the default), independent
+\item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
 genetic effects are assumed.}
 
 \item{alpha}{(Default 0.01) The significance level used in the test. The test
