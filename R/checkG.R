@@ -30,6 +30,8 @@
 #' @references A paper on arxiv
 #'
 #' @export
+#' @importFrom ggm msep
+#' @importFrom graph isAdjacent
 
 checkG <- function(pcgen.output, suffStat, alpha = 0.01,
                    covariates = NULL) {

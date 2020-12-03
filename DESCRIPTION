@@ -27,5 +27,6 @@ Imports:
     methods,
     lme4,
     sommer,
-    ggm
+    ggm,
+    gaston
 

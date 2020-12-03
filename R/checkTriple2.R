@@ -1,3 +1,4 @@
+#' @importFrom Hmisc %nin%
 checkTriple2 <- function (a, b, c, nbrsA, nbrsC, sepsetA, sepsetC, suffStat,
                           alpha, version.unf = c(NA, NA),
                           maj.rule = FALSE,verbose = FALSE,

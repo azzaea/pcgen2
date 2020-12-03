@@ -21,9 +21,9 @@
 #'
 #' @param use.GBLUP Use the GBLUP itself, instead of the residuals (as in Topner et al)
 #'
-#'                
-#' @param return.pvalues   
-#' 
+#'
+#' @param return.pvalues
+#'
 #' @return A graph (an object with S3 class \code{"pcgen"})
 #'
 #' @author Willem Kruijer and Pariya Behrouzi.
@@ -33,6 +33,7 @@
 #' @references A paper on arxiv and Topner et al (2017)
 #'
 #' @export
+#' @import pcalg
 
 pcRes <-
   function (suffStat, alpha= 0.01, K = NULL, m.max = Inf,
@@ -76,6 +77,6 @@ pcRes <-
       return(list(gr = pc.res, pMax = pc.res@pMax))
     } else {
       return(pc.res)
-    }    
-    
+    }
+
 }

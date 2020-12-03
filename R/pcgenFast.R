@@ -28,9 +28,9 @@
 #'                  computation of residuals in the first step. Options are 'us' (unstructured multi-trait model fitted
 #'                  using sommer), and uni' (based on univariate GBLUPs).
 #'
-#'                
-#' @param return.pvalues   
-#' 
+#'
+#' @param return.pvalues
+#'
 #' @return A graph (an object with S3 class \code{"pcgen"})
 #'
 #' @author Willem Kruijer and Pariya Behrouzi.
@@ -40,7 +40,9 @@
 #' @references A paper on arxiv
 #'
 #' @export
-
+#' @import pcalg
+#' @importFrom methods as
+#'
 pcgenFast <-
 function (suffStat, alpha = 0.01, m.max = Inf,
           res.m.max = Inf, verbose = FALSE, covariates = NULL,
@@ -104,16 +106,16 @@ function (suffStat, alpha = 0.01, m.max = Inf,
                        use.res = use.res, res.cor = res.cor,
                        return.pvalues = TRUE)
     pMax <- pcgen.fit[[2]]
-    
+
     #pMax[-1, -1] <- pmax(pMax[-1, -1], skel.res@pMax)
     inf.select <- which(pMax[-1, -1] == -Inf, arr.ind = T)
-    
+
     pMax[-1, -1][inf.select] <- skel.res@pMax[inf.select]
-    
+
     return(list(gr = pcgen.fit[[1]], pMax = pMax))
-    
+
   } else {
-    
+
     pcgen.fit <- pcgen(suffStat = suffStat, alpha=alpha, verbose = verbose,
                        fixedGaps = gapMatrix, fixedEdges = fixMatrix,
                        covariates = covariates, QTLs = QTLs, m.max = m.max,
@@ -123,5 +125,5 @@ function (suffStat, alpha = 0.01, m.max = Inf,
                        return.pvalues = FALSE)
     return(pcgen.fit)
   }
-  
+
 }

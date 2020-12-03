@@ -134,106 +134,105 @@
 #' }
 #' @export
 #'
-pcgen <-
-  function (suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha = 0.01,
-            m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE,
-            use.res = FALSE, res.cor = NULL, max.iter = 50,
-            stop.if.significant = TRUE, NAdelete = FALSE, return.pvalues = FALSE) {
+pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha = 0.01,
+                  m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE,
+                  use.res = FALSE, res.cor = NULL, max.iter = 50, stop.if.significant = TRUE,
+                  NAdelete = FALSE, return.pvalues = FALSE) {
 
-    cl <- match.call()
+  cl <- match.call()
 
-    if (is.null(alpha)) alpha = 0.01
-    if (!is.null(covariates)) {
-      covariates <- as.data.frame(covariates)
-      stopifnot(nrow(covariates)==nrow(suffStat))
-    }
+  if (is.null(alpha)) alpha = 0.01
 
-    if (colnames(suffStat)[1]!='G')
-      stop('The first column of suffStat should be named G (genotype)')
-
-    if (class(QTLs)!='integer')
-      stop('QTLs should be a vector of integers')
-
-    if (1 %in% QTLs)
-      stop('QTLs should not contain the genotype column (G)')
-
-    if (length(QTLs) > 0) {
-      non.collider.nodes <- c(1,sort(QTLs))
-    } else {
-      non.collider.nodes <- 1
-    }
-
-    ###
-
-    labels <- colnames(suffStat)
-    p      <- ncol(suffStat)
-
-
-    ##################################
-    # Azza: this comment block is confusing. remove it?
-    # The following chunk is (i) not in the original pcalg function
-    #                        (ii) ALSO in the skeleton2 function
-    #                             (which now can also deal with QTLs by itself)
-
-    #if (is.null(fixedEdges)) {
-    #  stopifnot(identical(dim(fixedEdges), c(p, p)))
-    #}
-
-    #if (is.null(fixedGaps)) {
-    #  gapMatrix <- matrix(FALSE, p, p)
-    #} else {
-    #  #stopifnot(identical(dim(fixedGaps), c(p, p)))
-    #  stopifnot(identical(dim(fixedGaps), c(p, p)))
-    #  gapMatrix <- as.matrix(fixedGaps)
-    #}
-
-    #if (length(QTLs) > 0) {
-    #  gapMatrix[c(1,QTLs),c(1,QTLs)] <- TRUE
-    #}
-
-    #fixedGaps <- gapMatrix
-
-    ##########################
-
-    skel <- skeleton2(suffStat = suffStat, alpha = alpha, labels = labels, p = p,
-                      method = "stable", m.max = m.max, fixedGaps = fixedGaps,
-                      fixedEdges = fixedEdges, NAdelete = NAdelete,
-                      verbose = verbose, covariates=covariates, QTLs = QTLs, K = K,
-                      max.iter = max.iter, stop.if.significant = stop.if.significant,
-                      use.res = use.res, res.cor = res.cor)
-    # Infer an order-independent skeleton (pcalg:: with skel.method = "stable")
-
-    # Azza: more old comments- delete?
-    ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
-    #genVar <- skel[['genVar']]
-    #qtlVar <- skel[['qtlVar']]
-    #skel   <- skel[['skel.out']]
-
-    skel@call <- cl
-
-    # Resolve ambuities in edge orientations with the majority rule of Colombo & Maathuis 2014,
-    # and allow bi-directed edges to resolve conflicting orientaitons
-    # (pcalg:: with conservative = FALSE, maj.rule = TRUE, solve.confl = TRUE):
-
-    pc. <- pc.cons.intern2(skel, suffStat = suffStat, alpha = alpha,
-                           version.unf = c(2, 1), maj.rule = TRUE,
-                           verbose = verbose,
-                           covariates = covariates, K = K,
-                           QTLs = QTLs, max.iter = max.iter,
-                           stop.if.significant = stop.if.significant,
-                           use.res = use.res, res.cor = res.cor)
-
-    gr <- udag2pdagRelaxed2(pc.$sk, verbose = verbose,
-                            unfVect = pc.$unfTripl,
-                            solve.confl = TRUE,
-                            non.collider.nodes = non.collider.nodes)
-
-
-
-    if (return.pvalues == TRUE) {
-      return(list(gr = gr, pMax = skel@pMax))
-    } else {
-      return(gr)
-    }
+  if (!is.null(covariates)) {
+    covariates <- as.data.frame(covariates)
+    stopifnot(nrow(covariates)==nrow(suffStat))
   }
+
+  if (colnames(suffStat)[1]!='G')
+    stop('The first column of suffStat should be named G (genotype)')
+
+  if (class(QTLs)!='integer')
+    stop('QTLs should be a vector of integers')
+
+  if (1 %in% QTLs)
+    stop('QTLs should not contain the genotype column (G)')
+
+  if (length(QTLs) > 0) {
+    non.collider.nodes <- c(1,sort(QTLs))
+  } else {
+    non.collider.nodes <- 1
+  }
+
+  ###
+
+  labels <- colnames(suffStat)
+  p      <- ncol(suffStat)
+
+
+  ##################################
+  # Azza: this comment block is confusing. remove it?
+  # The following chunk is (i) not in the original pcalg function
+  #                        (ii) ALSO in the skeleton2 function
+  #                             (which now can also deal with QTLs by itself)
+
+  #if (is.null(fixedEdges)) {
+  #  stopifnot(identical(dim(fixedEdges), c(p, p)))
+  #}
+
+  #if (is.null(fixedGaps)) {
+  #  gapMatrix <- matrix(FALSE, p, p)
+  #} else {
+  #  #stopifnot(identical(dim(fixedGaps), c(p, p)))
+  #  stopifnot(identical(dim(fixedGaps), c(p, p)))
+  #  gapMatrix <- as.matrix(fixedGaps)
+  #}
+
+  #if (length(QTLs) > 0) {
+  #  gapMatrix[c(1,QTLs),c(1,QTLs)] <- TRUE
+  #}
+
+  #fixedGaps <- gapMatrix
+
+  ##########################
+
+  skel <- skeleton2(suffStat = suffStat, alpha = alpha, labels = labels, p = p,
+                    method = "stable", m.max = m.max, fixedGaps = fixedGaps,
+                    fixedEdges = fixedEdges, NAdelete = NAdelete,
+                    verbose = verbose, covariates=covariates, QTLs = QTLs, K = K,
+                    max.iter = max.iter, stop.if.significant = stop.if.significant,
+                    use.res = use.res, res.cor = res.cor)
+  # Infer an order-independent skeleton (pcalg:: with skel.method = "stable")
+
+  # Azza: more old comments- delete?
+  ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
+  #genVar <- skel[['genVar']]
+  #qtlVar <- skel[['qtlVar']]
+  #skel   <- skel[['skel.out']]
+
+  skel@call <- cl
+
+  # Resolve ambuities in edge orientations with the majority rule of Colombo & Maathuis 2014,
+  # and allow bi-directed edges to resolve conflicting orientaitons
+  # (pcalg:: with conservative = FALSE, maj.rule = TRUE, solve.confl = TRUE):
+
+  pc. <- pc.cons.intern2(skel, suffStat = suffStat, alpha = alpha,
+                         version.unf = c(2, 1), maj.rule = TRUE,
+                         verbose = verbose,
+                         covariates = covariates, K = K,
+                         QTLs = QTLs, max.iter = max.iter,
+                         stop.if.significant = stop.if.significant,
+                         use.res = use.res, res.cor = res.cor)
+
+  gr <- udag2pdagRelaxed2(pc.$sk, verbose = verbose,
+                          unfVect = pc.$unfTripl,
+                          solve.confl = TRUE,
+                          non.collider.nodes = non.collider.nodes)
+
+  if (return.pvalues == TRUE) {
+    return(list(gr = gr, pMax = skel@pMax))
+  } else {
+    return(gr)
+  }
+
+}
 

@@ -26,6 +26,9 @@
 #'
 #' @export
 #'
+#' @importFrom sommer mmer vs unsm
+#' @importFrom lme4 lmer VarCorr
+
 getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
                          K = NULL) {
 
@@ -106,18 +109,18 @@ getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
       #                     rcov=~us(trait):units, data=suffStat, draw = F,
       #                     silent = T, G = list(id = Ks))
 
-      out <- mmer(fixed  = as.formula(cv3), 
+      out <- mmer(fixed  = as.formula(cv3),
                   random = ~ vs(id, Gu = Ks, Gtc = unsm(ncol(suffStat) -2) ),
-                  rcov   = ~ vs(units, Gtc = unsm(ncol(suffStat) -2)), 
+                  rcov   = ~ vs(units, Gtc = unsm(ncol(suffStat) -2)),
                   data   =  suffStat)
-      
+
       if (out$convergence == TRUE) {
-        
+
         gb <- matrix(NA, nrow(suffStat), p-1)
         for (j in 2:p) {
           gb[,j-1] <- out$U[[1]][[j-1]][suffStat$id]
         }
-        
+
         #res <- out$residuals - gb
         res <- suffStat[,2:p] - gb
       } else {
@@ -150,12 +153,12 @@ getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
           #             data = suffStat, draw = F,
           #             silent = T, G = list(id = Ks))
 
-          out <- mmer(fixed  = as.formula(paste0(names(suffStat)[j], cv2)), 
+          out <- mmer(fixed  = as.formula(paste0(names(suffStat)[j], cv2)),
                       random = ~vs(id, Gu = Ks),
                       rcov   = ~vs(units), data=suffStat)
-          
-          #res[which(!is.na(suffStat[,j])), j - 1] <- as.numeric(out$residuals) - out$U[[1]][[1]][suffStat$id] 
-          res[which(!is.na(suffStat[,j])), j - 1] <-  suffStat[,j]- out$U[[1]][[1]][suffStat$id] 
+
+          #res[which(!is.na(suffStat[,j])), j - 1] <- as.numeric(out$residuals) - out$U[[1]][[1]][suffStat$id]
+          res[which(!is.na(suffStat[,j])), j - 1] <-  suffStat[,j]- out$U[[1]][[1]][suffStat$id]
         }
       }
       rownames(res) <- rownames(suffStat)

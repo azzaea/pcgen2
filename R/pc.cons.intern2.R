@@ -1,3 +1,6 @@
+#' @importFrom methods as new
+#' @import pcalg
+#'
 pc.cons.intern2 <- function (sk, suffStat, alpha, version.unf = c(NA, NA),
                              maj.rule = FALSE, verbose = FALSE,
                              covariates=NULL,

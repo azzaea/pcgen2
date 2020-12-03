@@ -1,3 +1,6 @@
+#' @importFrom methods as new
+#' @import pcalg
+#'
 skeleton2  <-
   function (suffStat, alpha, labels, p, method = c("stable", "original"),
             m.max = Inf, fixedGaps = NULL, fixedEdges = NULL, NAdelete = TRUE,

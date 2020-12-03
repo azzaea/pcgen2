@@ -39,6 +39,8 @@
 #' @export
 #' @seealso \code{\link[pcalg]{gaussCItest}}, \code{\link[pcalg]{disCItest}},
 #'   \code{\link[pcalg]{binCItest}}
+#'
+#' @import pcalg
 pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K = NULL,
                       alpha = 0.01, max.iter = 50, stop.if.significant = TRUE,
                       use.res = FALSE, res.cor = NULL) {

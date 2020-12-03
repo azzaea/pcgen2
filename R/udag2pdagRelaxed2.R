@@ -1,3 +1,8 @@
+#' @import pcalg
+#' @import graph
+#' @importFrom utils combn
+#' @importFrom methods as
+#'
 udag2pdagRelaxed2 <- function(gInput, verbose = FALSE, unfVect = NULL,
                               solve.confl = FALSE, orientCollider = TRUE,
                               rules = rep(TRUE, 3), non.collider.nodes=1) {
