@@ -1,7 +1,7 @@
 skeleton2  <-
   function (suffStat, alpha, labels, p, method = c("stable", "original"),
             m.max = Inf, fixedGaps = NULL, fixedEdges = NULL, NAdelete = TRUE,
-            verbose = FALSE, covariates=NULL, QTLs = integer(), K = NULL, dec = NULL,
+            verbose = FALSE, covariates=NULL, QTLs = integer(), K = NULL,
             max.iter = 50, stop.if.significant = TRUE, use.res = FALSE,
             res.cor = NULL) {
 

@@ -139,15 +139,9 @@ pcgen <-
             m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE,
             use.res = FALSE, res.cor = NULL, max.iter = 50,
             stop.if.significant = TRUE, NAdelete = FALSE, return.pvalues = FALSE) {
-    # pcalg::pc options for order-independt network construction
-
-    u2pd <- c("relaxed", "rand", "retry")[1]
-    skel.method <- c("stable", "original", "stable.fast")[1]
-    conservative <- FALSE
-    maj.rule <- TRUE
-    solve.confl <- TRUE
 
     cl <- match.call()
+
     if (is.null(alpha)) alpha = 0.01
     if (!is.null(covariates)) {
       covariates <- as.data.frame(covariates)
@@ -156,8 +150,10 @@ pcgen <-
 
     if (colnames(suffStat)[1]!='G')
       stop('The first column of suffStat should be named G (genotype)')
+
     if (class(QTLs)!='integer')
       stop('QTLs should be a vector of integers')
+
     if (1 %in% QTLs)
       stop('QTLs should not contain the genotype column (G)')
 
@@ -172,22 +168,9 @@ pcgen <-
     labels <- colnames(suffStat)
     p      <- ncol(suffStat)
 
-    # Azza: what do these 2 lines do?
-    #u2pd <- match.arg(u2pd)
-    #skel.method <- match.arg(skel.method)
-
-    # Azza: Was there a version were these options were allowed to vary?
-    # They are moot as is now!
-    if (u2pd != "relaxed") {
-      if (conservative || maj.rule)
-        stop("Conservative PC and majority rule PC can only be run with 'u2pd = relaxed'")
-      if (solve.confl)
-        stop("Versions of PC using lists for the orientation rules (and possibly bi-directed edges)\n can only be run with 'u2pd = relaxed'")
-    }
-
-    if (conservative && maj.rule) stop("Choose either conservative PC or majority rule PC!")
 
     ##################################
+    # Azza: this comment block is confusing. remove it?
     # The following chunk is (i) not in the original pcalg function
     #                        (ii) ALSO in the skeleton2 function
     #                             (which now can also deal with QTLs by itself)
@@ -212,46 +195,40 @@ pcgen <-
 
     ##########################
 
-    #skel.out <-
     skel <- skeleton2(suffStat = suffStat, alpha = alpha, labels = labels, p = p,
-                      method = skel.method, m.max = m.max, fixedGaps = fixedGaps,
+                      method = "stable", m.max = m.max, fixedGaps = fixedGaps,
                       fixedEdges = fixedEdges, NAdelete = NAdelete,
-                      verbose = verbose, covariates=covariates, QTLs = QTLs, K = K, #dec?
+                      verbose = verbose, covariates=covariates, QTLs = QTLs, K = K,
                       max.iter = max.iter, stop.if.significant = stop.if.significant,
                       use.res = use.res, res.cor = res.cor)
+    # Infer an order-independent skeleton (pcalg:: with skel.method = "stable")
+
+    # Azza: more old comments- delete?
     ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
-
-
     #genVar <- skel[['genVar']]
     #qtlVar <- skel[['qtlVar']]
     #skel   <- skel[['skel.out']]
 
     skel@call <- cl
 
-    if (!conservative && !maj.rule) {
-      # this option can not occur, at least for the moment
-      gr <- switch(u2pd, rand = udag2pdag(skel),
-                   retry = udag2pdagSpecial(skel)$pcObj,
-                   relaxed = udag2pdagRelaxed2(skel, verbose = verbose,
-                                               solve.confl = solve.confl,
-                                               non.collider.nodes = non.collider.nodes))
+    # Resolve ambuities in edge orientations with the majority rule of Colombo & Maathuis 2014,
+    # and allow bi-directed edges to resolve conflicting orientaitons
+    # (pcalg:: with conservative = FALSE, maj.rule = TRUE, solve.confl = TRUE):
 
-    } else {
+    pc. <- pc.cons.intern2(skel, suffStat = suffStat, alpha = alpha,
+                           version.unf = c(2, 1), maj.rule = TRUE,
+                           verbose = verbose,
+                           covariates = covariates, K = K,
+                           QTLs = QTLs, max.iter = max.iter,
+                           stop.if.significant = stop.if.significant,
+                           use.res = use.res, res.cor = res.cor)
 
-      pc. <- pc.cons.intern2(skel, suffStat = suffStat, alpha = alpha,
-                             version.unf = c(2, 1), maj.rule = maj.rule,
-                             verbose = verbose,
-                             covariates = covariates, K = K,
-                             QTLs = QTLs, max.iter = max.iter,
-                             stop.if.significant = stop.if.significant,
-                             use.res = use.res, res.cor = res.cor)
+    gr <- udag2pdagRelaxed2(pc.$sk, verbose = verbose,
+                            unfVect = pc.$unfTripl,
+                            solve.confl = TRUE,
+                            non.collider.nodes = non.collider.nodes)
 
-      gr <- udag2pdagRelaxed2(pc.$sk, verbose = verbose,
-                              unfVect = pc.$unfTripl,
-                              solve.confl = solve.confl,
-                              non.collider.nodes = non.collider.nodes)
 
-    }
 
     if (return.pvalues == TRUE) {
       return(list(gr = gr, pMax = skel@pMax))
