@@ -26,7 +26,7 @@ independence given the variables in S}
 \item{S}{vector of integers defining the conditioning set, where the integers
 refer to column numbers in suffStat. May be numeric(), i.e. the empty set.}
 
-\item{suffStat}{A data.frame, of which the first column is the factor G
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
 (genotype, i.e samples' IDs) and subsequent columns contain the traits, and
 optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
@@ -42,7 +42,7 @@ may be partly in S and x and y, but x and y cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
 \item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-genetic effects are assumed.}
+genetic effects are assumed. Azza: conside the def below:#'}
 
 \item{alpha}{(Default 0.01) The significance level used in the test. The test
 itself of course does not depend on this, but it is used in the

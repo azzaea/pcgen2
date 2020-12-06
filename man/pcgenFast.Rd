@@ -21,7 +21,7 @@ pcgenFast(
 )
 }
 \arguments{
-\item{suffStat}{A data.frame, of which the first column is the factor G
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
 (genotype, i.e samples' IDs) and subsequent columns contain the traits, and
 optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
@@ -33,9 +33,10 @@ precisely, the EM-algorithm is stopped once the P value is below the
 significance level. This can be done because the PC algorithm only needs an
 accept/ reject decision.}
 
-\item{m.max}{maximum size of the conditioning set, in pcgen}
+\item{m.max}{Maximum size of the conditioning sets.}
 
-\item{res.m.max}{maximum size of the conditioning set, in the pc-algorithm on the residuals}
+\item{res.m.max}{Maximum size of the conditioning set, in the pc-algorithm on
+the residuals (used for prior screening).}
 
 \item{verbose}{If \code{TRUE}, p-values for the conditional independence
 tests are printed}
@@ -68,40 +69,71 @@ algorithm only needs an accept/reject decision (2) In EM the likelihood is
 nondecreasing. Should be put to \code{FALSE} if the precise p-values are of
 interest.}
 
-\item{cov.method}{(Default 'uni') A string, specifying which method should be
-used to estimate the covariance structure required for the
-computation of conditional means, as well as for the
-computation of residuals in the first step. Options are 'us' (unstructured multi-trait model fitted
-using sommer), and uni' (based on univariate GBLUPs).}
+\item{cov.method}{A string, specifying which method should be used to
+estimate the covariance structure required for the computation of
+conditional means, as well as for the computation of residuals in the first
+step. Options are 'us' (unstructured multi-trait model fitted using
+sommer), and uni' (based on univariate GBLUPs).(Default 'uni')
+Azza: alternative explanation: A string, specifying which method should be used to
+compute the GBLUP. Options are \code{'us'} (unstructured multi-trait model
+fitted using sommer) and \code{'uni'} (based on univariate GBLUPs). Default
+is \code{'uni'}.}
 
-\item{use.res}{If FALSE, residuals are only used for screening. If TRUE,
-residuals are also used the
-test for conditional independence of 2 traits given a set of
-other traits and G}
+\item{use.res}{If \code{FALSE}, residuals from GBLUP are only used for screening with the
+standard pc algotihm. After that, the standard pcgen algorithm is run on
+the remaining edges; the test for conditional independence of 2 traits
+given a set of other traits and G is based on bivariate mixed models. If
+\code{TRUE}, this test for conditional independence of 2 traits given a set
+of other traits and G is based on the residuals. In this case, no further
+edges between traits are removed after screening and \code{pcgen} will only
+infer the orientation, and the direct genetic effects.}
 
-\item{return.pvalues}{}
+\item{return.pvalues}{If \code{TRUE}, the maximal p-value for each edge is
+returned.}
 }
 \value{
-A graph (an object with S3 class \code{"pcgen"})
+If \code{return.pvalues = FALSE}, the output is a graph (an object
+with S3 class \code{"pcgen"}). If \code{return.pvalues = TRUE}, the output
+is a list with elements \code{gr} (the graph) and \code{pMax} (a matrix
+with the p-values).
 }
 \description{
-This will run the pcgen algorithm, assuming there are replicates,
-and K = Z Z^t. Fast version, with residuals-based pre-selection.
+pcgen with residual-based screening
 }
 \details{
-Here we
-put a lot
-of details
-COMMENT on cov.method (the same option is
-used in the computation of the residuals and the conditional means)
-fixedGaps and fixedEdges are NULL
-m.max, alpha,.... are also used in the first step
+The pcgen algorithm starting with a skeleton estimated using the standard
+pc-algorithm, based on residuals from the GBLUP.
+
+Here we put a lot of details COMMENT on cov.method (the same option is used
+in the computation of the residuals and the conditional means) fixedGaps and
+fixedEdges are NULL m.max, alpha,.... are also used in the first step
+}
+\examples{
+\dontrun{
+data(simdata)
+out <- pcgenFast(suffStat = simdata, alpha = 0.01, verbose= FALSE, use.res = TRUE)
+}
+
 }
 \references{
-A paper on arxiv
+\itemize{
+\item Kruijer, W., Behrouzi, P., Bustos-Korts, D., Rodríguez-Álvarez,
+M. X., Mahmoudi, S. M., Yandell, B., ... & van Eeuwijk, F. A. (2020).
+Reconstruction of networks with direct and indirect genetic effects.
+\emph{Genetics}, 214(4), 781-807.
+}
+
+\itemize{
+\item Colombo, D., & Maathuis, M. H. (2014). Order-independent
+constraint-based causal structure learning. \emph{The Journal of Machine
+Learning Research}, 15(1), 3741-3782.
+}
+}
+\seealso{
+{\code{\link{getResiduals}}}
 }
 \author{
-Willem Kruijer and Pariya Behrouzi.
-Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
-Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
+Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+\email{willem.kruijer@wur.nl} and Pariya Behrouzi
+\email{pariya.behrouzi@gmail.com}
 }

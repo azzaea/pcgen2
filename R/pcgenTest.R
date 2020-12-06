@@ -1,25 +1,41 @@
 #' The conditional independence test in pcgen
 #'
-#' This will perform the conditional independence test used in pcgen algorithm,
-#' assuming replicates and K = Z Z^t; or no replicates with a generic kinship
-#' matrix K = A
+#' This performs the conditional independence test used in the pcgen algorithm,
+#' assuming there are replicates, and independent genetic effects.
 #'
-#' COMMENT on Vg and Ve, which should be either both NULL or positive definite
-#' matrices
+#' This will perform the conditional independence test used in pcgen algorithm,
+#' assuming (replicates and K = Z Z^t; or no replicates with a generic kinship
+#' matrix K = A) and (independent genetic effects)
+#'
+#' \code{pcgenTest} tests for conditional independence between \eqn{x} and
+#' \eqn{y} given \eqn{S}. It distinguishes 2 situations: (i) if one of \eqn{x}
+#' and \eqn{y} (say \eqn{x}) is the factor G, \code{pcgenTest} will test if the
+#' genetic variance in \eqn{y} is zero, given the traits in S. (ii) if \eqn{x}
+#' and \eqn{y} are both traits, \code{pcgenTest} tests if the residual
+#' covariance between them is zero, given the traits in \eqn{S} and the factor
+#' G. The factor G is automatically included in the conditioning set \eqn{S}
+#' (\eqn{S} does not need to contain the integer 1). This test is either based
+#' on a bivariate mixed model (when \code{use.res=FALSE}), or on residuals from
+#' GBLUP (\code{use.res=T}), obtained with the getResiduals function. In the
+#' latter case, \code{res.cor} must be provided.
+#'
+#' @references * Kruijer, W., Behrouzi, P., Bustos-Korts, D., Rodríguez-Álvarez,
+#'   M. X., Mahmoudi, S. M., Yandell, B., ... & van Eeuwijk, F. A. (2020).
+#'   Reconstruction of networks with direct and indirect genetic effects.
+#'   \emph{Genetics}, 214(4), 781-807.
+#'
+#' @author Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+#'   \email{willem.kruijer@wur.nl} and Pariya Behrouzi
+#'   \email{pariya.behrouzi@gmail.com}
 #'
 #' @inheritParams pcgen
 #'
-#' @param x,y column numbers in suffStat that should be tested for conditional
-#'   independence given the variables in S
+#' @param x,y Column numbers in \code{suffStat} that should be tested for
+#'   conditional independence given the variables in \code{S}.
 #'
 #' @param S vector of integers defining the conditioning set, where the integers
-#'   refer to column numbers in suffStat. May be numeric(), i.e. the empty set.
-#'
-#' @param alpha (Default 0.01) The significance level used in the test. The test
-#'   itself of course does not depend on this, but it is used in the
-#'   EM-algorithm to speed up calculations. More precisely, the EM-algorithm is
-#'   stopped once the p-value is below the significance level. This can be done
-#'   because the PC-algorithm only needs an accept/reject decision.
+#'   refer to column numbers in \code{suffStat}. May be numeric(), i.e. the
+#'   empty set.
 #'
 #' @param stop.if.significant If TRUE, the EM-algorithm used in some of the
 #'   conditional independence tests will be stopped whenever the p-value becomes
@@ -30,17 +46,22 @@
 #'
 #' @return a p-value
 #'
-#' @author Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
-#'   \email{willem.kruijer@wur.nl} and Pariya Behrouzi
-#'   \email{pariya.behrouzi@gmail.com}
+#' @seealso \code{\link{getResiduals}}, \code{\link[pcalg]{gaussCItest}},
+#'   \code{\link[pcalg]{disCItest}}, \code{\link[pcalg]{binCItest}}
 #'
-#' @references A paper on arxiv
+#'  @examples
+#'  \dontrun{
+#'  data(simdata)
+#'  rs <- getResiduals(suffStat= simdata)
+#'  pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4)
+#'  pcgenTest(suffStat= simdata, x= 2, y= 3, S= c(1,4))
+#'  pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4, use.res= TRUE, res.cor= cor(rs))
+#'  pcgenTest(suffStat= simdata, x= 2, y= 1, S= 4)
+#'  }
 #'
 #' @export
-#' @seealso \code{\link[pcalg]{gaussCItest}}, \code{\link[pcalg]{disCItest}},
-#'   \code{\link[pcalg]{binCItest}}
-#'
 #' @import pcalg
+#'
 pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K = NULL,
                       alpha = 0.01, max.iter = 50, stop.if.significant = TRUE,
                       use.res = FALSE, res.cor = NULL) {

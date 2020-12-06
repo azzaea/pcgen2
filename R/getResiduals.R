@@ -1,33 +1,60 @@
 #' Residuals from GBLUP
 #'
-#' Computes residuals from the BLUP (best linear unbiased predictor) of the genetic effects
+#' Residuals from the best linear unbiased predictor of the genetic effects
+#' (GBLUP), which is computed given REML-estimates of the variance components.
+#' The residuals are used in \code{pcgenFast} and \code{pcRes}
 #'
-#' The residuals are used in pcgenFast and pcRes
+#' If \code{cov.method = "uni"}, the GBLUP and the residuals are computed
+#' separately for each trait in suffStat. The covariance of each trait is then
+#' assumed to be \deqn{\sigma_G^2 Z K Z^t + \sigma_E^2 I_n} where \eqn{Z} is a
+#' binary incidence matrix, assigning plants or plots to genotypes. \eqn{Z} is
+#' based on the first column in \code{suffStat}. If there is a single
+#' observation per genotype (typically a genotypic mean), \eqn{Z} is the
+#' identity matrix, and the relatedness matrix \eqn{K} should be specified. If
+#' there are replicates for at least some of the genotypes, and no \eqn{K} is
+#' provided, independent genetic effects are assumed (\eqn{K} will be the
+#' identity matrix). It is also possible to have replicates and specify a
+#' non-diagonal \eqn{K}. Whenever \eqn{K} is specified, sommer (mmer2) will be
+#' used; otherwise lmer (lme4). The mmer2 is also used when \code{cov.method =
+#' "us"}, in which case the multivariate GBLUP is computed, for all traits in
+#' \code{suffStat} simultaneously. This is only possible for a limited number of
+#' traits.
+#'
+#' @references Covarrubias-Pazaran, G., 2016. Genome-assisted prediction of
+#'   quantitative traits using the R package sommer. \emph{PloS one}, 11(6),
+#'   p.e0156744.
+#'
+#' @author Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+#'   \email{willem.kruijer@wur.nl} and Pariya Behrouzi
+#'   \email{pariya.behrouzi@gmail.com}
 #'
 #' @inheritParams pcgen
 #'
-#' @param cov.method (Default 'uni') A string, specifying whether the BLUP of the genetic effects
-#'                   a multi-trait mixed model should be fitted
-#'                   using sommer ('us'), or univariate mixed models ('uni')
+#' @param cov.method specifying which method should be used to compute the
+#'   GBLUP. Options are \code{"us"} (unstructured multi-trait model fitted using
+#'   \code{sommer}) and \code{"uni"} (based on univariate GBLUPs). Default is
+#'   \code{"uni"}.
 #'
-#' @param K An optional marker-based relatedness matrix of dimension n x n, n being the
-#'          number of unique genotypes in the first column in suffStat. In case suffStat contains
-#'          replicates, the resulting relatedness of the observations will be Z K Z^t, where Z
-#'          is the incidence matrix assigning plants to genotypes
-#'
+# @param K An optional marker-based relatedness matrix of dimension n x n, n
+#   being the number of unique genotypes in the first column in suffStat. In
+#   case suffStat contains replicates, the resulting relatedness of the
+#   observations will be Z K Z^t, where Z is the incidence matrix assigning
+#   plants to genotypes
 #'
 #' @return A data-frame with the residuals
 #'
-#' @author Willem Kruijer and Pariya Behrouzi.
-#'         Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
-#'        Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
+#' @examples
+#' \dontrun{
+#' data(simdata)
+#' rs <- getResiduals(suffStat= simdata)
+#' }
 #'
-#' @references A paper on arxiv
 #'
 #' @export
 #'
 #' @importFrom sommer mmer vs unsm
 #' @importFrom lme4 lmer VarCorr
+#'
 
 getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
                          K = NULL) {

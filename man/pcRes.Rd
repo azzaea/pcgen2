@@ -18,7 +18,7 @@ pcRes(
 )
 }
 \arguments{
-\item{suffStat}{A data.frame, of which the first column is the factor G
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
 (genotype, i.e samples' IDs) and subsequent columns contain the traits, and
 optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
@@ -30,9 +30,11 @@ precisely, the EM-algorithm is stopped once the P value is below the
 significance level. This can be done because the PC algorithm only needs an
 accept/ reject decision.}
 
-\item{K}{kinship}
+\item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
+genetic effects are assumed. Azza: conside the def below:#'}
 
-\item{m.max}{maximum size of the conditioning set, in the pc-algorithm on the residuals}
+\item{m.max}{maximum size of the conditioning set, in the pc-algorithm on the
+residuals}
 
 \item{verbose}{If \code{TRUE}, p-values for the conditional independence
 tests are printed}
@@ -47,33 +49,85 @@ should not contain a column of ones.}
 may be partly in S and x and y, but x and y cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{cov.method}{(Default 'fe') A string, specifying which method should be
-used to compute the G-BLUP. Options are 'us'
-(unstructured multi-trait model fitted
-using sommer) and uni' (based on univariate GBLUPs).}
+\item{cov.method}{A string, specifying which method should be used to compute
+the G-BLUP. Options are \code{"us"} (unstructured multi-trait model fitted
+using \code{sommer}) and \code{"uni"} (based on univariate GBLUPs).
+(Default \code{"uni"})}
 
-\item{use.GBLUP}{Use the GBLUP itself, instead of the residuals (as in Topner et al)}
+\item{use.GBLUP}{Use the GBLUP itself, instead of the residuals (as in Topner
+et al)}
 
-\item{return.pvalues}{}
+\item{return.pvalues}{If \code{TRUE}, the maximal p-value for each edge is
+returned.}
 }
 \value{
-A graph (an object with S3 class \code{"pcgen"})
+If \code{return.pvalues = FALSE}, the output is a graph (an object
+with S3 class \code{"pcgen"}). If \code{return.pvalues = TRUE}, the output
+is a list with elements \code{gr} (the graph) and \code{pMax} (a matrix
+with the p-values).
 }
 \description{
-The pc algorithm applied to residuals, assuming there are replicates,
-and K = Z Z^t.
+The pc algorithm applied to residuals, assuming there are replicates, and K =
+Z Z^t.
 }
 \details{
-Here we
-put a lot
-of details
-COMMENT
+If \code{use.GBLUP = FALSE}, GBLUP residuals are used as input for the
+pc-stable algorithm of Colombo and Maathuis (2014). This closely resembles
+the residual networks of Valente et al., (2010) and Topner et al., (2017)
+(who used different ways to predict the genetic effects, and applied other
+causal inference algorithms to the residuals). When \code{use.GBLUP = TRUE},
+pc-stable is applied to the GBLUP itself, which resembles the genomic
+networks of Topner et al., (2017). If \code{cov.method = "uni"}, the GBLUP
+and the residuals are computed separately for each trait in suffStat. The
+covariance of each trait is assumed to be \deqn{\sigma_G^2 Z K Z^t +
+\sigma_E^2 I_n} where \eqn{Z} is a binary incidence matrix, assigning plants
+or plots to genotypes. \eqn{Z} is based on the first column in suffStat. If
+there is a single observation per genotype (typically a genotypic mean),
+\eqn{Z} is the identity matrix, and the relatedness matrix \eqn{K} should be
+specified. If there are replicates for at least some of the genotypes, and no
+\eqn{K} is provided, independent genetic effects are assumed (\eqn{K} will be
+the identity matrix). It is also possible to have replicates and specify a
+non-diagonal \eqn{K}. Whenever  \eqn{K} is specified, sommer (mmer2) will be
+used; otherwise lmer (lme4). mmer2 is also used when \code{cov.method =
+"us"}, in which case the multivariate GBLUP is computed, for all traits in
+suffStat simultaneously. This is only possible for a limited number of
+traits.
+}
+\examples{
+\dontrun{
+data(simdata)
+out <- pcRes(suffStat = simdata, alpha = 0.01, verbose= FALSE)
+}
+
 }
 \references{
+\itemize{
+\item Colombo, D., & Maathuis, M. H. (2014). Order-independent
+constraint-based causal structure learning. \emph{The Journal of Machine
+Learning Research}, 15(1), 3741-3782.
+}
+
+\itemize{
+\item Kruijer, W., Behrouzi, P., Bustos-Korts, D., Rodríguez-Álvarez,
+M. X., Mahmoudi, S. M., Yandell, B., ... & van Eeuwijk, F. A. (2020).
+Reconstruction of networks with direct and indirect genetic effects.
+\emph{Genetics}, 214(4), 781-807.
+}
+
+\itemize{
+\item Töpner, K., Rosa, G. J., Gianola, D., & Schön, C. C. (2017).
+Bayesian networks illustrate genomic and residual trait connections in
+maize (Zea mays L.). \emph{G3: Genes, Genomes, Genetics}, 7(8), 2779-2789.
+}
+
+Valente, B. D., Rosa, G. J., de los Campos, G., Gianola, D., &
+Silva, M. A. (2010). Searching for recursive causal structures in
+multivariate quantitative genetics mixed models. \emph{Genetics}, 185(2), 633-644.
+
 A paper on arxiv and Topner et al (2017)
 }
 \author{
-Willem Kruijer and Pariya Behrouzi.
-Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
-Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
+Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+\email{willem.kruijer@wur.nl} and Pariya Behrouzi
+\email{pariya.behrouzi@gmail.com}
 }

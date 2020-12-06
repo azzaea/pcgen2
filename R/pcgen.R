@@ -31,13 +31,13 @@
 #'   M. X., Mahmoudi, S. M., Yandell, B., ... & van Eeuwijk, F. A. (2020).
 #'   Reconstruction of networks with direct and indirect genetic effects.
 #'   \emph{Genetics}, 214(4), 781-807.
-#' @references * Colombo, D. and Maathuis, M.H., 2014. Order-independent
+#' @references * Colombo, D., & Maathuis, M. H. (2014). Order-independent
 #'   constraint-based causal structure learning. \emph{The Journal of Machine
-#'   Learning Research}, 15(1), pp.3741-3782.
+#'   Learning Research}, 15(1), 3741-3782.
 #' @references * Kalisch, M., Machler, M., Colombo, D., Maathuis, M.H. and
 #'   Buhlmann, P., 2012. Causal inference using graphical models with the R
 #'   package pcalg. \emph{Journal of Statistical Software}, 47(11), pp.1-26.
-#' @references  *  Hauser, A. and Buhlmann, P., 2012. Characterization and
+#' @references  * Hauser, A. and Buhlmann, P., 2012. Characterization and
 #'   greedy learning of interventional Markov equivalence classes of directed
 #'   acyclic graphs. Journal of Machine Learning Research, 13(Aug),
 #'   pp.2409-2464.
@@ -46,9 +46,9 @@
 #'   \email{willem.kruijer@wur.nl} and Pariya Behrouzi
 #'   \email{pariya.behrouzi@gmail.com}
 #'
-#' @param suffStat A data.frame, of which the first column is the factor G
-#'   (genotype, i.e samples' IDs) and subsequent columns contain the traits, and
-#'   optionally some QTLs. The name of the first column should be G. Should not
+#' @param suffStat A data.frame with \eqn{(p+1)} columns, the first of which is the
+#'   factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
+#'   and optionally some QTLs. The name of the first column should be G. Should not
 #'   contain covariates.
 #'
 #' @param covariates A data.frame containing covariates that should always be
@@ -57,12 +57,17 @@
 #'   An intercept is already included for each trait in suffStat; covariates
 #'   should not contain a column of ones.
 #'
-#' @param QTLs Column numbers in \code{suffStat} that correspond to QTLs. These
-#'   may be partly in S and x and y, but x and y cannot be both QTLs.
+#' @param QTLs Column numbers in \code{suffStat} that correspond to QTLs. These may be
+#'  partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 #'   Note: the factor genotype (column number 1) may occur in S, as well as x and y
 #'
 #' @param K The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-#'   genetic effects are assumed.
+#'   genetic effects are assumed. Azza: conside the def below originally in getResiduals.R:
+#   An optional marker-based relatedness (kinship) matrix of dimension \eqn{n x n}, \eqn{n}
+#   being the number of unique genotypes in the first column in \code{suffStat}. In
+#   case \code{suffStat} contains replicates, the resulting relatedness of the
+#   observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
+#   plants to genotypes.
 #'
 #' @param alpha The significance level used in each conditional independence
 #'   test. Default is 0.01. The test itself of course does not depend on this,
@@ -138,6 +143,7 @@
 #' pc.fit1 <- pcgen(suffStat = simdata, alpha = 0.01, verbose = TRUE,
 #'                  use.res = TRUE, res.cor = cor(rs))
 #' }
+#'
 #' @export
 #'
 pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha = 0.01,

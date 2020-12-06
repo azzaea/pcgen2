@@ -23,7 +23,7 @@ pcgen(
 )
 }
 \arguments{
-\item{suffStat}{A data.frame, of which the first column is the factor G
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
 (genotype, i.e samples' IDs) and subsequent columns contain the traits, and
 optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
@@ -39,7 +39,7 @@ may be partly in S and x and y, but x and y cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
 \item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-genetic effects are assumed.}
+genetic effects are assumed. Azza: conside the def below:#'}
 
 \item{alpha}{The significance level used in each conditional independence
 test. Default is 0.01. The test itself of course does not depend on this,
@@ -152,9 +152,9 @@ Reconstruction of networks with direct and indirect genetic effects.
 }
 
 \itemize{
-\item Colombo, D. and Maathuis, M.H., 2014. Order-independent
+\item Colombo, D., & Maathuis, M. H. (2014). Order-independent
 constraint-based causal structure learning. \emph{The Journal of Machine
-Learning Research}, 15(1), pp.3741-3782.
+Learning Research}, 15(1), 3741-3782.
 }
 
 \itemize{
