@@ -1,6 +1,0 @@
-Error in as.vector(y) : object 'd' not found
-Calls: subGraph -> setdiff -> setdiff -> <Anonymous> -> as.vector
-Execution halted
-Error in compareGeneticEffects(QTL_to_G(testdag@graph), gsem$gdag) : 
-  could not find function "compareGeneticEffects"
-Execution halted

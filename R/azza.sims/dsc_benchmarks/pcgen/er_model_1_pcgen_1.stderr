@@ -1,4 +1,0 @@
-Error in `diag<-`(`*tmp*`, value = `*vtmp*`) : 
-  only matrix diagonals can be replaced
-Calls: pcgen ... checkTriple2 -> pcgenTest -> res.covar.test -> diag<- -> diag<-
-Execution halted
