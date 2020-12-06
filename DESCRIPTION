@@ -27,4 +27,7 @@ Imports:
     sommer,
     ggm,
     gaston
-
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr
