@@ -1,5 +1,9 @@
-fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE, 
-                   stop.if.significant = FALSE, null.dev = NULL, alpha = 0.01, 
+#' @import Matrix
+#' @importFrom MASS ginv
+#' @importFrom stats lm as.formula pchisq anova model.frame terms model.matrix
+#'   contrasts manova residuals cor coefficients
+fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE,
+                   stop.if.significant = FALSE, null.dev = NULL, alpha = 0.01,
                    max.iter = 100, Vg.start = NULL, Ve.start = NULL, cov.gen = TRUE) {
 
 #y = em.vec; K = NULL; null.dev = NULL; Vg.start = as.numeric(Vg.manova)[c(1,4,2)]; stop.if.significant= F; Vg = NULL; Ve = NULL; Ve.start = c(as.numeric(Ve.manova)[c(1,4)], 0); cov.error = FALSE; max.iter = 5
@@ -25,7 +29,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
   y <- y[rep(!is.na,2)]
   X.t <- X.t[!is.na,]
   Z.t <- Z.t[!is.na,]
-  
+
 	Ve.aux <- Ve
 	Vg.aux <- Vg
 
@@ -39,7 +43,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	  ##K.trans <- U %*% diag(1/sqrt(d))
 	  #K.trans <- U %*% diag(sqrt(d))
 	  #Z.t <- Matrix(Z.t %*% K.trans)
-	  
+
 	  eig <- svd(K)
 	  U <- eig$u
 	  d <- eig$d
@@ -166,7 +170,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 
 		#D <- Matrix:::bdiag(diag(rep(0,np[1])), Ginv)
 		D <- bdiag(diag(rep(0,np[1])), Ginv)
-		
+
 		# Henderson system of equations
 		H <- V + D
 
@@ -223,8 +227,8 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 			} else {
 			  tau3 <- 0
 			}
-			
-			
+
+
 			Vg.new <- c(tau1, tau2, tau3)
 		} else {
 			Vg.new = Vg
@@ -287,15 +291,15 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 		# These numbers are useful for debugging, and the cacluations are not expensive
 		loglik_Full    <- -0.5 * dev
 		loglik_Reduced <- -0.5 * null.dev
-		
+
 		REMLLRT <- 2 * max(loglik_Full - loglik_Reduced, 0)
 		pvalue  <- (1 - pchisq(REMLLRT, df = 1))
-		
+
 		if (stop.if.significant) {
 			if (pvalue < alpha) break
 		  if (it > 20 & pvalue > 0.1) break
-		} 
-	
+		}
+
 		if (dla < thr) break
 	}
 
@@ -304,13 +308,13 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	if(!is.null(K)) {
 		b.random <- (Diagonal(2)%x%K.trans)%*%b.random
 	}
-	
+
 	res           <- list()
 	res$coeff     <- list(fixed = b.fixed, random = b.random)
 	res$variances <- list(Ve = Ve, Vg = Vg)
 	res$deviance  <- dev
   res$it        <- it
-  # if (stop.if.significant) 
+  # if (stop.if.significant)
       res$pvalue    <- pvalue
 
 	res

@@ -1,3 +1,6 @@
+#' @importFrom methods as new
+#' @import pcalg
+#'
 pc.cons.intern2 <- function (sk, suffStat, alpha, version.unf = c(NA, NA),
                              maj.rule = FALSE, verbose = FALSE,
                              covariates=NULL,
@@ -7,22 +10,22 @@ pc.cons.intern2 <- function (sk, suffStat, alpha, version.unf = c(NA, NA),
 {
 ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
 
-#' param sk, version.unf, maj.rule, verbose: as in the original pc.cons.intern function
+# param sk, version.unf, maj.rule, verbose: as in the original pc.cons.intern function
 #
-#' param suffStat data.frame, of which the first column is the factor genotype,
+# param suffStat data.frame, of which the first column is the factor genotype,
 #                 and subsequent columns contain the traits. The name of the
 #                 first column should be genotype
-#' param alpha (Default 0.01) The significance level used in the test. The test
+# param alpha (Default 0.01) The significance level used in the test. The test
 #              itself of course does not depend on this, but it is used in the
 #              EM-algorithm to speed up calculations. More precisely, the
 #              EM-algorithm is stopped once the P value is below the
 #              significance level. This can be done because the PC algorithm
 #              only needs an accept/ reject decision.
-#' param QTLs column numbers in suffStat that correspond to QTLs
+# param QTLs column numbers in suffStat that correspond to QTLs
 #             These may be partly in S and x and y, but not x and y both in QTLs!
 #             Note: the factor genotype (column number 1) may occur in S, as well as x and y
-#' param K (Default NULL) The kinship (i.e Genetic Relationship Matrix) 
-#' param covariates data.frame containing covariates, that should always be used
+# param K (Default NULL) The kinship (i.e Genetic Relationship Matrix)
+# param covariates data.frame containing covariates, that should always be used
 #                   in each conditional independence test. Should be either NULL (default)
 #                   or a data.frame with the same number of rows as suffStat
 #

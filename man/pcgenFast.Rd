@@ -21,82 +21,119 @@ pcgenFast(
 )
 }
 \arguments{
-\item{suffStat}{data.frame, of which the first column is the factor genotype
-(i.e samples' IDs) and subsequent columns contain the traits.
-The name of the first column should be G
-Should not contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
+(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
+optionally some QTLs. The name of the first column should be G. Should not
+contain covariates.}
 
-\item{alpha}{(Default 0.01) The significance level used in each conditional
-independence test.}
+\item{alpha}{The significance level used in each conditional independence
+test. Default is 0.01. The test itself of course does not depend on this,
+but it is used in the EM-algorithm to speed up calculations. More
+precisely, the EM-algorithm is stopped once the P value is below the
+significance level. This can be done because the PC algorithm only needs an
+accept/ reject decision.}
 
-\item{m.max}{maximum size of the conditioning set, in pcgen}
+\item{m.max}{Maximum size of the conditioning sets.}
 
-\item{res.m.max}{maximum size of the conditioning set, in the pc-algorithm on the residuals}
+\item{res.m.max}{Maximum size of the conditioning set, in the pc-algorithm on
+the residuals (used for prior screening).}
 
-\item{verbose}{If TRUE, p-values for the conditional independence
+\item{verbose}{If \code{TRUE}, p-values for the conditional independence
 tests are printed}
 
-\item{covariates}{data.frame containing covariates that should always be used
-in each conditional independence test. Should be either NULL
-(default) or a data.frame with the same number of rows as
-suffStat}
+\item{covariates}{A data.frame containing covariates that should always be
+used in each conditional independence test. Should be either \code{NULL}
+(default) or a data.frame with the same number of rows as \code{suffStat}.
+An intercept is already included for each trait in suffStat; covariates
+should not contain a column of ones.}
 
-\item{fixedEdges}{A logical matrix of dimension (p+1) * (p+1), where
-p is the number of traits. The first row and column
-refer to the node genotype, and subsequent rows and
-columns to the traits. As in the pcalg package,
-the edge i-j is never considered for removal
-if the entry \link{i,j} or \link{j,i} (or both) are TRUE.
-In that case, the edge is guaranteed to be present
-in the resulting graph.}
+\item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
+where \eqn{p} is the number of traits. The first row and column refer to
+the genotype node G, and subsequent rows and columns to the traits. As in
+the pcalg package, the edge \eqn{i - j} is never considered for removal if
+the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
+case, the edge is guaranteed to be present in the resulting graph.}
 
-\item{QTLs}{column numbers in suffStat data.frame that correspond to QTLs.
-These may be partly in S and x and y, but x and y cannot be both QTLs.}
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
+may be partly in S and x and y, but x and y cannot be both QTLs.
+Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{max.iter}{Maximum number of iterations in the EM-algorithm.}
+\item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
+the bivariate mixed model (when \code{use.res = FALSE)}.}
 
-\item{stop.if.significant}{If TRUE, the EM-algorithm used in some
-of the conditional independence tests will be stopped
-whenever the p-value becomes significant, i.e. below
-alpha. This will speed up calculations, and can be done
-because (1) the PC algorithm only needs an accept/reject
-decision (2) In EM the likelihood is nondecreasing. Should
-be put to FALSE if the precise p-values are of interest.}
+\item{stop.if.significant}{If \code{TRUE}, the EM-algorithm used in some of
+the conditional independence tests (when \code{use.res = FALSE}) will be
+stopped whenever the p-value becomes significant, i.e. below \code{alpha}.
+This will speed up calculations, and can be done because (1) the PC
+algorithm only needs an accept/reject decision (2) In EM the likelihood is
+nondecreasing. Should be put to \code{FALSE} if the precise p-values are of
+interest.}
 
-\item{cov.method}{(Default 'uni') A string, specifying which method should be
-used to estimate the covariance structure required for the
-computation of conditional means, as well as for the
-computation of residuals in the first step. Options are 'us' (unstructured multi-trait model fitted
-using sommer), and uni' (based on univariate GBLUPs).}
+\item{cov.method}{A string, specifying which method should be used to
+estimate the covariance structure required for the computation of
+conditional means, as well as for the computation of residuals in the first
+step. Options are 'us' (unstructured multi-trait model fitted using
+sommer), and uni' (based on univariate GBLUPs).(Default 'uni')
+Azza: alternative explanation: A string, specifying which method should be used to
+compute the GBLUP. Options are \code{'us'} (unstructured multi-trait model
+fitted using sommer) and \code{'uni'} (based on univariate GBLUPs). Default
+is \code{'uni'}.}
 
-\item{use.res}{If FALSE, residuals are only used for screening. If TRUE,
-residuals are also used the
-test for conditional independence of 2 traits given a set of
-other traits and G}
+\item{use.res}{If \code{FALSE}, residuals from GBLUP are only used for screening with the
+standard pc algotihm. After that, the standard pcgen algorithm is run on
+the remaining edges; the test for conditional independence of 2 traits
+given a set of other traits and G is based on bivariate mixed models. If
+\code{TRUE}, this test for conditional independence of 2 traits given a set
+of other traits and G is based on the residuals. In this case, no further
+edges between traits are removed after screening and \code{pcgen} will only
+infer the orientation, and the direct genetic effects.}
 
-\item{return.pvalues}{}
+\item{return.pvalues}{If \code{TRUE}, the maximal p-value for each edge is
+returned.}
 }
 \value{
-A graph (an object with S3 class \code{"pcgen"})
+If \code{return.pvalues = FALSE}, the output is a graph (an object
+with S3 class \code{"pcgen"}). If \code{return.pvalues = TRUE}, the output
+is a list with elements \code{gr} (the graph) and \code{pMax} (a matrix
+with the p-values).
 }
 \description{
-This will run the pcgen algorithm, assuming there are replicates,
-and K = Z Z^t. Fast version, with residuals-based pre-selection.
+pcgen with residual-based screening
 }
 \details{
-Here we
-put a lot
-of details
-COMMENT on cov.method (the same option is
-used in the computation of the residuals and the conditional means)
-fixedGaps and fixedEdges are NULL
-m.max, alpha,.... are also used in the first step
+The pcgen algorithm starting with a skeleton estimated using the standard
+pc-algorithm, based on residuals from the GBLUP.
+
+Here we put a lot of details COMMENT on cov.method (the same option is used
+in the computation of the residuals and the conditional means) fixedGaps and
+fixedEdges are NULL m.max, alpha,.... are also used in the first step
+}
+\examples{
+\dontrun{
+data(simdata)
+out <- pcgenFast(suffStat = simdata, alpha = 0.01, verbose= FALSE, use.res = TRUE)
+}
+
 }
 \references{
-A paper on arxiv
+\itemize{
+\item Kruijer, W., Behrouzi, P., Bustos-Korts, D., Rodríguez-Álvarez,
+M. X., Mahmoudi, S. M., Yandell, B., ... & van Eeuwijk, F. A. (2020).
+Reconstruction of networks with direct and indirect genetic effects.
+\emph{Genetics}, 214(4), 781-807.
+}
+
+\itemize{
+\item Colombo, D., & Maathuis, M. H. (2014). Order-independent
+constraint-based causal structure learning. \emph{The Journal of Machine
+Learning Research}, 15(1), 3741-3782.
+}
+}
+\seealso{
+{\code{\link{getResiduals}}}
 }
 \author{
-Willem Kruijer and Pariya Behrouzi.
-Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
-Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
+Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+\email{willem.kruijer@wur.nl} and Pariya Behrouzi
+\email{pariya.behrouzi@gmail.com}
 }

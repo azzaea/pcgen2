@@ -2,7 +2,7 @@
 % Please edit documentation in R/pcgen.R
 \name{pcgen}
 \alias{pcgen}
-\title{The pcgen algorithm}
+\title{Causal inference with genetic effects}
 \usage{
 pcgen(
   suffStat,
@@ -23,111 +23,158 @@ pcgen(
 )
 }
 \arguments{
-\item{suffStat}{data.frame, of which the first column is the factor genotype
-(i.e samples' IDs) and subsequent columns contain the traits.
-The name of the first column should be G
-Should not contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
+(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
+optionally some QTLs. The name of the first column should be G. Should not
+contain covariates.}
 
-\item{covariates}{data.frame containing covariates that should always be used
-in each conditional independence test. Should be either NULL
-(default) or a data.frame with the same number of rows as
-suffStat}
+\item{covariates}{A data.frame containing covariates that should always be
+used in each conditional independence test. Should be either \code{NULL}
+(default) or a data.frame with the same number of rows as \code{suffStat}.
+An intercept is already included for each trait in suffStat; covariates
+should not contain a column of ones.}
 
-\item{QTLs}{column numbers in suffStat data.frame that correspond to QTLs.
-These may be partly in S and x and y, but x and y cannot be both QTLs.}
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
+may be partly in S and x and y, but x and y cannot be both QTLs.
+Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{K}{The genetic relatedness matrix. If NULL (the default), independent
-genetic effects are assumed.}
+\item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
+genetic effects are assumed. Azza: conside the def below:#'}
 
-\item{alpha}{(Default 0.01) The significance level used in each conditional
-independence test.}
+\item{alpha}{The significance level used in each conditional independence
+test. Default is 0.01. The test itself of course does not depend on this,
+but it is used in the EM-algorithm to speed up calculations. More
+precisely, the EM-algorithm is stopped once the P value is below the
+significance level. This can be done because the PC algorithm only needs an
+accept/ reject decision.}
 
 \item{m.max}{Maximum size of the conditioning sets.}
 
-\item{fixedEdges}{A logical matrix of dimension (p+1) * (p+1), where
-p is the number of traits. The first row and column
-refer to the node genotype, and subsequent rows and
-columns to the traits. As in the pcalg package,
-the edge i-j is never considered for removal
-if the entry \link{i,j} or \link{j,i} (or both) are TRUE.
-In that case, the edge is guaranteed to be present
-in the resulting graph.}
+\item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
+where \eqn{p} is the number of traits. The first row and column refer to
+the genotype node G, and subsequent rows and columns to the traits. As in
+the pcalg package, the edge \eqn{i - j} is never considered for removal if
+the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
+case, the edge is guaranteed to be present in the resulting graph.}
 
-\item{fixedGaps}{A logical matrix of dimension (p+1) * (p+1), where
-p is the number of traits. The first row and column
-refer to the node genotype, and subsequent rows and
-columns to the traits. As in the pcalg package,
-the edge i-j is removed before starting the algorithm
-if the entry \link{i,j} or \link{j,i} (or both) are TRUE.
-In that case, the edge is guaranteed to be absent
-in the resulting graph.}
+\item{fixedGaps}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
+where \eqn{p} is the number of traits. The first row and column refer to
+the genotype node G, and subsequent rows and columns to the traits. As in
+the pcalg package, the edge \eqn{i - j} is removed before starting the
+algorithm if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are
+\code{TRUE}. In that case, the edge is guaranteed to be absent in the
+resulting graph.}
 
-\item{verbose}{If TRUE, p-values for the conditional independence
+\item{verbose}{If \code{TRUE}, p-values for the conditional independence
 tests are printed}
 
-\item{use.res}{If TRUE, the test for conditional independence of 2 traits given
-a set of other traits and G is based on residuals from GBLUP.
-If FALSE (the default), it is based on bivariate mixed models.}
+\item{use.res}{If \code{TRUE}, the test for conditional independence of 2
+traits given a set of other traits and \eqn{G} is based on residuals from
+GBLUP. If \code{FALSE} (the default), it is based on bivariate mixed
+models.}
 
-\item{res.cor}{Correlation matrix of the residuals of the GBLUP. In case
-it is NULL (default), the test for conditional independence
-between Yj and Yk given a set of traits YS is based on a
-bivariate mixed model. If res.cor is provided, it is based
-on partial correlations among the residuals, tested using
-the gaussCItest function from pcalg. The residuals can be
-obtained using the function getResiduals}
+\item{res.cor}{If \code{use.res = TRUE}, \code{res.cor} should be the
+correlation matrix of the residuals of the GBLUP- the residuals can be
+obtained using the \code{getResiduals} function. If \code{res.cor} is
+provided, it is based on partial correlations among the residuals, tested
+using the gaussCItest function from pcalg. In case \code{res.cor} is
+\code{NULL} (the default), the test for conditional independence between Yj
+and Yk given a set of traits YS is based on a bivariate mixed model.}
 
-\item{max.iter}{Maximum number of iterations in the EM-algorithm.}
+\item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
+the bivariate mixed model (when \code{use.res = FALSE)}.}
 
-\item{stop.if.significant}{If TRUE, the EM-algorithm used in some
-of the conditional independence tests will be stopped
-whenever the p-value becomes significant, i.e. below
-alpha. This will speed up calculations, and can be done
-because (1) the PC algorithm only needs an accept/reject
-decision (2) In EM the likelihood is nondecreasing. Should
-be put to FALSE if the precise p-values are of interest.}
+\item{stop.if.significant}{If \code{TRUE}, the EM-algorithm used in some of
+the conditional independence tests (when \code{use.res = FALSE}) will be
+stopped whenever the p-value becomes significant, i.e. below \code{alpha}.
+This will speed up calculations, and can be done because (1) the PC
+algorithm only needs an accept/reject decision (2) In EM the likelihood is
+nondecreasing. Should be put to \code{FALSE} if the precise p-values are of
+interest.}
 
-\item{NAdelete}{Logical, and is the NAdelete option in pcalg::pc function: TRUE
-deletes the edge corresponding to the conditional independence
-test when it returns NA. Default is FALSE}
+\item{NAdelete}{Logical, and is the NAdelete option in pcalg::pc function:
+TRUE deletes the edge corresponding to the conditional independence test
+when it returns NA. Default is FALSE}
 
-\item{return.pvalues}{If FALSE, the output is a graph (an object with S3 class
-\code{"pcgen"}). If TRUE, the output is a list with
-elements \code{gr} (the graph) and \code{pMax} (a matrix
-with the the maximal p-value for each edge).}
+\item{return.pvalues}{If \code{TRUE}, the maximal p-value for each edge is
+returned.}
 }
 \value{
-a graph (an object with S3 class \code{"pcgen"})
+If \code{return.pvalues = FALSE}, the output is a graph (an object
+with S3 class \code{"pcgen"}). If \code{return.pvalues = TRUE}, the output
+is a list with elements \code{gr} (the graph) and \code{pMax} (a matrix
+with the p-values).
 }
 \description{
-The pcgen algorithm, assuming independent genetic effects.
+Reconstruction of directed networks with random genetic effects, based on
+phenotypic observations. The pcgen algorithm is a modification of the
+pc-stable algorithm of Colombo & Maathuis (2014) . It works with and without
+replicates, assuming independent genetic effects.
 }
 \details{
-(1) This is an adaptation of the pc function from pcalg, with a
-different conditional independence test (see pcgenTest), as well as
-modified orientation rules  (2) Some parameters from the original
-pc function are fixed here: skel.method = "stable", u2pd = "relaxed",
-conservative = FALSE, maj.rule = TRUE and solve.confl = TRUE, while the user
-can set the "NAdelete" parameter (defaults to FALSE).
-Labels (defining the names of the nodes of the
-graph) is derived from the data-frame suffStat, containing the data
-(3) pcgen requires phenotypic observations on multiple traits,
-measured on the same samples. The current implementation extends the genetic
-relatedness matrix definition from K = Z Z^t, Z being the incidence matrix
-assigning plants to genotypes (as is common in plants data) to a
-a marker-based relatedness matrix definition (appropriate for human data).
-(4) the test for conditional independence between Yj and Yk given
-a set of traits YS can be based either on a bivariate mixed model
-(put res.cor = NULL) or on partial correlations among the residuals.
-In the latter case, res.cor should be the correlation matrix of the
-residuals, obtained with getResiduals.
+The \code{pcgen} function is based on the \code{pc} function from the pcalg
+package (Kalisch et al. (2012) and Hauser and Buhlmann (2012)), with a
+different conditional independence test (see pcgenTest), as well as modified
+orientation rules.
+
+Some parameters from the original pc function are fixed here: skel.method =
+"stable", u2pd = "relaxed", conservative = FALSE, maj.rule = TRUE and
+solve.confl = TRUE, while the user can set the "NAdelete" parameter (defaults
+to FALSE). Labels (defining the names of the nodes of the graph) is derived
+from the data-frame suffStat, containing the data
+
+pcgen requires phenotypic observations on multiple traits, measured on the
+same samples. The current implementation extends the genetic relatedness
+matrix definition from K = Z Z^t, Z being the incidence matrix assigning
+plants to genotypes (as is common in plants data) to a a marker-based
+relatedness matrix definition (appropriate for human data).
+
+The test for conditional independence between Yj and Yk given a set of traits
+YS can be based either on a bivariate mixed model (put res.cor = NULL) or on
+partial correlations among the residuals. In the latter case, res.cor should
+be the correlation matrix of the residuals, obtained with getResiduals.
+}
+\examples{
+\dontrun{
+data(simdata)
+out <- pcgen(simdata)
+rs <- getResiduals(suffStat = simdata)
+pc.fit1 <- pcgen(suffStat = simdata, alpha = 0.01, verbose = TRUE,
+                 use.res = TRUE, res.cor = cor(rs))
+}
 }
 \references{
-Kruijer et al. (2020) Reconstruction of networks with direct and
-indirect genetic effects
+\itemize{
+\item Kruijer, W., Behrouzi, P., Bustos-Korts, D., Rodríguez-Álvarez,
+M. X., Mahmoudi, S. M., Yandell, B., ... & van Eeuwijk, F. A. (2020).
+Reconstruction of networks with direct and indirect genetic effects.
+\emph{Genetics}, 214(4), 781-807.
+}
+
+\itemize{
+\item Colombo, D., & Maathuis, M. H. (2014). Order-independent
+constraint-based causal structure learning. \emph{The Journal of Machine
+Learning Research}, 15(1), 3741-3782.
+}
+
+\itemize{
+\item Kalisch, M., Machler, M., Colombo, D., Maathuis, M.H. and
+Buhlmann, P., 2012. Causal inference using graphical models with the R
+package pcalg. \emph{Journal of Statistical Software}, 47(11), pp.1-26.
+}
+
+\itemize{
+\item Hauser, A. and Buhlmann, P., 2012. Characterization and
+greedy learning of interventional Markov equivalence classes of directed
+acyclic graphs. Journal of Machine Learning Research, 13(Aug),
+pp.2409-2464.
+}
+}
+\seealso{
+\code{\link[pcalg]{pc}}
 }
 \author{
-Willem Kruijer and Pariya Behrouzi.
-Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
-Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
+Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+\email{willem.kruijer@wur.nl} and Pariya Behrouzi
+\email{pariya.behrouzi@gmail.com}
 }

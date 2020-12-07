@@ -2,11 +2,9 @@ Package: pcgen2
 Title: Reconstruction of Causal Networks for Data with Random Genetic Effects
 Version: 0.3.0
 Authors@R: 
-    person(given = "First",
-           family = "Last",
-           role = c("aut", "cre"),
-           email = "first.last@example.com",
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+    c(person("Willem", "Kruijer", role = c("aut"), email = "willem.kruijer@wur.nl"),
+      person("Pariya", "Behrouzi", role = c("aut", "cre"), email = "pariya.behrouzi@gmail.com"),
+      person("Maria Xose", "Rodriguez-Alvarez", role = "ctb"))
 Description: Implements the pcgen algorithm, which is a modified version of the standard pc-algorithm,
              with specific conditional independence tests and modified orientation rules. pcgen extends
              the approach of Valente et al. (2010) <doi:10.1534/genetics.109.112979> with reconstruction of 
@@ -27,6 +25,10 @@ Imports:
     methods,
     lme4,
     sommer,
-    ggm
+    ggm,
+    gaston
 Suggests: 
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

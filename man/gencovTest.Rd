@@ -2,58 +2,47 @@
 % Please edit documentation in R/gencovTest.R
 \name{gencovTest}
 \alias{gencovTest}
-\title{The conditional independence test in pcgen}
+\title{Estimate genetic covariances between all pairs of traits, and test their
+significance}
 \usage{
 gencovTest(suffStat, max.iter = 200, out.cor = TRUE)
 }
 \arguments{
-\item{suffStat}{data.frame, of which the first column is the factor genotype
-(i.e samples' IDs) and subsequent columns contain the traits.
-The name of the first column should be G
-Should not contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
+(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
+optionally some QTLs. The name of the first column should be G. Should not
+contain covariates.}
 
-\item{max.iter}{Maximum number of iterations in the EM-algorithm.}
+\item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
+the bivariate mixed model (when \code{use.res = FALSE)}.}
 
-\item{x, y}{column numbers in suffStat that should be tested for conditional
-independence given the variables in S}
-
-\item{S}{vector of integers defining the conditioning set,
-where the integers refer to column numbers in suffStat.
-May be numeric(), i.e. the empty set.}
-
-\item{alpha}{(Default 0.01) The significance level used in the test. The test
-itself of course does not depend on this, but it is used in the
-EM-algorithm to speed up calculations. More precisely, the
-EM-algorithm is stopped once the p-value is below the
-significance level. This can be done because the PC-algorithm
-only needs an accept/reject decision.}
-
-\item{stop.if.significant}{If TRUE, the EM-algorithm used in some
-of the conditional independence tests will be stopped
-whenever the p-value becomes significant, i.e. below
-alpha. This will speed up calculations, and can be done
-because (1) the PC algorithm only needs an accept/reject
-decision (2) In EM the likelihood is nondecreasing. Should
-be put to FALSE if the precise p-values are of interest.}
+\item{out.cor}{If \code{TRUE}, the output will contain estimates of genetic
+correlations; otherwise covariances. The pvalues are always for genetic
+covariance.}
 }
 \value{
-a p-value
+A list with elements pvalues and out.cor, which are both p x p
+matrices
 }
 \description{
 This will perform the conditional independence test used in pcgen algorithm,
 assuming there are replicates, and K = Z Z^t
 }
-\details{
-Here we
-put a lot
-of details
-COMMENT on Vg and Ve, which should be either both NULL or positive definite matrices
+\examples{
+\dontrun{
+data(simdata)
+test <- gencovTest(suffStat= simdata, max.iter = 200, out.cor= TRUE )
+}
+
 }
 \references{
-A paper on arxiv
+Kruijer, W., Behrouzi, P., Bustos-Korts, D., Rodríguez-Álvarez,
+M. X., Mahmoudi, S. M., Yandell, B., ... & van Eeuwijk, F. A. (2020).
+Reconstruction of networks with direct and indirect genetic effects.
+\emph{Genetics}, 214(4), 781-807.
 }
 \author{
-Willem Kruijer and Pariya Behrouzi.
-Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
-Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
+Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+\email{willem.kruijer@wur.nl} and Pariya Behrouzi
+\email{pariya.behrouzi@gmail.com}
 }

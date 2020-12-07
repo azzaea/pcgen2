@@ -23,70 +23,77 @@ pcgenTest(
 \item{x, y}{column numbers in suffStat that should be tested for conditional
 independence given the variables in S}
 
-\item{S}{vector of integers defining the conditioning set,
-where the integers refer to column numbers in suffStat.
-May be numeric(), i.e. the empty set.}
+\item{S}{vector of integers defining the conditioning set, where the integers
+refer to column numbers in suffStat. May be numeric(), i.e. the empty set.}
 
-\item{suffStat}{data.frame, of which the first column is the factor genotype
-(i.e samples' IDs) and subsequent columns contain the traits.
-The name of the first column should be G
-Should not contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
+(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
+optionally some QTLs. The name of the first column should be G. Should not
+contain covariates.}
 
-\item{covariates}{data.frame containing covariates that should always be used
-in each conditional independence test. Should be either NULL
-(default) or a data.frame with the same number of rows as
-suffStat}
+\item{covariates}{A data.frame containing covariates that should always be
+used in each conditional independence test. Should be either \code{NULL}
+(default) or a data.frame with the same number of rows as \code{suffStat}.
+An intercept is already included for each trait in suffStat; covariates
+should not contain a column of ones.}
 
-\item{QTLs}{column numbers in suffStat data.frame that correspond to QTLs.
-These may be partly in S and x and y, but x and y cannot be both QTLs.}
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
+may be partly in S and x and y, but x and y cannot be both QTLs.
+Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{K}{The genetic relatedness matrix. If NULL (the default), independent
-genetic effects are assumed.}
+\item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
+genetic effects are assumed. Azza: conside the def below:#'}
 
 \item{alpha}{(Default 0.01) The significance level used in the test. The test
 itself of course does not depend on this, but it is used in the
-EM-algorithm to speed up calculations. More precisely, the
-EM-algorithm is stopped once the p-value is below the
-significance level. This can be done because the PC-algorithm
-only needs an accept/reject decision.}
+EM-algorithm to speed up calculations. More precisely, the EM-algorithm is
+stopped once the p-value is below the significance level. This can be done
+because the PC-algorithm only needs an accept/reject decision.}
 
-\item{max.iter}{Maximum number of iterations in the EM-algorithm.}
+\item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
+the bivariate mixed model (when \code{use.res = FALSE)}.}
 
-\item{stop.if.significant}{If TRUE, the EM-algorithm used in some
-of the conditional independence tests will be stopped
-whenever the p-value becomes significant, i.e. below
-alpha. This will speed up calculations, and can be done
-because (1) the PC algorithm only needs an accept/reject
-decision (2) In EM the likelihood is nondecreasing. Should
-be put to FALSE if the precise p-values are of interest.}
+\item{stop.if.significant}{If TRUE, the EM-algorithm used in some of the
+conditional independence tests will be stopped whenever the p-value becomes
+significant, i.e. below alpha. This will speed up calculations, and can be
+done because (1) the PC algorithm only needs an accept/reject decision (2)
+In EM the likelihood is nondecreasing. Should be put to FALSE if the
+precise p-values are of interest.}
 
-\item{use.res}{If TRUE, the test for conditional independence of 2 traits given
-a set of other traits and G is based on residuals from GBLUP.
-If FALSE (the default), it is based on bivariate mixed models.}
+\item{use.res}{If \code{TRUE}, the test for conditional independence of 2
+traits given a set of other traits and \eqn{G} is based on residuals from
+GBLUP. If \code{FALSE} (the default), it is based on bivariate mixed
+models.}
 
-\item{res.cor}{Correlation matrix of the residuals of the GBLUP. In case
-it is NULL (default), the test for conditional independence
-between Yj and Yk given a set of traits YS is based on a
-bivariate mixed model. If res.cor is provided, it is based
-on partial correlations among the residuals, tested using
-the gaussCItest function from pcalg. The residuals can be
-obtained using the function getResiduals}
+\item{res.cor}{If \code{use.res = TRUE}, \code{res.cor} should be the
+correlation matrix of the residuals of the GBLUP- the residuals can be
+obtained using the \code{getResiduals} function. If \code{res.cor} is
+provided, it is based on partial correlations among the residuals, tested
+using the gaussCItest function from pcalg. In case \code{res.cor} is
+\code{NULL} (the default), the test for conditional independence between Yj
+and Yk given a set of traits YS is based on a bivariate mixed model.}
 }
 \value{
 a p-value
 }
 \description{
 This will perform the conditional independence test used in pcgen algorithm,
-assuming replicates and K = Z Z^t; or no replicates with a generic kinship matrix K = A
+assuming replicates and K = Z Z^t; or no replicates with a generic kinship
+matrix K = A
 }
 \details{
-COMMENT on Vg and Ve, which should be either both NULL or positive definite matrices
+COMMENT on Vg and Ve, which should be either both NULL or positive definite
+matrices
 }
 \references{
 A paper on arxiv
 }
+\seealso{
+\code{\link[pcalg]{gaussCItest}}, \code{\link[pcalg]{disCItest}},
+\code{\link[pcalg]{binCItest}}
+}
 \author{
-Willem Kruijer and Pariya Behrouzi.
-Maintainers: Willem Kruijer \email{willem.kruijer@wur.nl} and
-Pariya Behrouzi \email{pariya.behrouzi@gmail.com}
+Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer
+\email{willem.kruijer@wur.nl} and Pariya Behrouzi
+\email{pariya.behrouzi@gmail.com}
 }
