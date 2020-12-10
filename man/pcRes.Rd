@@ -18,9 +18,9 @@ pcRes(
 )
 }
 \arguments{
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
-(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
-optionally some QTLs. The name of the first column should be G. Should not
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
+factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
+and optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
 
 \item{alpha}{The significance level used in each conditional independence
@@ -31,7 +31,7 @@ significance level. This can be done because the PC algorithm only needs an
 accept/ reject decision.}
 
 \item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-genetic effects are assumed. Azza: conside the def below:#'}
+genetic effects are assumed. Azza: conside the def below originally in getResiduals.R:}
 
 \item{m.max}{maximum size of the conditioning set, in the pc-algorithm on the
 residuals}
@@ -45,8 +45,8 @@ used in each conditional independence test. Should be either \code{NULL}
 An intercept is already included for each trait in suffStat; covariates
 should not contain a column of ones.}
 
-\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
-may be partly in S and x and y, but x and y cannot be both QTLs.
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These may be
+partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
 \item{cov.method}{A string, specifying which method should be used to compute

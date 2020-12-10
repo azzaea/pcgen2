@@ -1,6 +1,6 @@
 Package: pcgen2
 Title: Reconstruction of Causal Networks for Data with Random Genetic Effects
-Version: 0.3.0
+Version: 0.2.0.9999
 Authors@R: 
     c(person("Willem", "Kruijer", role = c("aut"), email = "willem.kruijer@wur.nl"),
       person("Pariya", "Behrouzi", role = c("aut", "cre"), email = "pariya.behrouzi@gmail.com"),

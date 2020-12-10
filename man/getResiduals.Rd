@@ -7,9 +7,9 @@
 getResiduals(suffStat, covariates = NULL, cov.method = "uni", K = NULL)
 }
 \arguments{
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
-(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
-optionally some QTLs. The name of the first column should be G. Should not
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
+factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
+and optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
 
 \item{covariates}{A data.frame containing covariates that should always be
@@ -23,11 +23,8 @@ GBLUP. Options are \code{"us"} (unstructured multi-trait model fitted using
 \code{sommer}) and \code{"uni"} (based on univariate GBLUPs). Default is
 \code{"uni"}.}
 
-\item{K}{An optional marker-based relatedness matrix of dimension n x n, n
-being the number of unique genotypes in the first column in suffStat. In
-case suffStat contains replicates, the resulting relatedness of the
-observations will be Z K Z^t, where Z is the incidence matrix assigning
-plants to genotypes}
+\item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
+genetic effects are assumed. Azza: conside the def below originally in getResiduals.R:}
 }
 \value{
 A data-frame with the residuals
@@ -59,6 +56,8 @@ traits.
 data(simdata)
 rs <- getResiduals(suffStat= simdata)
 }
+
+
 }
 \references{
 Covarrubias-Pazaran, G., 2016. Genome-assisted prediction of

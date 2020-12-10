@@ -20,15 +20,16 @@ pcgenTest(
 )
 }
 \arguments{
-\item{x, y}{column numbers in suffStat that should be tested for conditional
-independence given the variables in S}
+\item{x, y}{Column numbers in \code{suffStat} that should be tested for
+conditional independence given the variables in \code{S}.}
 
 \item{S}{vector of integers defining the conditioning set, where the integers
-refer to column numbers in suffStat. May be numeric(), i.e. the empty set.}
+refer to column numbers in \code{suffStat}. May be numeric(), i.e. the
+empty set.}
 
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
-(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
-optionally some QTLs. The name of the first column should be G. Should not
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
+factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
+and optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
 
 \item{covariates}{A data.frame containing covariates that should always be
@@ -37,18 +38,19 @@ used in each conditional independence test. Should be either \code{NULL}
 An intercept is already included for each trait in suffStat; covariates
 should not contain a column of ones.}
 
-\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
-may be partly in S and x and y, but x and y cannot be both QTLs.
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These may be
+partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
 \item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-genetic effects are assumed. Azza: conside the def below:#'}
+genetic effects are assumed. Azza: conside the def below originally in getResiduals.R:}
 
-\item{alpha}{(Default 0.01) The significance level used in the test. The test
-itself of course does not depend on this, but it is used in the
-EM-algorithm to speed up calculations. More precisely, the EM-algorithm is
-stopped once the p-value is below the significance level. This can be done
-because the PC-algorithm only needs an accept/reject decision.}
+\item{alpha}{The significance level used in each conditional independence
+test. Default is 0.01. The test itself of course does not depend on this,
+but it is used in the EM-algorithm to speed up calculations. More
+precisely, the EM-algorithm is stopped once the P value is below the
+significance level. This can be done because the PC algorithm only needs an
+accept/ reject decision.}
 
 \item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
 the bivariate mixed model (when \code{use.res = FALSE)}.}
@@ -77,20 +79,47 @@ and Yk given a set of traits YS is based on a bivariate mixed model.}
 a p-value
 }
 \description{
-This will perform the conditional independence test used in pcgen algorithm,
-assuming replicates and K = Z Z^t; or no replicates with a generic kinship
-matrix K = A
+This performs the conditional independence test used in the pcgen algorithm,
+assuming there are replicates, and independent genetic effects.
 }
 \details{
-COMMENT on Vg and Ve, which should be either both NULL or positive definite
-matrices
+This will perform the conditional independence test used in pcgen algorithm,
+assuming (replicates and K = Z Z^t; or no replicates with a generic kinship
+matrix K = A) and (independent genetic effects)
+
+\code{pcgenTest} tests for conditional independence between \eqn{x} and
+\eqn{y} given \eqn{S}. It distinguishes 2 situations: (i) if one of \eqn{x}
+and \eqn{y} (say \eqn{x}) is the factor G, \code{pcgenTest} will test if the
+genetic variance in \eqn{y} is zero, given the traits in S. (ii) if \eqn{x}
+and \eqn{y} are both traits, \code{pcgenTest} tests if the residual
+covariance between them is zero, given the traits in \eqn{S} and the factor
+G. The factor G is automatically included in the conditioning set \eqn{S}
+(\eqn{S} does not need to contain the integer 1). This test is either based
+on a bivariate mixed model (when \code{use.res=FALSE}), or on residuals from
+GBLUP (\code{use.res=T}), obtained with the getResiduals function. In the
+latter case, \code{res.cor} must be provided.
 }
 \references{
-A paper on arxiv
+\itemize{
+\item Kruijer, W., Behrouzi, P., Bustos-Korts, D., Rodríguez-Álvarez,
+M. X., Mahmoudi, S. M., Yandell, B., ... & van Eeuwijk, F. A. (2020).
+Reconstruction of networks with direct and indirect genetic effects.
+\emph{Genetics}, 214(4), 781-807.
+}
 }
 \seealso{
-\code{\link[pcalg]{gaussCItest}}, \code{\link[pcalg]{disCItest}},
-\code{\link[pcalg]{binCItest}}
+\code{\link{getResiduals}}, \code{\link[pcalg]{gaussCItest}},
+\code{\link[pcalg]{disCItest}}, \code{\link[pcalg]{binCItest}}
+
+@examples
+\dontrun{
+ data(simdata)
+ rs <- getResiduals(suffStat= simdata)
+ pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4)
+ pcgenTest(suffStat= simdata, x= 2, y= 3, S= c(1,4))
+ pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4, use.res= TRUE, res.cor= cor(rs))
+ pcgenTest(suffStat= simdata, x= 2, y= 1, S= 4)
+ }
 }
 \author{
 Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer

@@ -1,15 +1,23 @@
-#' Infer the DAG Of a Phenotypic Traits' network with Genetic Effects
+#' Infer the skeleton of a DAG of Phenotypes with Genetic Effects.
+#'
+#' The inferred skeleton is order-independent (equivalent to pcalg::skeleton
+#' with skel.method = "stable") following the “PC-stable” approach proposed by
+#' Colombo and Maathuis (2014).
+#'
+#' @references * Colombo, D., & Maathuis, M. H. (2014). Order-independent
+#'   constraint-based causal structure learning. \emph{The Journal of Machine
+#'   Learning Research}, 15(1), 3741-3782.
 #'
 #' @import pcalg
 #' @keywords internal
 #' @inheritParams pcgen
 #' @inheritParams pcalg::skeleton
 #'
-skeleton2  <- function (suffStat, alpha, labels, p, method = c("stable", "original"),
-                        m.max = Inf, fixedGaps = NULL, fixedEdges = NULL, NAdelete = TRUE,
-                        verbose = FALSE, covariates=NULL, QTLs = integer(), K = NULL,
-                        max.iter = 50, stop.if.significant = TRUE, use.res = FALSE,
-                        res.cor = NULL) {
+skeleton2  <- function(suffStat, alpha, labels, p,
+                       m.max = Inf, fixedGaps = NULL, fixedEdges = NULL, NAdelete = TRUE,
+                       verbose = FALSE, covariates=NULL, QTLs = integer(), K = NULL,
+                       max.iter = 50, stop.if.significant = TRUE, use.res = FALSE,
+                       res.cor = NULL) {
 
   cl <- match.call()
 
@@ -33,7 +41,7 @@ skeleton2  <- function (suffStat, alpha, labels, p, method = c("stable", "origin
   }
 
   seq_p    <- seq_len(p)
-  method   <- match.arg(method)
+
 
   ##!##
   # Modified the original skeleton function, so that regardless of the value of fixedGaps,
@@ -61,7 +69,6 @@ skeleton2  <- function (suffStat, alpha, labels, p, method = c("stable", "origin
     } else if (!identical(fixedEdges, t(fixedEdges)))
       stop("fixedEdges must be symmetric")
 
-
   pval <- NULL
   sepset <- lapply(seq_p, function(.) vector("list", p))
   pMax <- matrix(-Inf, nrow = p, ncol = p)
@@ -78,16 +85,17 @@ skeleton2  <- function (suffStat, alpha, labels, p, method = c("stable", "origin
     ind <- ind[order(ind[, 1]), ]
     remEdges <- nrow(ind)
     if (verbose)
-      cat("Order=", ord, "; remaining edges:", remEdges,
-          "\n", sep = "")
-    if (method == "stable") G.l <- split(G, gl(p, p))
+      cat("Order=", ord, "; remaining edges:", remEdges, "\n", sep = "")
+    # if (method == "stable") G.l <- split(G, gl(p, p))
+    G.l <- split(G, gl(p, p))
 
     for (i in 1:remEdges) {
       if (verbose && (verbose >= 2 || i%%100 == 0))
         cat("|i=", i, "|iMax=", remEdges, "\n")
       x <- ind[i, 1]; y <- ind[i, 2]
       if (G[y, x] && !fixedEdges[y, x]) {
-        nbrsBool <- if (method == "stable")  G.l[[x]] else G[, x]
+        # nbrsBool <- if (method == "stable")  G.l[[x]] else G[, x]
+        nbrsBool <- G.l[[x]]
         nbrsBool[y] <- FALSE
         nbrs <- seq_p[nbrsBool]
         length_nbrs <- length(nbrs)

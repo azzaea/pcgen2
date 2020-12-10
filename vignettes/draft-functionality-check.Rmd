@@ -54,8 +54,8 @@ if (!skipvis) {
 ## Using Willem's data: ------------------------------------------------------------
 
 This is a dataset from Willem, composed of:
-- `d`: a dataframe of 500 genotypes and 2 traits: `d$G`, `d$Y1` and `d$Y2` with 2 replicates per genotype
-- `dm`: a dataframe of genotypic marker means and trait means (so it has size: `500*100` )
+- `d`: a dataframe of 500 genotypes, 2 replicates from true graph G -> Y1 -> Y2
+- `dm`: a dataframe of genotypic marker means and trait means across 100 SNPs that generate genetic effects
 
 
 ```{r}

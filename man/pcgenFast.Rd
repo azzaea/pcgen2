@@ -21,9 +21,9 @@ pcgenFast(
 )
 }
 \arguments{
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the factor G
-(genotype, i.e samples' IDs) and subsequent columns contain the traits, and
-optionally some QTLs. The name of the first column should be G. Should not
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
+factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
+and optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
 
 \item{alpha}{The significance level used in each conditional independence
@@ -54,8 +54,8 @@ the pcalg package, the edge \eqn{i - j} is never considered for removal if
 the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
 case, the edge is guaranteed to be present in the resulting graph.}
 
-\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
-may be partly in S and x and y, but x and y cannot be both QTLs.
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These may be
+partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
 \item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit

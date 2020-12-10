@@ -208,11 +208,11 @@ pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha
   ##########################
 
   skel <- skeleton2(suffStat = suffStat, alpha = alpha, labels = labels, p = p,
-                    method = "stable", m.max = m.max, fixedGaps = fixedGaps,
-                    fixedEdges = fixedEdges, NAdelete = NAdelete,
-                    verbose = verbose, covariates=covariates, QTLs = QTLs, K = K,
-                    max.iter = max.iter, stop.if.significant = stop.if.significant,
-                    use.res = use.res, res.cor = res.cor)
+                    m.max = m.max, fixedGaps = fixedGaps, fixedEdges = fixedEdges,
+                    NAdelete = NAdelete, verbose = verbose, covariates=covariates,
+                    QTLs = QTLs, K = K, max.iter = max.iter,
+                    stop.if.significant = stop.if.significant, use.res = use.res,
+                    res.cor = res.cor)
   # Infer an order-independent skeleton (pcalg:: with skel.method = "stable")
 
   # Azza: more old comments- delete?
