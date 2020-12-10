@@ -22,6 +22,7 @@
 #'   \email{pariya.behrouzi@gmail.com}
 #'
 #' @inheritParams pcgen
+#' @inheritParams getResiduals
 #'
 #' @param res.m.max Maximum size of the conditioning set, in the pc-algorithm on
 #'   the residuals (used for prior screening).
@@ -34,16 +35,6 @@
 #'   of other traits and G is based on the residuals. In this case, no further
 #'   edges between traits are removed after screening and \code{pcgen} will only
 #'   infer the orientation, and the direct genetic effects.
-#'
-#' @param cov.method  A string, specifying which method should be used to
-#'   estimate the covariance structure required for the computation of
-#'   conditional means, as well as for the computation of residuals in the first
-#'   step. Options are 'us' (unstructured multi-trait model fitted using
-#'   sommer), and uni' (based on univariate GBLUPs).(Default 'uni')
-#' Azza: alternative explanation: A string, specifying which method should be used to
-#' compute the GBLUP. Options are \code{'us'} (unstructured multi-trait model
-#' fitted using sommer) and \code{'uni'} (based on univariate GBLUPs). Default
-#' is \code{'uni'}.
 #'
 #'
 #' @return If \code{return.pvalues = FALSE}, the output is a graph (an object

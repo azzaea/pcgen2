@@ -30,16 +30,10 @@
 #'
 #' @inheritParams pcgen
 #'
-#' @param cov.method specifying which method should be used to compute the
-#'   GBLUP. Options are \code{"us"} (unstructured multi-trait model fitted using
-#'   \code{sommer}) and \code{"uni"} (based on univariate GBLUPs). Default is
-#'   \code{"uni"}.
-#'
-# @param K An optional marker-based relatedness matrix of dimension n x n, n
-#   being the number of unique genotypes in the first column in suffStat. In
-#   case suffStat contains replicates, the resulting relatedness of the
-#   observations will be Z K Z^t, where Z is the incidence matrix assigning
-#   plants to genotypes
+#' @param cov.method A string, specifying which method should be used to compute
+#'   the G-BLUP. Options are \code{"us"} (unstructured multi-trait model fitted
+#'   using \code{sommer}) and \code{"uni"} (based on univariate GBLUPs).
+#'   (Default \code{"uni"})
 #'
 #' @return A data-frame with the residuals
 #'

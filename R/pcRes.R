@@ -44,14 +44,11 @@
 #'   \email{pariya.behrouzi@gmail.com}
 #'
 #' @inheritParams pcgen
+#' @inheritParams getResiduals
 #'
 #' @param m.max maximum size of the conditioning set, in the pc-algorithm on the
 #'   residuals
 #'
-#' @param cov.method A string, specifying which method should be used to compute
-#'   the G-BLUP. Options are \code{"us"} (unstructured multi-trait model fitted
-#'   using \code{sommer}) and \code{"uni"} (based on univariate GBLUPs).
-#'   (Default \code{"uni"})
 #'
 #' @param use.GBLUP Use the GBLUP itself, instead of the residuals (as in Topner
 #'   et al)

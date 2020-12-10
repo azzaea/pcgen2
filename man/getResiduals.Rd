@@ -18,13 +18,13 @@ used in each conditional independence test. Should be either \code{NULL}
 An intercept is already included for each trait in suffStat; covariates
 should not contain a column of ones.}
 
-\item{cov.method}{specifying which method should be used to compute the
-GBLUP. Options are \code{"us"} (unstructured multi-trait model fitted using
-\code{sommer}) and \code{"uni"} (based on univariate GBLUPs). Default is
-\code{"uni"}.}
+\item{cov.method}{A string, specifying which method should be used to compute
+the G-BLUP. Options are \code{"us"} (unstructured multi-trait model fitted
+using \code{sommer}) and \code{"uni"} (based on univariate GBLUPs).
+(Default \code{"uni"})}
 
-\item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-genetic effects are assumed. Azza: conside the def below originally in getResiduals.R:}
+\item{K}{The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
+genetic effects are assumed.}
 }
 \value{
 A data-frame with the residuals

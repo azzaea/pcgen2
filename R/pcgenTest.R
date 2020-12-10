@@ -49,15 +49,15 @@
 #' @seealso \code{\link{getResiduals}}, \code{\link[pcalg]{gaussCItest}},
 #'   \code{\link[pcalg]{disCItest}}, \code{\link[pcalg]{binCItest}}
 #'
-#'  @examples
-#'  \dontrun{
+#' @examples
+#' \dontrun{
 #'  data(simdata)
 #'  rs <- getResiduals(suffStat= simdata)
 #'  pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4)
 #'  pcgenTest(suffStat= simdata, x= 2, y= 3, S= c(1,4))
 #'  pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4, use.res= TRUE, res.cor= cor(rs))
 #'  pcgenTest(suffStat= simdata, x= 2, y= 1, S= 4)
-#'  }
+#' }
 #'
 #' @export
 #' @import pcalg

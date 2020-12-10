@@ -61,8 +61,9 @@
 #'  partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 #'   Note: the factor genotype (column number 1) may occur in S, as well as x and y
 #'
-#' @param K The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-#'   genetic effects are assumed. Azza: conside the def below originally in getResiduals.R:
+#' @param K The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
+#'   genetic effects are assumed.
+#   Azza: conside ther def below originally in getResiduals.R:
 #   An optional marker-based relatedness (kinship) matrix of dimension \eqn{n x n}, \eqn{n}
 #   being the number of unique genotypes in the first column in \code{suffStat}. In
 #   case \code{suffStat} contains replicates, the resulting relatedness of the

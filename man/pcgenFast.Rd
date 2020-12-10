@@ -69,15 +69,10 @@ algorithm only needs an accept/reject decision (2) In EM the likelihood is
 nondecreasing. Should be put to \code{FALSE} if the precise p-values are of
 interest.}
 
-\item{cov.method}{A string, specifying which method should be used to
-estimate the covariance structure required for the computation of
-conditional means, as well as for the computation of residuals in the first
-step. Options are 'us' (unstructured multi-trait model fitted using
-sommer), and uni' (based on univariate GBLUPs).(Default 'uni')
-Azza: alternative explanation: A string, specifying which method should be used to
-compute the GBLUP. Options are \code{'us'} (unstructured multi-trait model
-fitted using sommer) and \code{'uni'} (based on univariate GBLUPs). Default
-is \code{'uni'}.}
+\item{cov.method}{A string, specifying which method should be used to compute
+the G-BLUP. Options are \code{"us"} (unstructured multi-trait model fitted
+using \code{sommer}) and \code{"uni"} (based on univariate GBLUPs).
+(Default \code{"uni"})}
 
 \item{use.res}{If \code{FALSE}, residuals from GBLUP are only used for screening with the
 standard pc algotihm. After that, the standard pcgen algorithm is run on

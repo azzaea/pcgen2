@@ -30,8 +30,8 @@ precisely, the EM-algorithm is stopped once the P value is below the
 significance level. This can be done because the PC algorithm only needs an
 accept/ reject decision.}
 
-\item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-genetic effects are assumed. Azza: conside the def below originally in getResiduals.R:}
+\item{K}{The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
+genetic effects are assumed.}
 
 \item{m.max}{maximum size of the conditioning set, in the pc-algorithm on the
 residuals}

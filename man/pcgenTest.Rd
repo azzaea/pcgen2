@@ -42,8 +42,8 @@ should not contain a column of ones.}
 partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-genetic effects are assumed. Azza: conside the def below originally in getResiduals.R:}
+\item{K}{The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
+genetic effects are assumed.}
 
 \item{alpha}{The significance level used in each conditional independence
 test. Default is 0.01. The test itself of course does not depend on this,
@@ -99,6 +99,17 @@ on a bivariate mixed model (when \code{use.res=FALSE}), or on residuals from
 GBLUP (\code{use.res=T}), obtained with the getResiduals function. In the
 latter case, \code{res.cor} must be provided.
 }
+\examples{
+\dontrun{
+ data(simdata)
+ rs <- getResiduals(suffStat= simdata)
+ pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4)
+ pcgenTest(suffStat= simdata, x= 2, y= 3, S= c(1,4))
+ pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4, use.res= TRUE, res.cor= cor(rs))
+ pcgenTest(suffStat= simdata, x= 2, y= 1, S= 4)
+}
+
+}
 \references{
 \itemize{
 \item Kruijer, W., Behrouzi, P., Bustos-Korts, D., Rodríguez-Álvarez,
@@ -110,16 +121,6 @@ Reconstruction of networks with direct and indirect genetic effects.
 \seealso{
 \code{\link{getResiduals}}, \code{\link[pcalg]{gaussCItest}},
 \code{\link[pcalg]{disCItest}}, \code{\link[pcalg]{binCItest}}
-
-@examples
-\dontrun{
- data(simdata)
- rs <- getResiduals(suffStat= simdata)
- pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4)
- pcgenTest(suffStat= simdata, x= 2, y= 3, S= c(1,4))
- pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4, use.res= TRUE, res.cor= cor(rs))
- pcgenTest(suffStat= simdata, x= 2, y= 1, S= 4)
- }
 }
 \author{
 Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer

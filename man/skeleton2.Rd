@@ -2,14 +2,13 @@
 % Please edit documentation in R/skeleton2.R
 \name{skeleton2}
 \alias{skeleton2}
-\title{Infer the DAG Of a Phenotypic Traits' network with Genetic Effects.}
+\title{Infer the skeleton of a DAG of Phenotypes with Genetic Effects.}
 \usage{
 skeleton2(
   suffStat,
   alpha,
   labels,
   p,
-  method = c("stable"),
   m.max = Inf,
   fixedGaps = NULL,
   fixedEdges = NULL,
@@ -43,10 +42,6 @@ accept/ reject decision.}
 \item{p}{(optional) number of variables (or nodes).  May be specified
     if \code{labels} are not, in which case \code{labels} is set to
     \code{1:p}.}
-
-\item{method}{Character string specifying method; the default,
-    \code{"stable"} provides an \emph{order-independent} skeleton, see
-    \sQuote{Details} below.}
 
 \item{m.max}{Maximum size of the conditioning sets.}
 
@@ -82,8 +77,8 @@ should not contain a column of ones.}
 partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{K}{The kinship (i.e genetic relatedness matrix . If NULL (the default), independent
-genetic effects are assumed. Azza: conside the def below originally in getResiduals.R:}
+\item{K}{The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
+genetic effects are assumed.}
 
 \item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
 the bivariate mixed model (when \code{use.res = FALSE)}.}
@@ -110,6 +105,15 @@ using the gaussCItest function from pcalg. In case \code{res.cor} is
 and Yk given a set of traits YS is based on a bivariate mixed model.}
 }
 \description{
-Infer the DAG Of a Phenotypic Traits' network with Genetic Effects.
+The inferred skeleton is order-independent (equivalent to pcalg::skeleton
+with skel.method = "stable") following the “PC-stable” approach proposed by
+Colombo and Maathuis (2014).
+}
+\references{
+\itemize{
+\item Colombo, D., & Maathuis, M. H. (2014). Order-independent
+constraint-based causal structure learning. \emph{The Journal of Machine
+Learning Research}, 15(1), 3741-3782.
+}
 }
 \keyword{internal}
