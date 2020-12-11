@@ -8,18 +8,23 @@
 #'   constraint-based causal structure learning. \emph{The Journal of Machine
 #'   Learning Research}, 15(1), 3741-3782.
 #'
-#' @import pcalg
+# @import pcalg
 #' @keywords internal
 #' @inheritParams pcgen
 #' @inheritParams pcalg::skeleton
 #'
-skeleton2  <- function(suffStat, alpha, labels, p,
-                       m.max = Inf, fixedGaps = NULL, fixedEdges = NULL, NAdelete = TRUE,
-                       verbose = FALSE, covariates=NULL, QTLs = integer(), K = NULL,
-                       max.iter = 50, stop.if.significant = TRUE, use.res = FALSE,
-                       res.cor = NULL) {
+skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE, alpha,
+                       labels, p, m.max = Inf, fixedGaps = NULL, fixedEdges = NULL,
+                       NAdelete = TRUE, covariates=NULL, max.iter = 50,
+                       use.res = FALSE, res.cor = NULL, verbose = FALSE,
+                       stop.if.significant = TRUE){
 
   cl <- match.call()
+
+  if (is.null(K))
+    stopifnot(replicates)
+  if (!is.null(K))
+    stopifnot(!replicates)
 
   if (!is.null(covariates)) {
     covariates <- as.data.frame(covariates)
@@ -42,27 +47,26 @@ skeleton2  <- function(suffStat, alpha, labels, p,
 
   seq_p    <- seq_len(p)
 
-
   ##!##
   # Modified the original skeleton function, so that regardless of the value of fixedGaps,
   # there should never be edges between QTLs, or between QTLs and genotype :
 
-  if (is.null(fixedGaps)) {
+  if (is.null(fixedGaps)) { # G can be a complete graph
     G <- matrix(TRUE, p, p)
-  } else {
+  } else {                  # G has specific fixedGaps
     stopifnot(identical(dim(fixedGaps), c(p, p)))
     stopifnot(identical(fixedGaps, t(fixedGaps)))
     G <- !fixedGaps
   }
-  diag(G) <- FALSE
+  diag(G) <- FALSE    # self-loops removed from network G
   if (length(QTLs) > 0) {
-    G[c(1,QTLs),c(1,QTLs)] <- FALSE
+    G[c(1,QTLs),c(1,QTLs)] <- FALSE # G-QTL edges removed
   }
 
   #########################
 
   if (any(is.null(fixedEdges))) {
-    fixedEdges <- matrix(rep(FALSE, p * p), nrow = p, ncol = p)
+    fixedEdges <- matrix(FALSE, nrow = p, ncol = p)
   } else
     if (!identical(dim(fixedEdges), c(p, p))) {
       stop("Dimensions of the dataset and fixedEdges do not agree.")

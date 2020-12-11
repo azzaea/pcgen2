@@ -42,8 +42,8 @@ should not contain a column of ones.}
 partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{K}{The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
-genetic effects are assumed.}
+\item{K}{The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
+independent genetic effects are assumed.}
 
 \item{alpha}{The significance level used in each conditional independence
 test. Default is 0.01. The test itself of course does not depend on this,

@@ -6,6 +6,9 @@
 \usage{
 skeleton2(
   suffStat,
+  QTLs = integer(),
+  K = NULL,
+  replicates = TRUE,
   alpha,
   labels,
   p,
@@ -13,14 +16,12 @@ skeleton2(
   fixedGaps = NULL,
   fixedEdges = NULL,
   NAdelete = TRUE,
-  verbose = FALSE,
   covariates = NULL,
-  QTLs = integer(),
-  K = NULL,
   max.iter = 50,
-  stop.if.significant = TRUE,
   use.res = FALSE,
-  res.cor = NULL
+  res.cor = NULL,
+  verbose = FALSE,
+  stop.if.significant = TRUE
 )
 }
 \arguments{
@@ -28,6 +29,17 @@ skeleton2(
 factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
 and optionally some QTLs. The name of the first column should be G. Should not
 contain covariates.}
+
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These may be
+partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
+Note: the factor genotype (column number 1) may occur in S, as well as x and y}
+
+\item{K}{The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
+independent genetic effects are assumed.}
+
+\item{replicates}{Logical. \code{TRUE} indicates replicate genotypes and the kinship
+matrix \code{K} should not be provided in this case. \code{FALSE} means no replicates,
+so \code{K} should be provided.}
 
 \item{alpha}{The significance level used in each conditional independence
 test. Default is 0.01. The test itself of course does not depend on this,
@@ -48,15 +60,15 @@ accept/ reject decision.}
 \item{fixedGaps}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 where \eqn{p} is the number of traits. The first row and column refer to
 the genotype node G, and subsequent rows and columns to the traits. As in
-the pcalg package, the edge \eqn{i - j} is removed before starting the
+the pcalg package, the edge \eqn{[i - j]} is removed before starting the
 algorithm if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are
 \code{TRUE}. In that case, the edge is guaranteed to be absent in the
 resulting graph.}
 
 \item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 where \eqn{p} is the number of traits. The first row and column refer to
-the genotype node G, and subsequent rows and columns to the traits. As in
-the pcalg package, the edge \eqn{i - j} is never considered for removal if
+the genotype node \code{G}, and subsequent rows and columns to the traits. As in
+the \code{pcalg} package, the edge \eqn{[i - j]} is never considered for removal if
 the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
 case, the edge is guaranteed to be present in the resulting graph.}
 
@@ -64,32 +76,14 @@ case, the edge is guaranteed to be present in the resulting graph.}
 TRUE deletes the edge corresponding to the conditional independence test
 when it returns NA. Default is FALSE}
 
-\item{verbose}{If \code{TRUE}, p-values for the conditional independence
-tests are printed}
-
 \item{covariates}{A data.frame containing covariates that should always be
 used in each conditional independence test. Should be either \code{NULL}
 (default) or a data.frame with the same number of rows as \code{suffStat}.
 An intercept is already included for each trait in suffStat; covariates
 should not contain a column of ones.}
 
-\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These may be
-partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
-Note: the factor genotype (column number 1) may occur in S, as well as x and y}
-
-\item{K}{The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
-genetic effects are assumed.}
-
 \item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
 the bivariate mixed model (when \code{use.res = FALSE)}.}
-
-\item{stop.if.significant}{If \code{TRUE}, the EM-algorithm used in some of
-the conditional independence tests (when \code{use.res = FALSE}) will be
-stopped whenever the p-value becomes significant, i.e. below \code{alpha}.
-This will speed up calculations, and can be done because (1) the PC
-algorithm only needs an accept/reject decision (2) In EM the likelihood is
-nondecreasing. Should be put to \code{FALSE} if the precise p-values are of
-interest.}
 
 \item{use.res}{If \code{TRUE}, the test for conditional independence of 2
 traits given a set of other traits and \eqn{G} is based on residuals from
@@ -103,6 +97,17 @@ provided, it is based on partial correlations among the residuals, tested
 using the gaussCItest function from pcalg. In case \code{res.cor} is
 \code{NULL} (the default), the test for conditional independence between Yj
 and Yk given a set of traits YS is based on a bivariate mixed model.}
+
+\item{verbose}{If \code{TRUE}, p-values for the conditional independence
+tests are printed}
+
+\item{stop.if.significant}{If \code{TRUE}, the EM-algorithm used in some of
+the conditional independence tests (when \code{use.res = FALSE}) will be
+stopped whenever the p-value becomes significant, i.e. below \code{alpha}.
+This will speed up calculations, and can be done because (1) the PC
+algorithm only needs an accept/reject decision (2) In EM the likelihood is
+nondecreasing. Should be put to \code{FALSE} if the precise p-values are of
+interest.}
 }
 \description{
 The inferred skeleton is order-independent (equivalent to pcalg::skeleton

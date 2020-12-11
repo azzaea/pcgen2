@@ -9,6 +9,7 @@ pcgen(
   covariates = NULL,
   QTLs = integer(),
   K = NULL,
+  replicates = TRUE,
   alpha = 0.01,
   m.max = Inf,
   fixedEdges = NULL,
@@ -38,8 +39,12 @@ should not contain a column of ones.}
 partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{K}{The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
-genetic effects are assumed.}
+\item{K}{The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
+independent genetic effects are assumed.}
+
+\item{replicates}{Logical. \code{TRUE} indicates replicate genotypes and the kinship
+matrix \code{K} should not be provided in this case. \code{FALSE} means no replicates,
+so \code{K} should be provided.}
 
 \item{alpha}{The significance level used in each conditional independence
 test. Default is 0.01. The test itself of course does not depend on this,
@@ -52,15 +57,15 @@ accept/ reject decision.}
 
 \item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 where \eqn{p} is the number of traits. The first row and column refer to
-the genotype node G, and subsequent rows and columns to the traits. As in
-the pcalg package, the edge \eqn{i - j} is never considered for removal if
+the genotype node \code{G}, and subsequent rows and columns to the traits. As in
+the \code{pcalg} package, the edge \eqn{[i - j]} is never considered for removal if
 the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
 case, the edge is guaranteed to be present in the resulting graph.}
 
 \item{fixedGaps}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 where \eqn{p} is the number of traits. The first row and column refer to
 the genotype node G, and subsequent rows and columns to the traits. As in
-the pcalg package, the edge \eqn{i - j} is removed before starting the
+the pcalg package, the edge \eqn{[i - j]} is removed before starting the
 algorithm if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are
 \code{TRUE}. In that case, the edge is guaranteed to be absent in the
 resulting graph.}

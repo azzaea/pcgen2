@@ -49,8 +49,8 @@ should not contain a column of ones.}
 
 \item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 where \eqn{p} is the number of traits. The first row and column refer to
-the genotype node G, and subsequent rows and columns to the traits. As in
-the pcalg package, the edge \eqn{i - j} is never considered for removal if
+the genotype node \code{G}, and subsequent rows and columns to the traits. As in
+the \code{pcalg} package, the edge \eqn{[i - j]} is never considered for removal if
 the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
 case, the edge is guaranteed to be present in the resulting graph.}
 

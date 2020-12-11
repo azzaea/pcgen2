@@ -61,14 +61,18 @@
 #'  partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 #'   Note: the factor genotype (column number 1) may occur in S, as well as x and y
 #'
-#' @param K The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
-#'   genetic effects are assumed.
+#' @param K The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
+#'   independent genetic effects are assumed.
 #   Azza: conside ther def below originally in getResiduals.R:
 #   An optional marker-based relatedness (kinship) matrix of dimension \eqn{n x n}, \eqn{n}
 #   being the number of unique genotypes in the first column in \code{suffStat}. In
 #   case \code{suffStat} contains replicates, the resulting relatedness of the
 #   observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
 #   plants to genotypes.
+#'
+#' @param replicates Logical. \code{TRUE} indicates replicate genotypes and the kinship
+#'   matrix \code{K} should not be provided in this case. \code{FALSE} means no replicates,
+#'   so \code{K} should be provided.
 #'
 #' @param alpha The significance level used in each conditional independence
 #'   test. Default is 0.01. The test itself of course does not depend on this,
@@ -82,15 +86,15 @@
 #'
 #' @param fixedEdges A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 #'   where \eqn{p} is the number of traits. The first row and column refer to
-#'   the genotype node G, and subsequent rows and columns to the traits. As in
-#'   the pcalg package, the edge \eqn{i - j} is never considered for removal if
+#'   the genotype node \code{G}, and subsequent rows and columns to the traits. As in
+#'   the \code{pcalg} package, the edge \eqn{[i - j]} is never considered for removal if
 #'   the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
 #'   case, the edge is guaranteed to be present in the resulting graph.
 #'
 #' @param fixedGaps  A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 #'   where \eqn{p} is the number of traits. The first row and column refer to
 #'   the genotype node G, and subsequent rows and columns to the traits. As in
-#'   the pcalg package, the edge \eqn{i - j} is removed before starting the
+#'   the pcalg package, the edge \eqn{[i - j]} is removed before starting the
 #'   algorithm if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are
 #'   \code{TRUE}. In that case, the edge is guaranteed to be absent in the
 #'   resulting graph.
@@ -147,12 +151,17 @@
 #'
 #' @export
 #'
-pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha = 0.01,
-                  m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL, verbose = FALSE,
-                  use.res = FALSE, res.cor = NULL, max.iter = 50, stop.if.significant = TRUE,
-                  NAdelete = FALSE, return.pvalues = FALSE) {
+pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, replicates = TRUE,
+                  alpha = 0.01, m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL,
+                  verbose = FALSE, use.res = FALSE, res.cor = NULL, max.iter = 50,
+                  stop.if.significant = TRUE, NAdelete = FALSE, return.pvalues = FALSE) {
 
   cl <- match.call()
+
+  if (is.null(K))
+    stopifnot(replicates)
+  if (!is.null(K))
+    stopifnot(!replicates)
 
   if (is.null(alpha)) alpha = 0.01
 
@@ -208,12 +217,12 @@ pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, alpha
 
   ##########################
 
-  skel <- skeleton2(suffStat = suffStat, alpha = alpha, labels = labels, p = p,
-                    m.max = m.max, fixedGaps = fixedGaps, fixedEdges = fixedEdges,
-                    NAdelete = NAdelete, verbose = verbose, covariates=covariates,
-                    QTLs = QTLs, K = K, max.iter = max.iter,
-                    stop.if.significant = stop.if.significant, use.res = use.res,
-                    res.cor = res.cor)
+  skel <- skeleton2(suffStat = suffStat, QTLs = QTLs, K = K, replicates = replicates,
+                    alpha = alpha, labels = labels, p = p, m.max = m.max,
+                    fixedGaps = fixedGaps, fixedEdges = fixedEdges, NAdelete = NAdelete,
+                    covariates = covariates, max.iter = max.iter, use.res = use.res,
+                    res.cor = res.cor, verbose = verbose,
+                    stop.if.significant = stop.if.significant)
   # Infer an order-independent skeleton (pcalg:: with skel.method = "stable")
 
   # Azza: more old comments- delete?

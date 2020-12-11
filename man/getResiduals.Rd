@@ -23,8 +23,8 @@ the G-BLUP. Options are \code{"us"} (unstructured multi-trait model fitted
 using \code{sommer}) and \code{"uni"} (based on univariate GBLUPs).
 (Default \code{"uni"})}
 
-\item{K}{The kinship (i.e genetic relatedness matrix) . If NULL (the default), independent
-genetic effects are assumed.}
+\item{K}{The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
+independent genetic effects are assumed.}
 }
 \value{
 A data-frame with the residuals
