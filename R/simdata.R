@@ -18,6 +18,10 @@
 #'  out <- pcgen(simdata)
 #'  out2 <- pcRes(suffStat = simdata, alpha = 0.01, verbose= FALSE)
 #' }
+#'
+#' @family pcgen datasets
+#' @seealso
+#'
 
 "simdata"
 

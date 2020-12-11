@@ -16,4 +16,10 @@ data(d2treps)
 The means of 100 markers and two traits corresponding to the dataset
 \code{d2treps} of 500 genotypes g1,...,g500, where G -> Y1 -> Y2
 }
+\seealso{
+Other pcgen datasets: 
+\code{\link{d2treps}},
+\code{\link{simdata}}
+}
+\concept{pcgen datasets}
 \keyword{datasets}

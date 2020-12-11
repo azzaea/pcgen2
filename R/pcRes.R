@@ -67,7 +67,7 @@
 #' @references A paper on arxiv and Topner et al (2017)
 #'
 #' @export
-#' @import pcalg
+#' @importFrom pcalg pc gaussCItest
 
 pcRes <-
   function (suffStat, alpha= 0.01, K = NULL, m.max = Inf,

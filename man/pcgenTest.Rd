@@ -102,11 +102,11 @@ latter case, \code{res.cor} must be provided.
 \examples{
 \dontrun{
  data(simdata)
- rs <- getResiduals(suffStat= simdata)
- pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4)
- pcgenTest(suffStat= simdata, x= 2, y= 3, S= c(1,4))
- pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4, use.res= TRUE, res.cor= cor(rs))
- pcgenTest(suffStat= simdata, x= 2, y= 1, S= 4)
+ rs <- pcgen::getResiduals(suffStat = simdata)
+ pcgenTest(suffStat = simdata, x= 2, y= 3, S= 4)
+ pcgenTest(suffStat = simdata, x= 2, y= 3, S= c(1,4))
+ pcgenTest(suffStat=simdata, x= 2, y= 3, S= 4, use.res=T, res.cor= cor(rs))
+ pcgenTest(suffStat = simdata, x= 2, y= 1, S= 4)
 }
 
 }

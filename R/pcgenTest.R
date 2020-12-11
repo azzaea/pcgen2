@@ -52,104 +52,52 @@
 #' @examples
 #' \dontrun{
 #'  data(simdata)
-#'  rs <- getResiduals(suffStat= simdata)
-#'  pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4)
-#'  pcgenTest(suffStat= simdata, x= 2, y= 3, S= c(1,4))
-#'  pcgenTest(suffStat= simdata, x= 2, y= 3, S= 4, use.res= TRUE, res.cor= cor(rs))
-#'  pcgenTest(suffStat= simdata, x= 2, y= 1, S= 4)
+#'  rs <- pcgen::getResiduals(suffStat = simdata)
+#'  pcgenTest(suffStat = simdata, x= 2, y= 3, S= 4)
+#'  pcgenTest(suffStat = simdata, x= 2, y= 3, S= c(1,4))
+#'  pcgenTest(suffStat=simdata, x= 2, y= 3, S= 4, use.res=T, res.cor= cor(rs))
+#'  pcgenTest(suffStat = simdata, x= 2, y= 1, S= 4)
 #' }
 #'
 #' @export
-#' @import pcalg
+#' @importFrom pcalg gaussCItest
 #'
 pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K = NULL,
                       alpha = 0.01, max.iter = 50, stop.if.significant = TRUE,
                       use.res = FALSE, res.cor = NULL) {
 
-  ### Example (no replicates and generic K): suffStat = dm[,1:3]; K = K
-  ## case 1; Trait \perp Trait | {Traits, G, Q}
-  # x = 2; y = 3; S = 1;
-  # pcgenTest(x, y, S, suffStat, K = K) # Y1 \perp Y2 | G (No, low p)
-  #
-  # case 2; Trait \perp G | Traits
-  # x = 2; y = 1; S = 3;
-  # pcgenTest(x, y, S, suffStat, K = K) # Y1 \pepr G | Y2 (No, low p)
-  # x = 3; y = 1; S = 2;
-  # pcgenTest(x, y, S, suffStat, K = K) # Y1 \pepr G | Y2 (Yes, high p)
-  #
-  # Old examples (I think safe to delete?)
-  # suffStat = d; x = 2; y = 8; S = c(1,11)
-  # QTLs=integer(); covariates=NULL;
-  # skip.nongenetic=1; genVar=rep(TRUE, ncol(suffStat));
-  # qtlVar=rep(list(rep(TRUE, ncol(suffStat))); length(QTLs));
-  # gen.var.exact=FALSE; gen.covar.exact=TRUE; alpha = 0.01;
-  # mean.adj = 'none'; Vg = NULL; Ve = NULL; dec = NULL;
-  # max.iter = 50; stop.if.significant = TRUE;
-  # return.cond.mean = FALSE
+  ## Input parameters checks: -------------------------------------------------
 
-  #suffStat = dr[, c(1, 26:36)]; covariates = dr[, 37:38]; x = 6; y = 7;
-  #S = 8:9; QTLs=integer(); covariates=NULL; alpha = 0.01; mean.adj = 'none';
-  #Vg = NULL; Ve = NULL; dec = NULL; max.iter = 50;stop.if.significant = TRUE;
-  #return.cond.mean = FALSE
+  stopifnot(names(suffStat)[1] == 'G') # First col in suffStat should be G
+  if (class(QTLs)!='integer') {stop("QTLs should be a vector of integers")}
+  if (1 %in% QTLs) {stop("QTLs should not contain the genotype column (G)")}
+  stopifnot(length(unique(c(x, y, S))) == length(c(x, y, S))) # x, y and S uniq
+  if (x %in% QTLs & y %in% QTLs)
+    stop("Cond. indep. of two QTLs is not tested")
+  if ((x %in% QTLs & y == 1) | (y %in% QTLs & x==1))
+    stop("cond. indep. of QTL and G not tested")
 
-  ## First, some checking ------------------------------------------------
-
-  if (class(QTLs)!='integer') {stop('QTLs should be a vector of integers')}
-  if (1 %in% QTLs) {stop('QTLs should not contain the genotype column (G)')}
-
-  # stop if the first column in suffStat does not have the name G
-  stopifnot(names(suffStat)[1] == 'G')
-  # stop if the same variables occurs more than once
-  stopifnot(length(unique(c(x,y,S)))==length(c(x,y,S)))
-  # 1 should always be the genotype factor (G); stop if it is in the QTL vector
-  if (1 %in% QTLs) {stop()}
-  # stop if both x and y are QTLs (cond. indep. of two QTLs is not tested)
-  if (x %in% QTLs & y %in% QTLs) {stop()}
-  # Neither we test cond. indep. of a QTL and genotype
-  if (x %in% QTLs & y==1) {stop()}
-  if (y %in% QTLs & x==1) {stop()}
-
-  # put the QTL column numbers in ascending order
   QTLs <- sort(QTLs)
 
-  ###################################################################
-  # Define a data.frame X, containing the covariates. It is also defined when
-  # there are no covariates, in which case it will have zero columns.
-
   if (is.null(covariates)) {
-    X <- as.data.frame(matrix(0,nrow(suffStat),0))
+    X <- as.data.frame(matrix(0, nrow = nrow(suffStat), ncol = 0))
   } else {
     X <- as.data.frame(covariates)
-    names(X) <- paste0('covariate_', 1:ncol(covariates)) # I don't see how this is useful- Azza
+    names(X) <- paste0('covariate_', 1:ncol(covariates)) # Why rename? Azza
   }
 
+  ## Type A CI test: Trait \perp G | {Traits +/- QTLs}: -----------------------
 
-
-  #########################################################################
-
-  ## Case 2: Trait \perp G | {Traits + QTLs}: Type A test -----------------
-  # The case where one of x and y is the number 1 (direct genetic effects).
-  # S may also contain QTLs
-
-  if (x==1 | y==1) {
-    if (x==1) {
-      if (length(S)!=0)
-        X <- as.data.frame(cbind(X, suffStat[,S]))
-      return(gen.var.test(y = suffStat[,y], X = X, G = suffStat[,1], K))
-    }
-    if (y==1) {
-      if (length(S)!=0)
-        X <- as.data.frame(cbind(X, suffStat[,S]))
-      return(gen.var.test(y = suffStat[,x], X = X, G=suffStat[,1], K))
-    }
+  if (x == 1) {
+    if (length(S) != 0) X <- cbind(X, suffStat[,S])
+    return(gen.var.test(y = suffStat[,y], X = X, G = suffStat[,1], K))
+  }
+  if (y == 1) {
+    if (length(S) != 0) X <- cbind(X, suffStat[,S])
+    return(gen.var.test(y = suffStat[,x], X = X, G=suffStat[,1], K))
   }
 
-  ########################################################################
-
-  ## Case 3: Trait \perp QTL | {Traits + G + QTL} -----------------------
-  # The case where one of x and y is a QTL;
-  # the number 1 (direct genetic effects) may or may not be in S.
-  # S may also contain additional QTLs
+  ## Type A* CI test: Trait \perp QTL | {Traits +/- G +/- QTL} ----------------
 
   if (any(QTLs %in% c(x,y))) {
     if (y %in% QTLs) { # make x the QTL, not y (just to simplify the code)
@@ -185,31 +133,24 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
     return(pval)
   }
 
-  ##########################################################################
+  ## Type C CI test: Trait \perp Trait | {Traits +/- QTLs} --------------------
 
-  ## Case 1: Trait \perp Trait | {Traits + QTLs} ---------------------------
-  # x and y both represent real traits (no QTLs), and 1
-  # (direct genetic effects) is not in S. S may contain QTLs
+  if (!(1 %in% c(x, y, S)) & !(any(c(x, y) %in% QTLs))) {S <- c(1, S)}
 
-  if (!(1 %in% c(x,y,S)) & !(any(c(x,y) %in% QTLs))) {S <- c(1, S)}
-
-  ## Case 1*: Trait \perp Trait | {G, QTL and Traits}: Type B tests --------
-  # The case where x and y both represent real traits (no QTLs), and 1
-  # (direct genetic effects: G) IS contained in S. S may also contain QTLs.
-  # We do not skip any tests here.
+  ## Type B CI test: Trait \perp Trait | {G + Traits +/- QTLs} ----------------
   # Note that G will account for QTLs that may not be contained in S.
 
   if (use.res == TRUE) {
     out <- gaussCItest(x = x - 1, y = y - 1, S = (setdiff(S, 1) - 1),
                        suffStat = list(C = res.cor, n = nrow(suffStat)))
   } else { # No residuals
-    if (length(S)==1) {
-      out <- res.covar.test(x = suffStat[,x], y = suffStat[,y],
-                            G = suffStat[,1], K = K, X = X, alpha = alpha)
+    if (length(S) == 1) {
+      out <- res.covar.test(x = suffStat[, x], y = suffStat[, y],
+                            G = suffStat[, 1], K = K, X = X, alpha = alpha)
     } else {
-      X <- as.data.frame(cbind(X,suffStat[,setdiff(S,1)]))
-      out <- res.covar.test(x = suffStat[,x], y = suffStat[,y],
-                            G = suffStat[,1], K = K, X = X, alpha = alpha,
+      X <- as.data.frame(cbind(X, suffStat[, setdiff(S, 1)]))
+      out <- res.covar.test(x = suffStat[, x], y = suffStat[, y],
+                            G = suffStat[, 1], K = K, X = X, alpha = alpha,
                             max.iter = max.iter, stop.if.significant = stop.if.significant)
     }
   }

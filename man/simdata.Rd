@@ -23,5 +23,14 @@ Y1 -> Y2 -> Y3, and direct genetic effects on Y1 and Y3.
  out <- pcgen(simdata)
  out2 <- pcRes(suffStat = simdata, alpha = 0.01, verbose= FALSE)
 }
+
 }
+\seealso{
+
+
+Other pcgen datasets: 
+\code{\link{d2treps}},
+\code{\link{d2tsnpsmeans}}
+}
+\concept{pcgen datasets}
 \keyword{datasets}

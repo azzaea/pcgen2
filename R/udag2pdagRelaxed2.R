@@ -1,4 +1,4 @@
-#' @import pcalg
+#' @importFrom pcalg triple2numb
 #' @import graph
 #' @importFrom utils combn
 #' @importFrom methods as

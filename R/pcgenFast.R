@@ -51,7 +51,7 @@
 #' @seealso{\code{\link{getResiduals}}}
 #'
 #' @export
-#' @import pcalg
+#' @importFrom pcalg skeleton gaussCItest
 #' @importFrom methods as
 #'
 pcgenFast <-

@@ -16,4 +16,10 @@ data(d2treps)
 Simulated data, for two replicates of 500 genotypes g1,...,g500. Two traits
 were simulated (Y1 and Y2), such that G -> Y1 -> Y2
 }
+\seealso{
+Other pcgen datasets: 
+\code{\link{d2tsnpsmeans}},
+\code{\link{simdata}}
+}
+\concept{pcgen datasets}
 \keyword{datasets}

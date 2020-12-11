@@ -8,10 +8,10 @@
 #'   constraint-based causal structure learning. \emph{The Journal of Machine
 #'   Learning Research}, 15(1), 3741-3782.
 #'
-# @import pcalg
 #' @keywords internal
 #' @inheritParams pcgen
 #' @inheritParams pcalg::skeleton
+#' @importFrom pcalg getNextSet
 #'
 skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE, alpha,
                        labels, p, m.max = Inf, fixedGaps = NULL, fixedEdges = NULL,
@@ -45,25 +45,19 @@ skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE, 
       stop("'p' is not needed when 'labels' is specified, and must match length(labels)")
   }
 
-  seq_p    <- seq_len(p)
+  seq_p <- seq_len(p)
 
-  ##!##
-  # Modified the original skeleton function, so that regardless of the value of fixedGaps,
-  # there should never be edges between QTLs, or between QTLs and genotype :
-
-  if (is.null(fixedGaps)) { # G can be a complete graph
+  if (is.null(fixedGaps)) { # Graph G is complete
     G <- matrix(TRUE, p, p)
-  } else {                  # G has specific fixedGaps
+  } else {                  # Graph G has specific fixedGaps
     stopifnot(identical(dim(fixedGaps), c(p, p)))
     stopifnot(identical(fixedGaps, t(fixedGaps)))
     G <- !fixedGaps
   }
-  diag(G) <- FALSE    # self-loops removed from network G
+  diag(G) <- FALSE    # self-loops removed from graph G
   if (length(QTLs) > 0) {
-    G[c(1,QTLs),c(1,QTLs)] <- FALSE # G-QTL edges removed
+    G[c(1,QTLs),c(1,QTLs)] <- FALSE # G<->QTL edges removed
   }
-
-  #########################
 
   if (any(is.null(fixedEdges))) {
     fixedEdges <- matrix(FALSE, nrow = p, ncol = p)
@@ -77,9 +71,9 @@ skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE, 
   sepset <- lapply(seq_p, function(.) vector("list", p))
   pMax <- matrix(-Inf, nrow = p, ncol = p)
   diag(pMax) <- 1
-  done <- FALSE
   ord <- 0L
   n.edgetests <- numeric(1)
+  done <- FALSE
 
   while (!done && any(G) && ord <= m.max) {
     n.edgetests[ord1 <- ord + 1L] <- 0
@@ -88,17 +82,13 @@ skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE, 
     # ind <- which((G*upper.tri(G))>0, arr.ind = TRUE)
     ind <- ind[order(ind[, 1]), ]
     remEdges <- nrow(ind)
-    if (verbose)
-      cat("Order=", ord, "; remaining edges:", remEdges, "\n", sep = "")
-    # if (method == "stable") G.l <- split(G, gl(p, p))
+    if (verbose) cat("Order=", ord, "; remaining edges:", remEdges, "\n", sep = "")
     G.l <- split(G, gl(p, p))
 
     for (i in 1:remEdges) {
-      if (verbose && (verbose >= 2 || i%%100 == 0))
-        cat("|i=", i, "|iMax=", remEdges, "\n")
+      if (verbose) cat("|i=", i, "|iMax=", remEdges, "\n")
       x <- ind[i, 1]; y <- ind[i, 2]
       if (G[y, x] && !fixedEdges[y, x]) {
-        # nbrsBool <- if (method == "stable")  G.l[[x]] else G[, x]
         nbrsBool <- G.l[[x]]
         nbrsBool[y] <- FALSE
         nbrs <- seq_p[nbrsBool]
@@ -108,25 +98,21 @@ skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE, 
           S <- seq_len(ord)
           repeat {
             n.edgetests[ord1] <- n.edgetests[ord1] + 1
-            ##!##: pcgenTest instead of indepTest:
             pval <- pcgenTest(x, y, S = nbrs[S], suffStat, covariates = covariates,
                               QTLs = QTLs, K = K, alpha = alpha, max.iter = max.iter,
                               stop.if.significant = stop.if.significant,
                               use.res = use.res, res.cor = res.cor)
             if (verbose) {
-              ##!## 1. Print labels of variables (not their indices in the suffStat dataframe)
               cat("x=", labels[x], " y=", labels[y], " S=", labels[nbrs[S]],": pval =")
-              ##!## 2. if an edge is removed, mark this with <<<<<<<<<< >>>>>>>>>>>>>>>>
               if (!(is.na(pval)) & pval >= alpha) {
-                cat('<<<<<<< ', pval, ' >>>>>>>>>', "\n")
+                cat('<<<<<<< ', pval, ' >>>>>>>>>', "\n") # Highlight removed edges
               } else
                 cat(pval, "\n")
             } # End if (verbose)
 
-            if (is.na(pval))
-              pval <- as.numeric(NAdelete)
-            if (pMax[x, y] < pval)
-              pMax[x, y] <- pval
+            if (is.na(pval)) pval <- as.numeric(NAdelete)
+            if (pMax[x, y] < pval) pMax[x, y] <- pval
+
             if (pval >= alpha) {
               G[x, y] <- G[y, x] <- FALSE
               sepset[[x]][[y]] <- nbrs[S]
@@ -136,7 +122,8 @@ skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE, 
               if (nextSet$wasLast)
                 break
               S <- nextSet$nextSet
-            } # End pval (?) alpha comparison
+            } # End pval<=> alpha?
+
           } #End repeat
         } # End if (length_nbrs >= ord)
       } # End if (G[y, x] && !fixedEdges[y, x])

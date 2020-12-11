@@ -10,6 +10,7 @@
 #'
 #' @usage data(d2treps)
 #' @keywords datasets
+#' @family pcgen datasets
 
 "d2treps"
 
@@ -25,5 +26,6 @@
 #'
 #' @usage data(d2treps)
 #' @keywords datasets
+#' @family pcgen datasets
 
 "d2tsnpsmeans"
