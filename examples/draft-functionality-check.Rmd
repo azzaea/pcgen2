@@ -1,0 +1,254 @@
+---
+title: "draft-functionality-check"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{draft-functionality-check}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>", cache = TRUE
+)
+```
+
+```{r setup,warning=TRUE,message=FALSE}
+library(pcgen2)
+library(ggplot2)
+```
+
+# pcgen dependencies:
+
+```{r dependencies}
+skipvis <- T
+if (!skipvis) {
+  # The vanilla dependency graph
+  mvbutils::foodweb()
+
+  # The interactive version:
+  require(DependenciesGraphs)
+
+  # hacking the envirDependencies() function to get an idea of dependencies:
+  name.functions <- as.vector(ls.str( mode = "function"))
+  print(name.functions)
+  toutfonc <- linksForAll(".GlobalEnv")
+  visdata <- prepareToVis(unique(toutfonc), name.functions)
+  class(visdata) <- "dependenciesGraphs"
+  plot(visdata)
+
+  library(DependenciesGraphs)
+  depe <- envirDependencies("package:pcgen2")
+  plot(depe, block = T)
+  library(pcgen2)
+  dep <- funDependencies("package:pcgen2","gencovTest")
+  plot(dep)
+}
+
+```
+
+
+## Using Willem's data: ------------------------------------------------------------
+
+This is a dataset from Willem, composed of:
+- `d`: a dataframe of 500 genotypes, 2 replicates from true graph G -> Y1 -> Y2
+- `dm`: a dataframe of genotypic marker means and trait means across 100 SNPs that generate genetic effects
+
+
+```{r}
+load(file = '~/github_repos/pcgen2/data/simdata1.RData')
+str(d)
+dm[1:6,1:6]
+M <- as.matrix(dm[,-(1:3)] / sqrt(ncol(dm)))
+K <- M %*% t(M)
+
+# This evaluates the code 2 times. Increase for a realistic benchmark
+mbm <- microbenchmark::microbenchmark(
+  "Old w replicates" = {out.old.way.1 <- pcgen::pcgen(d, verbose = T)},
+  "New w replicates" = {out.old.way.2 <- pcgen::pcgen(d, verbose = T)},
+  "New w/ genric K" = {out.new.way <- pcgen2::pcgen(dm[,1:3], K = K, verbose =T)},
+  times = 1)
+
+mbm # Using K is obviously much slower than the other approaches
+
+#autoplot(mbm) +  theme_linedraw() # make times > 2 to see a plot
+
+par(mfrow=c(1,3))
+Rgraphviz::plot(out.old.way.1, main = "package output w/ replicates")
+Rgraphviz::plot(out.old.way.2, main = "modified code w/replicates")
+Rgraphviz::plot(out.new.way, main = "modified code w/ generic K")
+
+all.equal( out.old.way.1, out.old.way.2) # so the new tests didn't break the old code -
+                                         # they differ in the call here, which is expected.
+all.equal( out.old.way.2, out.new.way)   # so, we learn the same network with and without
+                                         # using the kinship matrix. The call and pMax differ
+                                         # but this is not surprising
+
+
+```
+
+
+# Inner package working
+
+```{r }
+
+y1 <- dm$Y1; y2  <- dm$Y2; G <- dm$G;
+## Type A CI tests, verifying the gen.var.test works: ------
+# Y1 \perp G (S is empty)
+pcgen2:::gen.var.test(y1, K = K) # (No, low p)
+# Y1 ~ (1|G) + Y2
+pcgen2:::gen.var.test(y1, y2, K = K) # (No, low p)
+
+# Y2 \perp G (S is empty)
+pcgen2:::gen.var.test(y2, K=K) # (No, low p)
+# Y2 \perp G | Y1
+pcgen2:::gen.var.test(y2, y1, K = K) # (Yes, high p)
+
+## Type B tests, verifying res.covar.test works: ---------
+
+Z.t <- pcgen2:::make.Z.matrix(G)
+X.t <- Matrix::Matrix(rep(1, length(G)))
+
+em.vec <- c(y1, y2)
+names(em.vec) <- rep(as.character(G), 2)
+
+fit.reduced.K <- pcgen2:::fitEM(em.vec, X.t, Z.t, cov.error = TRUE,
+                                cov.gen = FALSE, max.iter = 20,
+                                K = K)
+
+# But, this seems equivalent to changing Z defition (which is faster)
+# in terms of fixed coefficents and variances. Random effects differ.
+# The question IS: are they equivalent in terms of likelihood or not?!
+# In this case, both models have p-value of 1, so not conclusive
+fit.reduced.ZM <- pcgen2:::fitEM(em.vec, X.t, Z.t = Matrix::Matrix(Z.t %*% M),
+                                 cov.error = TRUE,
+                                 cov.gen = FALSE, max.iter = 20)
+
+all.equal(fit.reduced.K,fit.reduced.ZM) # Difference in random components only.
+# It makes sense to investigate this with larger
+# number of traits. See section on (Other scenarios)
+
+str(fit.reduced.K)
+str(fit.reduced.ZM)
+
+pcgen2:::res.covar.test(y1, y2, G, K = K)  # Y1 \not \perp Y2; so low p expected
+# The default was use.manova=T; but that produces an error in this set up (no
+# replicates so manova fails). I'm hard coding use.manova=F if K is present.
+
+# It is not sensible that this function returns c(pvalue, TRUE) together. Checking its
+# dependencies, TRUE is not used by any other function and is always ignored. Maybe just
+# remove it here?
+
+# Also, when calling fitEM function for the reduced model, I'm setting cov.error=T;
+# cov.gen=F as per the examples above; but I don't really understand these options
+
+## Calling pcgenTest -------------------------------------------------------------------
+
+suffStat <- dm[,1:3]; K <- K
+## case 1; Trait \perp Trait | {Traits, G, Q}
+x <- 2; y <- 3; S <- 1;
+pcgen2:::pcgenTest(x, y, S, suffStat, K = K) # Y1 \perp Y2 | G (No, low p)
+
+## case 2; Trait \perp G | Traits
+x <- 2; y <- 1; S <- 3;
+pcgen2:::pcgenTest(x, y, S, suffStat, K = K) # Y1 \pepr G | Y2 (No, low p)
+
+x <- 3; y <- 1; S <- 2;
+pcgen2:::pcgenTest(x, y, S, suffStat, K = K) # Y2 \pepr G | Y1 (Yes, high p)
+
+## case 3: Trait \perp QTL | {Trait, QTL, G}
+# Needs further investigation
+
+
+## Calling skeleton2 -------------------------------------------------------------------
+skel <- pcgen2:::skeleton2(suffStat, alpha = .01, K = K, labels = colnames(suffStat), verbose = T)
+Rgraphviz::plot(skel)
+
+
+out.new.way <- pcgen2:::pcgen(suffStat, K = K, verbose = T); Rgraphviz::plot(out.new.way)
+
+```
+
+## Other scenarios: --------------------------------------------------------------
+## 1. The effect of K:
+# giving pcgen an uninformative K matrix; or one that is calculated differently
+## 2. The presence of more traits
+
+```{r}
+# Uninformative Kinship matrix
+out.diag.K <- pcgen2::pcgen(dm[,1:3], K = diag(1, 500, 500), verbose = T, NAdelete = F)
+Rgraphviz::plot(out.diag.K) # all edges lost
+
+gy <- pcgen2::pcRes(dm[,1:3], K = diag(1, 500, 500))
+Rgraphviz::plot(gy) # However, pcRes is able to predict the Y1 --> Y2 edge
+
+# also, pcgen if given residuals:
+cor <- cor(pcgen2::getResiduals(suffStat = dm[,1:3], K = diag(1, 500, 500)))
+gy2 <- pcgen2::pcgen(dm[,1:3], use.res = T, K = diag(1, 500, 500), res.cor = cor, verbose = T,
+             NAdelete = F, return.pvalues = T)
+gy2$pMax
+Rgraphviz::plot(gy2$gr) # Giving the correct K (to pcgen adds the G-->Y1 edge and orients the Y1-->Y2
+          # edge. An uninformative K loses G--> Y1 edge and the direction on Y1 --> Y2
+          # This is somewhat not surprising
+
+## How about other definitions of K?
+# Generate the raw  0,2 dosage values (for Gaston)
+genos <- as.matrix(purrr::map_df(purrr::map_df(dm[, -c(1:3)], factor), as.integer))
+genos[genos == 1] <- 0
+rownames(genos) <- rownames(dm)
+genos.gaston <- as(genos,"bed.matrix")
+K2 <- gaston::GRM(genos.gaston, autosome.only = F) # calculated as: XX'/q, with X the standardized
+                                           # genotype matrix and q the number of SNPs (ncol(x))
+
+all.equal(K, K2)  # mean difference of ~1
+
+out.new.K <- pcgen2::pcgen(dm[,1:3], K = K2, verbose = T, NAdelete = T)
+Rgraphviz::plot(out.new.K)  # Only the Y1 -- Y2 edge remains but with no orientation
+
+cor <- cor(pcgen2::getResiduals(suffStat = dm[,1:3], K = K2))
+gy3 <- pcgen2::pcgen(dm[,1:3], use.res = T, K = K2, res.cor = cor)
+Rgraphviz::plot(gy3)        # We still lose the G-->Y1 edge
+
+# How about selecting the very commong snps for defining K?
+genos.trimmed <- gaston::select.snps(genos.gaston, maf > .2) # 70 snps
+K3 <- gaston::GRM(genos.trimmed, autosome.only = F)
+out.new.trimmed <- pcgen2::pcgen(dm[,1:3], K = K3, verbose = T, NAdelete = T)
+Rgraphviz::plot(out.new.trimmed)  # This gives the correct network
+
+# and if selecting the rare snps:
+genos.trimmed2 <- gaston::select.snps(genos.gaston, maf < .2) # 30 snps
+K4 <- gaston::GRM(genos.trimmed2, autosome.only = F)
+out.new.trimmed2 <- pcgen2::pcgen(dm[,1:3], K = K4, verbose = T)
+Rgraphviz::plot(out.new.trimmed2)  # We lose the G-->Y1 edge
+
+out.new.trimmed2 <- pcgen2::pcgen(dm[,1:3], K = K4, verbose = T, NAdelete = T)
+Rgraphviz::plot(out.new.trimmed2)  # We lose the G-->Y1 edge
+
+## How about having more traits?
+suffStat <- cbind(dm[,1:3], Y3 = rnorm(n = nrow(dm)),
+                  Y4 = dm$Y1 + runif(n = nrow(dm)))
+out.more.traits <- pcgen2::pcgen(suffStat, K = K, verbose = T)
+Rgraphviz::plot(out.more.traits)
+
+cor2 <- cor(pcgen2::getResiduals(suffStat = suffStat, K = K))
+gc2 <- pcgen(suffStat, use.res = T, K = K, res.cor = cor2)
+Rgraphviz::plot(gc2) # The G --> Y1 edge is lost; and logically non directed edges otherwise
+
+out.pc.res <- pcgen2::pcRes(suffStat, K = diag(1, 500, 500))
+Rgraphviz::plot(out.pc.res)
+```
+
+# Futuristic routes: -----------------------------------------------------
+
+1. Borrowing some functionality from GCTA.
+    - for calculating the GRM for example, GCTA has fast way of doing
+    - for finding the variance components, GCTA also has nice features
+    - The recent fastGWA way also looks cool --> see how a function like: 
+  `OmicKriging::computeGRM(bedfullheader, grmfullheader = "genomic", gctaname = "gcta", idfile = NULL, snpfile = NULL)`
+
+2. Consider adopting functionality and methods from `gwasTools`.
+    - Has efficient means of storing genomic data in general
+    - Also, methods for QC and relevant plots .. etc are readily available
