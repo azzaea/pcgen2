@@ -14,14 +14,11 @@
 #'
 #' @param use.manova
 #'
+# id  : a factor indicating which (complete) block each observation is in
+#       Always needed in asreml, to identify the units. May also be present
+#       in X, as covariate. ---------> I don't understand this- Azza
 #'
-#' @examples
-#' x = dm$Y1; y = dm$Y2; G = G; K = K;
-#' res.covar.test(y1, y2, G, K = K, use.manova = F)
-#'
-#' id  : a factor indicating which (complete) block each observation is in
-#'       Always needed in asreml, to identify the units. May also be present
-#'       in X, as covariate. ---------> I don't understand this- Azza
+#' @importFrom Matrix Matrix
 
 res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
                            X = as.data.frame(matrix(0,length(x),0)),

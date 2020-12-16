@@ -1,3 +1,5 @@
+#' @importFrom Matrix determinant
+#'
 deviance2 <- function(C, Gi, ng, Ri, N, Rinv, res, edf) {
 	log_det_C <- determinant(C)$modulus
 	log_det_G <- ng*determinant(Gi)$modulus

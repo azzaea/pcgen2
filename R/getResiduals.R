@@ -48,7 +48,7 @@
 #'
 #' @importFrom sommer mmer vs unsm
 #' @importFrom lme4 lmer VarCorr
-#'
+#' @importFrom Matrix Matrix
 
 getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
                          K = NULL) {

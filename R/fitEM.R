@@ -1,7 +1,8 @@
-#' @import Matrix
+#' @importFrom Matrix Matrix Diagonal bdiag crossprod t diag rowSums
 #' @importFrom MASS ginv
 #' @importFrom stats lm as.formula pchisq anova model.frame terms model.matrix
 #'   contrasts manova residuals cor coefficients
+#'
 fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE,
                    stop.if.significant = FALSE, null.dev = NULL, alpha = 0.01,
                    max.iter = 100, Vg.start = NULL, Ve.start = NULL, cov.gen = TRUE) {

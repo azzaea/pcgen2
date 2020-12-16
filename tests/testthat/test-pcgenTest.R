@@ -1,20 +1,6 @@
 alpha <- 0.01
 
 ## Type A: Trait _|_ G | Traits -----------------------------------------------
-test_that("Type A CI tests without replicates of pcgenTest() work", {
-  data("d2tsnpsmeans") # G -> Y1 -> Y2
-                       # 1     2     3
-
-  suffStat <- d2tsnpsmeans[,1:3]
-  M <- as.matrix(d2tsnpsmeans[,-(1:3)] / sqrt(ncol(d2tsnpsmeans)))
-  K <- M %*% t(M)
-
-  # Y1 _|_ G | Y2 (No, low p):
-  expect_lt(pcgenTest(x = 2, y = 1, S = 3, suffStat, K = K), alpha)
-
-  # Y2 _|_ G | Y1 (Yes, high p):
-  expect_gt(pcgenTest(x = 3, y = 1, S = 2, suffStat, K = K), alpha)
-})
 
 test_that("Type A CI tests WITH replicates of pcgenTest() work", {
   data(simdata) # G -> Y1 -> Y2 -> Y3; G -> Y3
@@ -40,22 +26,24 @@ test_that("Type A CI tests WITH replicates of pcgenTest() work", {
   expect_lt(pcgenTest(x = 4, y = 1, S = 3, simdata), alpha)
   # Y3 _|_ G | Y1, Y2 (No, low p)
   expect_lt(pcgenTest(x = 4, y = 1, S = c(2, 3), simdata), alpha)
-
 })
 
-## Type B: Trait _|_ Trait | {Traits, G, Q} -----------------------------------
-test_that("Type B CI tests without replicates of pcgenTest() work", {
+test_that("Type A CI tests W/T replicates of pcgenTest() work", {
   data("d2tsnpsmeans") # G -> Y1 -> Y2
                        # 1     2     3
 
   suffStat <- d2tsnpsmeans[,1:3]
-  M <- as.matrix(d2tsnpsmeans[,-(1:3)] / sqrt(ncol(d2tsnpsmeans)))
+  M <- as.matrix(d2tsnpsmeans[,-(1:3)] / sqrt(ncol(d2tsnpsmeans[,-(1:3)])))
   K <- M %*% t(M)
 
-  # Y1 \perp Y2 | G (No, low p)
-  expect_lt(pcgenTest(x = 2, y = 3, S = 1, suffStat, K = K), alpha)
+  # Y1 _|_ G | Y2 (No, low p):
+  expect_lt(pcgenTest(x = 2, y = 1, S = 3, suffStat, K = K), alpha)
+
+  # Y2 _|_ G | Y1 (Yes, high p):
+  expect_gt(pcgenTest(x = 3, y = 1, S = 2, suffStat, K = K), alpha)
 })
 
+## Type B: Trait _|_ Trait | {Traits, G, Q} -----------------------------------
 
 test_that("Type B CI tests WITH replicates of pcgenTest() work", {
   data(simdata) # G -> Y1 -> Y2 -> Y3; G -> Y3
@@ -63,27 +51,44 @@ test_that("Type B CI tests WITH replicates of pcgenTest() work", {
 
   # Y1 _|_ Y2 | Y3 (No, low p)
   expect_lt(pcgenTest(x = 2, y = 3, S = 4, simdata), alpha)
+
   # Y1 _|_ Y2 | G (No, low p)
   expect_lt(pcgenTest(x = 2, y = 3, S = 1, simdata), alpha)
+
   # Y1 _|_ Y2 | G, Y3 (No, low p)
   expect_lt(pcgenTest(x = 2, y = 3, S = c(1, 4), simdata), alpha)
 
   # Y1 _|_ Y3 | Y2  (No, low p)
   expect_lt(pcgenTest(x = 2, y = 4, S = 3, simdata), alpha)
+
   # Y1 _|_ Y3 | G  (No, low p)
   expect_lt(pcgenTest(x = 2, y = 4, S = 1, simdata), alpha)
+
   # Y1 _|_ Y3 | G, Y2  (Yes,  high p)
-  ##expect_gt(pcgenTest(x = 2, y = 4, S = c(1, 3), simdata), alpha) # Both method
-  ##expect_gt(pcgen::pcgenTest(x = 2, y = 4, S = c(1, 3), simdata), alpha) #here
+  ##expect_gt(pcgenTest(x = 2, y = 4, S = c(1, 3), simdata), alpha) # Both methods
+  ##expect_gt(pcgen::pcgenTest(x = 2, y = 4, S = c(1, 3), simdata), alpha) #suffer
 
 
-  # Y1 _|_ Y3 | Y2 (No, low p)
+  # Y2 _|_ Y3 | Y1 (No, low p)
   ##expect_lt(pcgenTest(x = 3, y = 4, S = 2, simdata), alpha)
   ##expect_lt(pcgen::pcgenTest(x = 3, y = 4, S = 2, simdata), alpha)
-  # Y1 _|_ Y3 | Y2 (No, low p)
-  ##expect_lt(pcgenTest(x = 3, y = 4, S = 1, simdata), alpha)
-  ##expect_lt(pcgen::pcgenTest(x = 3, y = 4, S = 1, simdata), alpha)
-  # Y1 _|_ Y3 | G, Y2  (No, low p)
+
+  # Y2 _|_ Y3 | Y4 (No, low p)
+  expect_lt(pcgenTest(x = 3, y = 4, S = 1, simdata), alpha)
+
+  # Y2 _|_ Y3 | G, Y2  (No, low p)
   ##expect_lt(pcgenTest(x = 3, y = 4, S = c(1, 2), simdata), alpha)
   ##expect_lt(pcgen::pcgenTest(x = 3, y = 4, S = 2, simdata), alpha)
+})
+
+test_that("Type B CI tests W/O replicates of pcgenTest() work", {
+  data("d2tsnpsmeans") # G -> Y1 -> Y2
+                       # 1     2     3
+
+  suffStat <- d2tsnpsmeans[,1:3]
+  M <- as.matrix(d2tsnpsmeans[,-(1:3)] / sqrt(ncol(d2tsnpsmeans[,-(1:3)])))
+  K <- M %*% t(M)
+
+  # Y1 \perp Y2 | G (No, low p)
+  expect_lt(pcgenTest(x = 2, y = 3, S = 1, suffStat, K = K), alpha)
 })

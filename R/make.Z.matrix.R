@@ -1,6 +1,7 @@
 #'
 #'
 #' @param genotype a vector (character or factor) with genotype labels
+#' @importFrom Matrix Matrix
 
 make.Z.matrix <- function(genotype) {
 
