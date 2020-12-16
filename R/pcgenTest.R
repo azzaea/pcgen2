@@ -74,7 +74,7 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
   stopifnot(length(unique(c(x, y, S))) == length(c(x, y, S))) # x, y and S uniq
   if (x %in% QTLs & y %in% QTLs)
     stop("Cond. indep. of two QTLs is not tested")
-  if ((x %in% QTLs & y == 1) | (y %in% QTLs & x==1))
+  if ((x %in% QTLs & y == 1) | (y %in% QTLs & x == 1))
     stop("cond. indep. of QTL and G not tested")
 
   QTLs <- sort(QTLs)
@@ -135,7 +135,13 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
 
   ## Type C CI test: Trait \perp Trait | {Traits +/- QTLs} --------------------
 
-  if (!(1 %in% c(x, y, S)) & !(any(c(x, y) %in% QTLs))) {S <- c(1, S)}
+  # if (!(1 %in% c(x, y, S)) & !(any(c(x, y) %in% QTLs))) {S <- c(1, S)} # Is this line
+  #               # meaningful? In `res.covar.test` below, G is actually manadatory, so it
+  #               # doesn't make sense to add it to S here and then do `setdiff`!.. Azza
+  # if (!(1 %in% c(x, y, S)) & !(any(c(x, y) %in% QTLs))) {S <- c(1, S)} # Is this line
+  # # meaningful? In `res.covar.test` below, G is actually manadatory, so it
+  # # doesn't make sense to add it to S here and then do `setdiff`!.. Azza
+
 
   ## Type B CI test: Trait \perp Trait | {G + Traits +/- QTLs} ----------------
   # Note that G will account for QTLs that may not be contained in S.
@@ -144,16 +150,12 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
     out <- gaussCItest(x = x - 1, y = y - 1, S = (setdiff(S, 1) - 1),
                        suffStat = list(C = res.cor, n = nrow(suffStat)))
   } else { # No residuals
-    if (length(S) == 1) {
-      out <- res.covar.test(x = suffStat[, x], y = suffStat[, y],
-                            G = suffStat[, 1], K = K, X = X, alpha = alpha)
-    } else {
-      X <- as.data.frame(cbind(X, suffStat[, setdiff(S, 1)]))
-      out <- res.covar.test(x = suffStat[, x], y = suffStat[, y],
-                            G = suffStat[, 1], K = K, X = X, alpha = alpha,
-                            max.iter = max.iter, stop.if.significant = stop.if.significant)
-    }
+    #X <- (cbind(X, suffStat[, setdiff(S, 1)]))
+    X <- (cbind(X, suffStat[, setdiff(S, 1)]))
+    out <- res.covar.test(x = suffStat[, x], y = suffStat[, y], G = suffStat[, "G"],
+                          K = K, X = X, alpha = alpha, max.iter = max.iter,
+                          stop.if.significant = stop.if.significant)
   }
-  return(out[1])
+  return(out)
 }
 

@@ -19,17 +19,17 @@ res.covar.test(
 }
 \arguments{
 \item{x, y}{trait vectors whose independence is to be tested, conditional on
-G (genotype) and possible covariates in X}
+G (genotype) and possible covariates in X. Manadatory}
 
-\item{G}{Factor of genotypes}
+\item{G}{Factor of genotypes. Manadatotry}
 
-\item{Z.t}{}
+\item{Z.t}{Defaults to \code{NULL}}
 
 \item{K}{The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
 independent genetic effects are assumed.}
 
-\item{X}{A dataframe of possibly the covariates, traits and QTLs used as part
-of a conditioning set}
+\item{X}{A dataframe of possibly the covariates, traits and QTLs used as a
+conditioning set. If not specified, this becomes a dependence test}
 
 \item{alpha}{The significance level used in each conditional independence
 test. Default is 0.01. The test itself of course does not depend on this,

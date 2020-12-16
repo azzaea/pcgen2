@@ -3,14 +3,14 @@
 #'
 #' @inheritParams pcgenTest
 #' @param x,y  trait vectors whose independence is to be tested, conditional on
-#'   G (genotype) and possible covariates in X
+#'   G (genotype) and possible covariates in X. Manadatory
 #'
-#' @param G Factor of genotypes
+#' @param G Factor of genotypes. Manadatotry
 #'
-#' @param Z.t
+#' @param Z.t Defaults to \code{NULL}
 #'
-#' @param X A dataframe of possibly the covariates, traits and QTLs used as part
-#'   of a conditioning set
+#' @param X A dataframe of possibly the covariates, traits and QTLs used as a
+#'   conditioning set. If not specified, this becomes a dependence test
 #'
 #' @param use.manova
 #'
@@ -103,6 +103,6 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
 
   #cat('\n\nDiff:',pvalue - fit.full$pvalue, '\n\n')
 
-  return(c(pvalue, TRUE)) # TRUE is never actually used. Could we omit it? Azza
+  return(pvalue) # TRUE is never actually used. I removed it! Azza
 
 }
