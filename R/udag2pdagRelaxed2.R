@@ -1,5 +1,5 @@
 #' @importFrom pcalg triple2numb
-#' @import graph
+#' @importFrom  graph numEdges
 #' @importFrom utils combn
 #' @importFrom methods as
 #'
