@@ -7,12 +7,18 @@
 #'
 #' @param G Factor of genotypes. Manadatotry
 #'
-#' @param Z.t Defaults to \code{NULL}
+#' @param Z.t Design matrix which links observations (replicates) to unique
+#'   genotypes. Hence, in expriements without replicates, it becomes the
+#'   Identity matrix. Defaults to \code{NULL}.
 #'
 #' @param X A dataframe of possibly the covariates, traits and QTLs used as a
 #'   conditioning set. If not specified, this becomes a dependence test
 #'
-#' @param use.manova
+#' @param use.manova Set to \code{TRUE} if your experimental design is balanced,
+#'   and there are replicates. This is the default value, and in this case,
+#'   MANOVA will set starting values for fitting. If there are no replicates,
+#'   the kinship matrix, \code{K}, should be supplied and this parameter set to
+#'   \code{FALSE}
 #'
 #' @importFrom Matrix Matrix
 

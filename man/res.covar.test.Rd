@@ -23,7 +23,9 @@ G (genotype) and possible covariates in X. Manadatory}
 
 \item{G}{Factor of genotypes. Manadatotry}
 
-\item{Z.t}{Defaults to \code{NULL}}
+\item{Z.t}{Design matrix which links observations (replicates) to unique
+genotypes. Hence, in expriements without replicates, it becomes the
+Identity matrix. Defaults to \code{NULL}.}
 
 \item{K}{The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
 independent genetic effects are assumed.}
@@ -38,7 +40,11 @@ precisely, the EM-algorithm is stopped once the P value is below the
 significance level. This can be done because the PC algorithm only needs an
 accept/ reject decision.}
 
-\item{use.manova}{}
+\item{use.manova}{Set to \code{TRUE} if your experimental design is balanced,
+and there are replicates. This is the default value, and in this case,
+MANOVA will set starting values for fitting. If there are no replicates,
+the kinship matrix, \code{K}, should be supplied and this parameter set to
+\code{FALSE}}
 
 \item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
 the bivariate mixed model (when \code{use.res = FALSE)}.}

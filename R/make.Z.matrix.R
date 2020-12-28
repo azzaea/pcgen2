@@ -14,6 +14,8 @@ make.Z.matrix <- function(genotype) {
 		Z.t <- Matrix(model.matrix(mt, data = mf,
                                contrasts.arg = lapply(mf[,f.terms, drop = FALSE],
                                                       contrasts, contrasts=FALSE)))
+		# experiment which is faster: `Matrix`, `new("dtCMatrix",...)`, `new("dtTMatrix",...)`,
+		# `as(x,"triangularMatrix")`, or `as(x,"dtCMatrix")`
 return(Z.t)
 }
 
