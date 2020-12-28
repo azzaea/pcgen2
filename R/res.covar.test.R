@@ -14,10 +14,6 @@
 #'
 #' @param use.manova
 #'
-# id  : a factor indicating which (complete) block each observation is in
-#       Always needed in asreml, to identify the units. May also be present
-#       in X, as covariate. ---------> I don't understand this- Azza
-#'
 #' @importFrom Matrix Matrix
 
 res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
@@ -34,7 +30,7 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
   if (!is.null(K)) use.manova <- FALSE # seems MANOVA not suitable for generic K
 
   if (!use.manova) {
-    fit.reduced <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = TRUE,
+    fit.reduced <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = FALSE, # maybe false
                          cov.gen = FALSE, max.iter = 500)
   } else {
     X  <- as.data.frame(X)

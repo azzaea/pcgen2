@@ -8,7 +8,7 @@ test_that("Type A CI tests WITH replicates of pcgenTest() work", {
 
   # Y1 _|_ G | Y2 (No, low p):
   expect_lt(pcgenTest(x = 2, y = 1, S = 3, simdata), alpha)
-  # Y1 _|_ G | Y3 (No, low p):
+  # Y1 _|_ G | Y3 (No,   low p):
   expect_lt(pcgenTest(x = 2, y = 1, S = 4, simdata), alpha)
   # Y1 _|_ G | Y2, Y3 (No, low p):
   expect_lt(pcgenTest(x = 2, y = 1, S = c(3, 4), simdata), alpha)
