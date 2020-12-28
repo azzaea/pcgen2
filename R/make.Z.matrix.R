@@ -1,6 +1,10 @@
+#' Create the incidence matrix
 #'
+#' The incidence (design) matrix links observations (replicates) to unique genotypes. In
+#' expriements without replicates, this reduces to the Identity matrix
 #'
 #' @param genotype a vector (character or factor) with genotype labels
+#'
 #' @importFrom Matrix Matrix
 
 make.Z.matrix <- function(genotype) {

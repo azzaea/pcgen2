@@ -7,7 +7,7 @@
 #'
 #' @param G Factor of genotypes. Manadatotry
 #'
-#' @param Z.t Design matrix which links observations (replicates) to unique
+#' @param Z.t Incidence (design) matrix linking observations (replicates) to unique
 #'   genotypes. Hence, in expriements without replicates, it becomes the
 #'   Identity matrix. Defaults to \code{NULL}.
 #'
@@ -33,7 +33,7 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
   em.vec        <- c(x, y)
   names(em.vec) <- rep(as.character(G), 2)
 
-  if (!is.null(K)) use.manova <- FALSE # seems MANOVA not suitable for generic K
+  if (!is.null(K)) use.manova <- FALSE # MANOVA not suitable for generic K with no reps
 
   if (!use.manova) {
     fit.reduced <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = FALSE, # maybe false
@@ -83,11 +83,12 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
       if (Vg.manova[2,2]==0) {Vg.manova[2,2] <- 0.01 * Ve.manova[2,2]}
     }
 
-    fit.reduced <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t, K = K,
-                         Vg.start = as.numeric(Vg.manova)[c(1,4,2)],
-                         Ve.start = c(as.numeric(Ve.manova)[c(1,4)], 0),
-                         cov.error = TRUE, cov.gen = FALSE, max.iter = 5)
-  }
+    fit.reduced <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t,
+                         Vg.start = as.numeric(Vg.manova)[c(1, 4, 2)],
+                         Ve.start = c(as.numeric(Ve.manova)[c(1, 4)], 0),
+                         cov.error = FALSE, max.iter = 5)
+
+  } # End if (use.manova)
 
   fit.full    <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = TRUE, alpha = alpha,
                        stop.if.significant = TRUE, max.iter = max.iter,

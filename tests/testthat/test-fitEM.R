@@ -22,7 +22,7 @@ test_that("fitEM works", {
                        K = K)
 
   # Much less time consuming! Incorporate the idea into the algorithm (if possible)!
-  fit.reduced.2 <- pcgen:::fitEM(em.vec, X.t, Z.t = Matrix(Z.t %*% M),
+  fit.reduced.2 <- fitEM(em.vec, X.t, Z.t = Matrix(Z.t %*% M),
                          cov.error = TRUE,
                          cov.gen = FALSE, max.iter = 20)
 

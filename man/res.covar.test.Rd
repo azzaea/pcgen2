@@ -23,7 +23,7 @@ G (genotype) and possible covariates in X. Manadatory}
 
 \item{G}{Factor of genotypes. Manadatotry}
 
-\item{Z.t}{Design matrix which links observations (replicates) to unique
+\item{Z.t}{Incidence (design) matrix linking observations (replicates) to unique
 genotypes. Hence, in expriements without replicates, it becomes the
 Identity matrix. Defaults to \code{NULL}.}
 

@@ -22,10 +22,10 @@ test_that("type B CI p-value of res.covar.test() WITH replicates", {
   expect_lt(res.covar.test(x = Y1, y = Y2, X = Y3, G = G), alpha)
 
   # Y1 _|_ Y3 | (G, Y2) ? (Yes, high p)
-  ##expect_gt(res.covar.test(x = Y1, y = Y3, X = Y2, G = G), alpha)
+  expect_gt(res.covar.test(x = Y1, y = Y3, X = Y2, G = G), alpha)
 
   # Y2 _|_ Y3 | (G, Y1)? (No, low p)
-  ##expect_lt(res.covar.test(x = Y2, y = Y3, G = G, X = Y1), alpha)
+  expect_lt(res.covar.test(x = Y2, y = Y3, G = G, X = Y1), alpha)
 
 })
 
