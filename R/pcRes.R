@@ -74,7 +74,7 @@ pcRes <-
             verbose = FALSE, covariates=NULL, QTLs=integer(),
             cov.method = 'uni', use.GBLUP = FALSE, return.pvalues = FALSE)
   {
-    NAdelete <- TRUE
+
     if (is.null(alpha)) alpha = 0.01
 
     stopifnot(cov.method %in% c('uni','us'))

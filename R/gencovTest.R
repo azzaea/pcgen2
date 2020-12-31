@@ -40,7 +40,7 @@ gencovTest <- function(suffStat, max.iter = 200, out.cor = TRUE)
   # stop if the first column in suffStat does not have the name G
   stopifnot(names(suffStat)[1] == 'G')
 
-  X <- as.data.frame(matrix(0,nrow(suffStat),0))
+  #X <- as.data.frame(matrix(0,nrow(suffStat),0))
 
   ###################################################################
   # The case where x and y both represent real traits (no QTLs), and 1

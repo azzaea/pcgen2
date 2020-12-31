@@ -45,7 +45,7 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
     if (ncol(X) > 0) {names(X) <- paste0('cov', 1:(ncol(X)))}
 
     n.rep.vector<- as.integer(table(dd$genotype))
-    n.geno      <- length(n.rep.vector)
+
     n.rep       <- (sum(n.rep.vector) - sum(n.rep.vector^2)/sum(n.rep.vector))/(length(n.rep.vector) - 1)
     manova.out  <- manova(as.formula(paste('cbind(x,y) ~',paste(c(names(X), 'genotype'), collapse='+'))), data = dd)
     #summary.out <- summary(manova.out)

@@ -71,7 +71,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 
 
 	# Weights: for the moment all ones
-	w <- rep(1, length(y))
+	#w <- rep(1, length(y))
 
 	# Number of coefficients (fixed and random, per trait)
 	np <- c(ncol(X), ngeno, ngeno)
@@ -149,7 +149,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 
 		# Error covariance matrix
 		Ri <- matrix(c(Ve[1], Ve[3], Ve[3], Ve[2]), ncol = 2)
-		R <- Ri%x%Diagonal(N)
+		#R <- Ri%x%Diagonal(N)
 
 		Riinv <- solve(Ri)
 		Rinv  <- Riinv%x%Diagonal(N)

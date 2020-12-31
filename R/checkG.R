@@ -66,7 +66,6 @@ checkG <- function(pcgen.output, suffStat, alpha = 0.01,
 
   if (colnames(suffStat)[1]!='G') {stop('The first column of suffStat should be G (genotype)')}
 
-  labels <- colnames(suffStat)
   p      <- ncol(suffStat)
 
   genVar <- rep(TRUE, p)

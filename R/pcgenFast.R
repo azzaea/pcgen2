@@ -62,13 +62,11 @@ function (suffStat, alpha = 0.01, m.max = Inf,
           cov.method = 'uni', use.res = FALSE, return.pvalues = FALSE)
 {
 
-  # suffStat=d; alpha=.01; K = NULL; NAdelete = TRUE; m.max = 3;
+  # suffStat=d; alpha=.01; K = NULL; m.max = 3;
   # res.m.max = Inf; verbose = FALSE; covariates = NULL;
   # fixedEdges = NULL; QTLs = integer(); cov.method = 'uni';
   # mean.adj = 'none'; max.iter = 50; stop.if.significant = TRUE; fix.skel = FALSE
   #
-
-  NAdelete <- TRUE
 
   stopifnot(cov.method %in% c('uni','us'))
 
