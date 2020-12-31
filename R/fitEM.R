@@ -1,4 +1,4 @@
-#' @importFrom Matrix Matrix Diagonal bdiag crossprod t diag rowSums
+#' @importFrom Matrix Matrix Diagonal bdiag crossprod t diag rowSums solve
 #' @importFrom MASS ginv
 #' @importFrom stats lm as.formula pchisq anova model.frame terms model.matrix
 #'   contrasts manova residuals cor coefficients
