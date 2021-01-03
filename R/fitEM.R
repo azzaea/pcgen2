@@ -7,7 +7,9 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
                    stop.if.significant = FALSE, null.dev = NULL, alpha = 0.01,
                    max.iter = 100, Vg.start = NULL, Ve.start = NULL, cov.gen = TRUE) {
 
-#y = em.vec; K = NULL; null.dev = NULL; Vg.start = as.numeric(Vg.manova)[c(1,4,2)]; stop.if.significant= F; Vg = NULL; Ve = NULL; Ve.start = c(as.numeric(Ve.manova)[c(1,4)], 0); cov.error = FALSE; max.iter = 5
+# y = em.vec; K = NULL; null.dev = NULL; Vg.start = as.numeric(Vg.manova)[c(1,4,2)];
+#  stop.if.significant= F; Vg = NULL; Ve = NULL; Ve.start = c(as.numeric(Ve.manova)[c(1,4)], 0);
+#  cov.error = FALSE; max.iter = 5
 
   if (stop.if.significant == TRUE & is.null(null.dev)) {stop('No null.dev given')}
 
