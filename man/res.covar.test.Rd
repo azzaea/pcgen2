@@ -10,6 +10,7 @@ res.covar.test(
   G,
   Z.t = NULL,
   K = NULL,
+  replicates = TRUE,
   X = as.data.frame(matrix(0, length(x), 0)),
   alpha = 0.01,
   use.manova = TRUE,
@@ -23,12 +24,24 @@ G (genotype) and possible covariates in X. Manadatory}
 
 \item{G}{Factor of genotypes. Manadatotry}
 
-\item{Z.t}{Incidence (design) matrix linking observations (replicates) to unique
-genotypes. Hence, in expriements without replicates, it becomes the
+\item{Z.t}{Incidence (design) matrix linking observations (replicates) to
+unique genotypes. Hence, in expriements without replicates, it becomes the
 Identity matrix. Defaults to \code{NULL}.}
 
-\item{K}{The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
-independent genetic effects are assumed.}
+\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based relatedness
+(kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the number of unique genotypes
+in the first column in \code{suffStat}. If \code{suffStat} contains replicates, this
+argument should be set to \code{NULL} (the default).
+If \code{NULL} (the default), independent  genetic effects are assumed.
+In case of replicates, the resulting relatedness of the
+observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
+plants to genotypes.}
+
+\item{replicates}{Logical. Set to \code{TRUE} if your data (experimental design) is
+balanced, and there are replicates. In this case, MANOVA will set starting values
+for fitting and the kinship matrix \code{K} should not be provided. If there are
+no replicates (unique genotypes), set \code{replicates = FALSE} and provide the
+kinship matrix \code{K} parameter. Default is \code{TRUE}}
 
 \item{X}{A dataframe of possibly the covariates, traits and QTLs used as a
 conditioning set. If not specified, this becomes a dependence test}
@@ -40,11 +53,11 @@ precisely, the EM-algorithm is stopped once the P value is below the
 significance level. This can be done because the PC algorithm only needs an
 accept/ reject decision.}
 
-\item{use.manova}{Set to \code{TRUE} if your experimental design is balanced,
-and there are replicates. This is the default value, and in this case,
-MANOVA will set starting values for fitting. If there are no replicates,
-the kinship matrix, \code{K}, should be supplied and this parameter set to
-\code{FALSE}}
+\item{use.manova}{Set to \code{TRUE} to let MANOVA set starting values for
+fitting (Default). This is only valid if your experimental design is
+balanced, and there are replicates. If there are no replicates, this
+parameter set to \code{FALSE} and the kinship matrix, \code{K}, should be
+supplied}
 
 \item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
 the bivariate mixed model (when \code{use.res = FALSE)}.}

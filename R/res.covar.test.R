@@ -14,12 +14,6 @@
 #' @param X A dataframe of possibly the covariates, traits and QTLs used as a
 #'   conditioning set. If not specified, this becomes a dependence test
 #'
-#' @param use.manova Set to \code{TRUE} to let MANOVA set starting values for
-#'   fitting (Default). This is only valid if your experimental design is
-#'   balanced, and there are replicates. If there are no replicates, this
-#'   parameter set to \code{FALSE} and the kinship matrix, \code{K}, should be
-#'   supplied
-#'
 #' @importFrom Matrix Matrix
 
 res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL, replicates = TRUE,

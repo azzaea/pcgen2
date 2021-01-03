@@ -76,6 +76,12 @@
 #'   no replicates (unique genotypes), set \code{replicates = FALSE} and provide the
 #'   kinship matrix \code{K} parameter. Default is \code{TRUE}
 #'
+#' @param use.manova Set to \code{TRUE} to let MANOVA set starting values for
+#'   fitting (Default). This is only valid if your experimental design is
+#'   balanced, and there are replicates. If there are no replicates, this
+#'   parameter set to \code{FALSE} and the kinship matrix, \code{K}, should be
+#'   supplied
+#'
 #' @param alpha The significance level used in each conditional independence
 #'   test. Default is 0.01. The test itself of course does not depend on this,
 #'   but it is used in the EM-algorithm to speed up calculations. More
