@@ -63,12 +63,13 @@
 #' @importFrom pcalg gaussCItest
 #'
 pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K = NULL,
-                      alpha = 0.01, max.iter = 50, stop.if.significant = TRUE,
-                      use.res = FALSE, res.cor = NULL) {
+                      replicates = TRUE, use.manova = TRUE, alpha = 0.01, max.iter = 50,
+                      stop.if.significant = TRUE, use.res = FALSE, res.cor = NULL) {
 
   ## Input parameters checks: -------------------------------------------------
 
   stopifnot(names(suffStat)[1] == 'G') # First col in suffStat should be G
+  if (!is.null(covariates)) stopifnot(is.data.frame(covariates))
   if (class(QTLs)!='integer') {stop("QTLs should be a vector of integers")}
   if (1 %in% QTLs) {stop("QTLs should not contain the genotype column (G)")}
   stopifnot(length(unique(c(x, y, S))) == length(c(x, y, S))) # x, y and S uniq
@@ -82,21 +83,20 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
   if (is.null(covariates)) {
     X <- as.data.frame(matrix(0, nrow = nrow(suffStat), ncol = 0))
   } else {
-    X <- as.data.frame(covariates)
-    names(X) <- paste0('covariate_', 1:ncol(covariates)) # Why rename? Azza
+    X <- covariates
   }
 
   ## Type A CI test: Trait \perp G | {Traits +/- QTLs}: -----------------------
-
-  if (x == 1) {
+  if (x == 1 | y == 1) {
     if (length(S) != 0) X <- cbind(X, suffStat[,S])
-    return(gen.var.test(y = suffStat[,y], X = X, G = suffStat[,1], K))
-  }
-  if (y == 1) {
-    if (length(S) != 0) X <- cbind(X, suffStat[,S])
-    return(gen.var.test(y = suffStat[,x], X = X, G=suffStat[,1], K))
-  }
 
+    if (x == 1){
+      return(gen.var.test(y = suffStat[, y], X = X, G = suffStat[, 1], K))
+    } else {
+      return(gen.var.test(y = suffStat[, x], X = X, G = suffStat[, 1], K))
+    }
+
+  }
   ## Type A* CI test: Trait \perp QTL | {Traits +/- G +/- QTL} ----------------
 
   if (any(QTLs %in% c(x,y))) {
@@ -135,12 +135,7 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
 
   ## Type C CI test: Trait \perp Trait | {Traits +/- QTLs} --------------------
 
-  # if (!(1 %in% c(x, y, S)) & !(any(c(x, y) %in% QTLs))) {S <- c(1, S)} # Is this line
-  #               # meaningful? In `res.covar.test` below, G is actually manadatory, so it
-  #               # doesn't make sense to add it to S here and then do `setdiff`!.. Azza
-  # if (!(1 %in% c(x, y, S)) & !(any(c(x, y) %in% QTLs))) {S <- c(1, S)} # Is this line
-  # # meaningful? In `res.covar.test` below, G is actually manadatory, so it
-  # # doesn't make sense to add it to S here and then do `setdiff`!.. Azza
+  # Absorbed in type B test below
 
 
   ## Type B CI test: Trait \perp Trait | {G + Traits +/- QTLs} ----------------
@@ -150,11 +145,11 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
     out <- gaussCItest(x = x - 1, y = y - 1, S = (setdiff(S, 1) - 1),
                        suffStat = list(C = res.cor, n = nrow(suffStat)))
   } else { # No residuals
-    #X <- (cbind(X, suffStat[, setdiff(S, 1)]))
-    X <- (cbind(X, suffStat[, setdiff(S, 1)]))
+    X <- cbind(X, suffStat[, setdiff(S, 1)])
     out <- res.covar.test(x = suffStat[, x], y = suffStat[, y], G = suffStat[, "G"],
                           K = K, X = X, alpha = alpha, max.iter = max.iter,
-                          stop.if.significant = stop.if.significant)
+                          use.manova = use.manova,
+                          replicates = replicates, stop.if.significant = stop.if.significant)
   }
   return(out)
 }

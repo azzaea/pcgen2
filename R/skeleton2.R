@@ -13,18 +13,18 @@
 #' @inheritParams pcalg::skeleton
 #' @importFrom pcalg getNextSet
 #'
-skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE, alpha,
-                       labels, p, m.max = Inf, fixedGaps = NULL, fixedEdges = NULL,
+skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE,
+                       use.manova = TRUE, alpha, labels, p, m.max = Inf, fixedGaps = NULL, fixedEdges = NULL,
                        NAdelete = TRUE, covariates=NULL, max.iter = 50,
                        use.res = FALSE, res.cor = NULL, verbose = FALSE,
                        stop.if.significant = TRUE){
 
   cl <- match.call()
 
-  if (is.null(K))
-    stopifnot(replicates)
-  if (!is.null(K))
-    stopifnot(!replicates)
+  # if (is.null(K))
+  #   stopifnot(replicates)
+  # if (!is.null(K))
+  #   stopifnot(!replicates)
 
   if (!is.null(covariates)) {
     covariates <- as.data.frame(covariates)
@@ -99,7 +99,8 @@ skeleton2  <- function(suffStat, QTLs = integer(), K = NULL, replicates = TRUE, 
           repeat {
             n.edgetests[ord1] <- n.edgetests[ord1] + 1
             pval <- pcgenTest(x, y, S = nbrs[S], suffStat, covariates = covariates,
-                              QTLs = QTLs, K = K, alpha = alpha, max.iter = max.iter,
+                              QTLs = QTLs, K = K, replicates = replicates, use.manova = use.manova,
+                              alpha = alpha, max.iter = max.iter,
                               stop.if.significant = stop.if.significant,
                               use.res = use.res, res.cor = res.cor)
             if (verbose) {

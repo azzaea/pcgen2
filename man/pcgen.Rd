@@ -10,6 +10,7 @@ pcgen(
   QTLs = integer(),
   K = NULL,
   replicates = TRUE,
+  use.manova = TRUE,
   alpha = 0.01,
   m.max = Inf,
   fixedEdges = NULL,
@@ -39,12 +40,26 @@ should not contain a column of ones.}
 partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 Note: the factor genotype (column number 1) may occur in S, as well as x and y}
 
-\item{K}{The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
-independent genetic effects are assumed.}
+\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based relatedness
+(kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the number of unique genotypes
+in the first column in \code{suffStat}. If \code{suffStat} contains replicates, this
+argument should be set to \code{NULL} (the default).
+If \code{NULL} (the default), independent  genetic effects are assumed.
+In case of replicates, the resulting relatedness of the
+observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
+plants to genotypes.}
 
-\item{replicates}{Logical. \code{TRUE} indicates replicate genotypes and the kinship
-matrix \code{K} should not be provided in this case. \code{FALSE} means no replicates,
-so \code{K} should be provided.}
+\item{replicates}{Logical. Set to \code{TRUE} if your data (experimental design) is
+balanced, and there are replicates. In this case, MANOVA will set starting values
+for fitting and the kinship matrix \code{K} should not be provided. If there are
+no replicates (unique genotypes), set \code{replicates = FALSE} and provide the
+kinship matrix \code{K} parameter. Default is \code{TRUE}}
+
+\item{use.manova}{Set to \code{TRUE} to let MANOVA set starting values for
+fitting (Default). This is only valid if your experimental design is
+balanced, and there are replicates. If there are no replicates, this
+parameter set to \code{FALSE} and the kinship matrix, \code{K}, should be
+supplied}
 
 \item{alpha}{The significance level used in each conditional independence
 test. Default is 0.01. The test itself of course does not depend on this,

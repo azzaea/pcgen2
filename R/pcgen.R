@@ -58,21 +58,29 @@
 #'   should not contain a column of ones.
 #'
 #' @param QTLs Column numbers in \code{suffStat} that correspond to QTLs. These may be
-#'  partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
+#'   partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
 #'   Note: the factor genotype (column number 1) may occur in S, as well as x and y
 #'
-#' @param K The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
-#'   independent genetic effects are assumed.
-#   Azza: conside ther def below originally in getResiduals.R:
-#   An optional marker-based relatedness (kinship) matrix of dimension \eqn{n x n}, \eqn{n}
-#   being the number of unique genotypes in the first column in \code{suffStat}. In
-#   case \code{suffStat} contains replicates, the resulting relatedness of the
-#   observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
-#   plants to genotypes.
+#' @param K The kinship (i.e genetic relatedness matrix). It's a marker-based relatedness
+#'   (kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the number of unique genotypes
+#'   in the first column in \code{suffStat}. If \code{suffStat} contains replicates, this
+#'   argument should be set to \code{NULL} (the default).
+#'   If \code{NULL} (the default), independent  genetic effects are assumed.
+#'   In case of replicates, the resulting relatedness of the
+#'   observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
+#'   plants to genotypes.
 #'
-#' @param replicates Logical. \code{TRUE} indicates replicate genotypes and the kinship
-#'   matrix \code{K} should not be provided in this case. \code{FALSE} means no replicates,
-#'   so \code{K} should be provided.
+#' @param replicates Logical. Set to \code{TRUE} if your data (experimental design) is
+#'   balanced, and there are replicates. In this case, MANOVA will set starting values
+#'   for fitting and the kinship matrix \code{K} should not be provided. If there are
+#'   no replicates (unique genotypes), set \code{replicates = FALSE} and provide the
+#'   kinship matrix \code{K} parameter. Default is \code{TRUE}
+#'
+#' @param use.manova Set to \code{TRUE} to let MANOVA set starting values for
+#'   fitting (Default). This is only valid if your experimental design is
+#'   balanced, and there are replicates. If there are no replicates, this
+#'   parameter set to \code{FALSE} and the kinship matrix, \code{K}, should be
+#'   supplied
 #'
 #' @param alpha The significance level used in each conditional independence
 #'   test. Default is 0.01. The test itself of course does not depend on this,
@@ -81,7 +89,6 @@
 #'   significance level. This can be done because the PC algorithm only needs an
 #'   accept/ reject decision.
 #
-#'
 #' @param m.max Maximum size of the conditioning sets.
 #'
 #' @param fixedEdges A logical matrix of dimension \eqn{(p+1) \times (p+1)},
@@ -152,16 +159,17 @@
 #' @export
 #'
 pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, replicates = TRUE,
+                  use.manova = TRUE,
                   alpha = 0.01, m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL,
                   verbose = FALSE, use.res = FALSE, res.cor = NULL, max.iter = 50,
                   stop.if.significant = TRUE, NAdelete = FALSE, return.pvalues = FALSE) {
 
   cl <- match.call()
 
-  if (is.null(K))
-    stopifnot(replicates)
-  if (!is.null(K))
-    stopifnot(!replicates)
+  # if (is.null(K))
+  #   stopifnot(replicates)
+  # if (!is.null(K))
+  #   stopifnot(!replicates)
 
   if (is.null(alpha)) alpha = 0.01
 
@@ -217,8 +225,9 @@ pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, repli
 
   ##########################
 
-  skel <- skeleton2(suffStat = suffStat, QTLs = QTLs, K = K, replicates = replicates,
-                    alpha = alpha, labels = labels, p = p, m.max = m.max,
+  skel <- skeleton2(suffStat = suffStat, QTLs = QTLs, K = K, alpha = alpha,
+                    labels = labels, p = p, m.max = m.max, replicates = replicates,
+                    use.manova = use.manova,
                     fixedGaps = fixedGaps, fixedEdges = fixedEdges, NAdelete = NAdelete,
                     covariates = covariates, max.iter = max.iter, use.res = use.res,
                     res.cor = res.cor, verbose = verbose,

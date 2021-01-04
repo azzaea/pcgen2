@@ -30,8 +30,14 @@ precisely, the EM-algorithm is stopped once the P value is below the
 significance level. This can be done because the PC algorithm only needs an
 accept/ reject decision.}
 
-\item{K}{The kinship (i.e genetic relatedness matrix) . If \code{NULL} (the default),
-independent genetic effects are assumed.}
+\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based relatedness
+(kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the number of unique genotypes
+in the first column in \code{suffStat}. If \code{suffStat} contains replicates, this
+argument should be set to \code{NULL} (the default).
+If \code{NULL} (the default), independent  genetic effects are assumed.
+In case of replicates, the resulting relatedness of the
+observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
+plants to genotypes.}
 
 \item{m.max}{maximum size of the conditioning set, in the pc-algorithm on the
 residuals}

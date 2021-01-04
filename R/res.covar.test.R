@@ -7,25 +7,23 @@
 #'
 #' @param G Factor of genotypes. Manadatotry
 #'
-#' @param Z.t Incidence (design) matrix linking observations (replicates) to unique
-#'   genotypes. Hence, in expriements without replicates, it becomes the
+#' @param Z.t Incidence (design) matrix linking observations (replicates) to
+#'   unique genotypes. Hence, in expriements without replicates, it becomes the
 #'   Identity matrix. Defaults to \code{NULL}.
 #'
 #' @param X A dataframe of possibly the covariates, traits and QTLs used as a
 #'   conditioning set. If not specified, this becomes a dependence test
 #'
-#' @param use.manova Set to \code{TRUE} if your experimental design is balanced,
-#'   and there are replicates. This is the default value, and in this case,
-#'   MANOVA will set starting values for fitting. If there are no replicates,
-#'   the kinship matrix, \code{K}, should be supplied and this parameter set to
-#'   \code{FALSE}
-#'
 #' @importFrom Matrix Matrix
 
-res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
+res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL, replicates = TRUE,
                            X = as.data.frame(matrix(0,length(x),0)),
                            alpha = 0.01, use.manova = TRUE,
                            max.iter = 50, stop.if.significant = TRUE) {
+
+  if ((!replicates & use.manova) | (use.manova & !is.null(K))) {
+    stop("MANOVA can not be used with no replicates")
+  }
 
   if (is.null(Z.t)) {Z.t <- make.Z.matrix(G)}
 
@@ -33,11 +31,9 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
   em.vec        <- c(x, y)
   names(em.vec) <- rep(as.character(G), 2)
 
-  if (!is.null(K)) use.manova <- FALSE # MANOVA not suitable for generic K with no reps
-
-  if (!use.manova) {
+  if (!use.manova | !is.null(K)) {
     fit.reduced <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = FALSE, # maybe false
-                         cov.gen = FALSE, max.iter = 500)
+                         cov.gen = FALSE, max.iter = max.iter)
   } else {
     X  <- as.data.frame(X)
     dd <- data.frame(genotype = G, x = x, y = y, X)
@@ -86,7 +82,7 @@ res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL,
     fit.reduced <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t,
                          Vg.start = as.numeric(Vg.manova)[c(1, 4, 2)],
                          Ve.start = c(as.numeric(Ve.manova)[c(1, 4)], 0),
-                         cov.error = FALSE, max.iter = 5)
+                         cov.error = FALSE, max.iter = max.iter)
 
   } # End if (use.manova)
 
