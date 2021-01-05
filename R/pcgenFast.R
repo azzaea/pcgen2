@@ -53,6 +53,7 @@
 #' @export
 #' @importFrom pcalg skeleton gaussCItest
 #' @importFrom methods as
+#' @importFrom stats cor
 #'
 pcgenFast <-
 function (suffStat, alpha = 0.01, m.max = Inf,

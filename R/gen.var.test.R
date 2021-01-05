@@ -1,3 +1,5 @@
+#' @importFrom stats lm as.formula anova coefficients
+#'
 gen.var.test <- function(y, X = data.frame(), G, K = NULL, return.fitted = FALSE) {
   # y=d[,2]; X=d[,3]; G=d[,1] # previous set up
   # y = dm[, 2]; X = dm[,3]; G=dm[,1]; K = K # new contribution

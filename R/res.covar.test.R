@@ -15,6 +15,7 @@
 #'   conditioning set. If not specified, this becomes a dependence test
 #'
 #' @importFrom Matrix Matrix
+#' @importFrom stats manova as.formula anova lm
 
 res.covar.test <- function(x, y, G, Z.t = NULL, K = NULL, replicates = TRUE,
                            X = as.data.frame(matrix(0,length(x),0)),

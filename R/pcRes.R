@@ -68,6 +68,7 @@
 #'
 #' @export
 #' @importFrom pcalg pc gaussCItest
+#' @importFrom stats cor
 
 pcRes <-
   function (suffStat, alpha= 0.01, K = NULL, m.max = Inf,

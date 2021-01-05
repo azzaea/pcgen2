@@ -61,7 +61,8 @@
 #'
 #' @export
 #' @importFrom pcalg gaussCItest
-#'
+#' @importFrom stats lm as.formula
+
 pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K = NULL,
                       replicates = TRUE, use.manova = TRUE, alpha = 0.01, max.iter = 50,
                       stop.if.significant = TRUE, use.res = FALSE, res.cor = NULL) {

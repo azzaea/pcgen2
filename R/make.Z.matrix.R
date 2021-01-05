@@ -6,6 +6,7 @@
 #' @param genotype a vector (character or factor) with genotype labels
 #'
 #' @importFrom Matrix Matrix
+#' @importFrom stats model.frame terms model.matrix contrasts
 
 make.Z.matrix <- function(genotype) {
 
