@@ -73,7 +73,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 
 
 	# Weights: for the moment all ones
-	#w <- rep(1, length(y))
+	# w <- rep(1, length(y))
 
 	# Number of coefficients (fixed and random, per trait)
 	np <- c(ncol(X), ngeno, ngeno)
@@ -91,32 +91,31 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	  } else {
 	    Vg <- Vg.start
 	  }
-	} else {
+	} else { # !(is.null(Vg))
 	  if (length(Vg.aux) == 2) {
 	    est.Vg <- TRUE
 	    est.Vg.var <- FALSE
 	    Vg <- c(Vg.aux[1], Vg.aux[2], 0.1)
-	  } else {
+	  } else { # !(length(Vg.aux) == 2)
 	    if (length(Vg.aux) == 3) {
 	      est.Vg <- FALSE
 	    } else {
 	      stop("The specified variance/covariance matrix for the error component is not correct")
 	    }
-	  }
-	}
+	  } # End elseif !(length(Vg.aux) == 2)
+	} # End elseif !(is.null(Vg))
 
   ###########################
 	if (is.null(Ve)) {
 	  est.Ve <- TRUE
 	  est.Ve.var <- TRUE
-	  if (cov.error) {
+	  if (cov.error) { # cov.error == T (full model)
 	    if (is.null(Ve.start)) {
 	      Ve <- c(1, 1, 0.1)
-	    }
-	    else {
+	    } else {
 	      Ve <- Ve.start
 	    }
-	  } else {
+	  } else { # cov.error == F (reduced model)
 	    if (is.null(Ve.start)) {
 	      Ve <- c(1, 1, 0)
 	    } else {
@@ -124,7 +123,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	      Ve[3] <- 0
 	    }
 	  }
-	} else {
+	} else { # !(is.null(Ve))
 	  if (length(Ve.aux) == 2) {
 	    est.Ve <- TRUE
 	    cov.error <- TRUE
@@ -135,7 +134,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	  } else {
 	    stop("The specified variance/covariance matrix for the error component is not correct")
 	  }
-	}
+	} # end ifelse !(is.null(Ve))
 
 	# Precision matrices for the genetic variances (needed for SAP/Schall algorithm)
 	g1 <- rep(c(Vg[1], 0), each = ngeno)
@@ -304,7 +303,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 		}
 
 		if (dla < thr) break
-	}
+	} # End for (it in 1:max.iter)
 
 	#end <-  proc.time()[3]
 	#cat(paste('Computing time:', end - start, '\n'))
