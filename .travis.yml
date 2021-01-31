@@ -3,5 +3,8 @@
 language: R
 r: bioc-devel
 cache: packages
-warnings_are_errors: false
+warnings_are_errors: 
+bioc_packages:
+  - graph
+  - RBGLfalse
 
