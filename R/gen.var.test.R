@@ -8,18 +8,19 @@ gen.var.test <- function(y, X = data.frame(), G, K = NULL, return.fitted = FALSE
     X <- as.data.frame(X)
     if (ncol(X) > 0) {
       a <- data.frame(y = y, X, G = G)
-      names(a) <- c('y',paste0('C',1:ncol(X)),'G')
-    } else {
+      #names(a) <- c('y',paste0('C',1:ncol(X)),'G')
+    } else { # ncol(X) !> 0
       a <- data.frame(y = y, G = G)
     }
     a <- a[!is.na(a$y),]
-    G <- factor(as.character(G))
+    # G <- factor(as.character(G))
     lm.obj <- lm(as.formula(paste("y~", paste(names(a)[-1],collapse = "+"))), data=a)
+
     av <- anova(lm.obj)
     pvalue <- av[[5]][1+ncol(X)]
     if (return.fitted == TRUE)
       fitted.values <- as.numeric(as.matrix(X) %*% matrix(as.numeric(coefficients(lm.obj))[2:(ncol(X)+1)]))
-  } else {  # Generic K = A
+  } else {  # !(is.null(K)) Generic K = A
     X <- as.matrix(X)
     if (ncol(X) == 0) { # Y_S = \phi
       X <-  matrix(1, nrow = length(y))

@@ -23,8 +23,56 @@ test_that("fitEM works", {
   names(em.vec) <- rep(as.character(G), 2)
 
   ## pcgen code:
-  fit.reducedem <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = FALSE, max.iter = 1, # maybe false
-                       cov.gen = FALSE)
+  tictoc::tic()
+  fit.reduced <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = FALSE, max.iter = 200, # maybe false
+                       cov.gen = FALSE, Vg.start = c(1, 1, 0.1), Ve.start = c(1, 1, 0))
+  tictoc::toc()
+  fit.full    <- fitEM(em.vec, X.t, Z.t, K = K, cov.error = TRUE,
+                       stop.if.significant = TRUE, max.iter = 200,
+                       null.dev = fit.reduced$deviance,
+                       Vg.start = fit.reduced$variances$Vg,
+                       Ve.start = fit.reduced$variances$Ve)
+  loglik_Full    <- -0.5*fit.full$deviance
+  loglik_Reduced <- -0.5*fit.reduced$deviance
+  REMLLRT <- 2 * max(loglik_Full - loglik_Reduced, 0)
+  pvalue  <- (1 - pchisq(REMLLRT, df = 1))
+  tictoc::toc()
+
+  ## gemma2 code:
+  pacman::p_load(gemma2)
+  e_out <- eigen2(K)
+  tictoc::tic()
+  gemma.reduced <- MphEM(eval = e_out$values, # eigen2(kinship)
+                         #X = as.matrix(g1) %*% e_out$vectors ,
+                         X = matrix(1, nrow = 1, ncol = nrow(d2tsnpsmeans)),
+                         Y = t(as.matrix(d2tsnpsmeans[, c(2, 3)])) %*% e_out$vectors,
+                         V_g = matrix(c(1, 0.1, 0.1, 1), nrow = 2),
+                         V_e = matrix(c(1, 0, 0, 1), nrow = 2), max_prec = 10^-4,
+                         max_iter = 300, verbose_output = T
+                         )
+  gemma.full    <- MphEM(eval = e_out$values, # eigen2(kinship)
+                         #X = as.matrix(g1) %*% e_out$vectors ,
+                         X = matrix(1, nrow = 1, ncol = nrow(d2tsnpsmeans)),
+                         Y = t(as.matrix(d2tsnpsmeans[, c(2, 3)])) %*% e_out$vectors,
+                         V_g = gemma.reduced[[1]]$Vg,
+                         V_e = gemma.reduced[[1]]$Ve, max_prec = 10^-4,
+                         max_iter = 300, verbose_output = F)
+                       #null.dev = fit.reduced$deviance,
+  loglik_Full    <- gemma.full[[1]]$logl_new
+  loglik_Reduced <- gemma.reduced[[1]]$logl_new
+  REMLLRT <- 2 * max(loglik_Full - loglik_Reduced, 0)
+  pvalue  <- (1 - pchisq(REMLLRT, df = 1))
+  tictoc::toc()
+
+
+
+  loglik <- sapply(FUN = function(x)x[[1]], X = gemma.reduced)
+  ggplot(data.frame(loglik = loglik, it = 1:length(gemma.reduced))) +
+    geom_point(aes(x = it, y=loglik)) + coord_cartesian(ylim = c(-1027, -1026), xlim = c(180, 200))
+  str(foo)
+  fit.reducedem$variances
+
+  ## -------- hglm code:
 
   fit.reducedh <- hglm::hglm(y = y, X = Matrix(x),
                              Z = (Z),
