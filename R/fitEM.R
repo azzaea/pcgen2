@@ -5,7 +5,7 @@
 #'
 fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE,
                    stop.if.significant = FALSE, null.dev = NULL, alpha = 0.01,
-                   max.iter = 100, Vg.start = NULL, Ve.start = NULL, cov.gen = TRUE) {
+                   max.iter = 100, Vg.start = NULL, Ve.start = NULL, cov.gen = TRUE, verbose = FALSE) {
 
 # y = em.vec; K = NULL; null.dev = NULL; Vg.start = as.numeric(Vg.manova)[c(1,4,2)];
 #  stop.if.significant= F; Vg = NULL; Ve = NULL; Ve.start = c(as.numeric(Ve.manova)[c(1,4)], 0);
@@ -139,6 +139,7 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	# Precision matrices for the genetic variances (needed for SAP/Schall algorithm)
 	g1 <- rep(c(Vg[1], 0), each = ngeno)
 	g2 <- rep(c(0, Vg[2]), each = ngeno)
+	output           <- list()
 
 	for (it in 1:max.iter) {
 		# Genotypic covariance matrix  # it=1
@@ -297,6 +298,11 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 		REMLLRT <- 2 * max(loglik_Full - loglik_Reduced, 0)
 		pvalue  <- (1 - pchisq(REMLLRT, df = 1))
 
+		if (verbose){
+		  output[[it]] <- list(Ve = Ve, Vg = Vg,
+		  deviance  = dev,  it        = it)
+		}
+
 		if (stop.if.significant) {
 			if (pvalue < alpha) break
 		  if (it > 20 & pvalue > 0.1) break
@@ -310,14 +316,16 @@ fitEM <- function (y, X.t, Z.t, K = NULL, Vg = NULL, Ve = NULL, cov.error = TRUE
 	if(!is.null(K)) {
 		b.random <- (Diagonal(2)%x%K.trans)%*%b.random
 	}
+  if (!verbose){
 
-	res           <- list()
-	res$coeff     <- list(fixed = b.fixed, random = b.random)
-	res$variances <- list(Ve = Ve, Vg = Vg)
-	res$deviance  <- dev
-  res$it        <- it
-  # if (stop.if.significant)
-      res$pvalue    <- pvalue
-
+    res$coeff     <- list(fixed = b.fixed, random = b.random)
+    res$variances <- list(Ve = Ve, Vg = Vg)
+    res$deviance  <- dev
+    res$it        <- it
+    # if (stop.if.significant)
+    res$pvalue    <- pvalue
+  } else {
+  res <- output
+}
 	res
 }

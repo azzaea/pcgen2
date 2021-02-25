@@ -3,8 +3,9 @@ Title: Reconstruction of Causal Networks for Data with Random Genetic Effects
 Version: 0.2.0.9999
 Authors@R: 
     c(person("Willem", "Kruijer", role = c("aut"), email = "willem.kruijer@wur.nl"),
-      person("Pariya", "Behrouzi", role = c("aut", "cre"), email = "pariya.behrouzi@gmail.com"),
-      person("Maria Xose", "Rodriguez-Alvarez", role = "ctb"))
+      person("Pariya", "Behrouzi", role = c("aut"), email = "pariya.behrouzi@gmail.com"),
+      person("Maria Xose", "Rodriguez-Alvarez", role = "ctb"),
+      person("Azza", "Ahmed", role = c("aut", "cre"), email = "azzaea@gmail.com"))
 Description: Implements the pcgen algorithm, which is a modified version of the standard pc-algorithm,
              with specific conditional independence tests and modified orientation rules. pcgen extends
              the approach of Valente et al. (2010) <doi:10.1534/genetics.109.112979> with reconstruction of 
@@ -26,7 +27,8 @@ Imports:
     lme4,
     sommer,
     ggm,
-    gaston
+    gaston,
+    Rcpp
 Suggests: 
     testthat (>= 3.0.0),
     knitr,
@@ -35,3 +37,5 @@ VignetteBuilder: knitr
 Depends: 
     R (>= 2.10)
 Config/testthat/edition: 3
+LinkingTo: 
+    Rcpp
