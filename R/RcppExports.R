@@ -35,3 +35,17 @@ gemmaMVLMM <- function(genoinputs, kfile, colnums, miss = 0.05, maf = 0.01, r2 =
     .Call(`_pcgen2_gemmaMVLMM`, genoinputs, kfile, colnums, miss, maf, r2, hwe, notsnp, lmmMode, gxe, outprefix, outdir, license)
 }
 
+#' R interface to 'Genome-wide Efficient Mixed Model Association' (GEMMA)
+#'
+#' GEMMA is an efficient association testing software of Linear Mixed Models
+#' (LMM)s and related GWAS models. This interface is for the Relatedness matrix
+#' calculation functionality in centered or standardized matrix form
+#' @param gk Integer variable for calculating the relatedness matrix. A value
+#'   of 1 (the default) generates a centered matrix. A value of 2 generates a
+#'   standardized matrix
+#' @inheritParams gemmaMVLMM
+#'
+gemmaGK <- function(genoinputs, gk, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, gxe = "", outprefix = "out", outdir = "output", license = FALSE) {
+    .Call(`_pcgen2_gemmaGK`, genoinputs, gk, miss, maf, r2, hwe, notsnp, gxe, outprefix, outdir, license)
+}
+
