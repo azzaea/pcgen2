@@ -1,2 +1,3 @@
-PKG_CPPFLAGS = -isystem/home/p287664/software/OpenBLAS/include/ -DOPENBLAS -O3 -DHAVE_INLINE -pthread -Wall  -Icontrib/catch-1.9.7 -Isrc
-PKG_LIBS = -lopenblas -lgsl -lz
+PKG_CPPFLAGS = -isystem/home/p287664/software/OpenBLAS/include/ -Icontrib/catch-1.9.7 -Isrc
+PKG_LIBS = -lopenblas -lgsl -lz -pthread -O3
+PKG_CXXFLAGS = -DOPENBLAS -DHAVE_INLINE -std=c++11 -fPIC

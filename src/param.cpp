@@ -41,6 +41,14 @@
 #include "param.h"
 #include "fastblas.h"
 
+
+#if defined(R_BUILD)
+  #define STRICT_R_HEADERS
+  #include "R.h"
+  // textual substitution
+  #define printf Rprintf
+#endif
+
 using namespace std;
 
 // ---- Helper functions which do not use the PARAM scope

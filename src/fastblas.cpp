@@ -27,6 +27,13 @@
 #include <string.h>
 #include "fastblas.h"
 
+#if defined(R_BUILD)
+  #define STRICT_R_HEADERS
+  #include "R.h"
+  // textual substitution
+  #define printf Rprintf
+#endif
+
 const char *FastblasTrans = "T";
 const char *FastblasNoTrans = "N";
 
