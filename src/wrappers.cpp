@@ -25,6 +25,8 @@ using namespace std;
 //'   menan genotypes, the phenotyes and SNP annotaiton files)
 //' @param kfile Character variable for the relatedness matrix file name (can be
 //'   in gzip compressed format)
+//' @param k_mode Integer variable for the type of the kinship/relatedness
+//'   matrix type
 //' @param colnums Numeric vector for specifying column number from the
 //'   phenotypes file used for association testing
 //' @param miss,maf,r2,hwe Floating point variables for filtering SNPs at
@@ -44,10 +46,12 @@ using namespace std;
 //' @param outdir Character variable for output directory path
 //' @param license Boolean variable for printing GEMMA's license information
 //'
+
 // [[Rcpp::export]]
 bool gemmaMVLMM(CharacterVector genoinputs,
                 std::string kfile,
                 NumericVector colnums,
+                int k_mode = 1,
                 double miss = 0.05,
                 double maf = 0.01,
                 double r2 = 0.9999,
@@ -100,7 +104,6 @@ bool gemmaMVLMM(CharacterVector genoinputs,
   }
 
   cPar.file_gxe = gxe;
-  cPar.file_kin = kfile;
   cPar.path_out = outdir;
   cPar.file_out = outprefix;
 
@@ -114,10 +117,42 @@ bool gemmaMVLMM(CharacterVector genoinputs,
   if (notsnp)
     cPar.maf_level = -1;
 
+  // Calculate the kinship matrix if need be
+ cPar.file_kin = kfile;
+  Rcout << "kinship file: " << cPar.file_kin <<
+         " and size " << cPar.file_kin.empty() << "\n";
+
+  if (FILE *file = fopen(kfile.c_str(), "r")) {
+    fclose(file);
+    Rcout << "File is ok";
+  } else {
+    Rcout << "The kinship file provided is empty."
+    "GEMMA will calculate the relatedness matrixx" << "\n";
+  }
+
+/*
+
+    if (cPar.a_mode != 0) {
+      cPar.error = true;
+      Rcout << "error! only one of -gk -gs -eigen -vc -lm -lmm -bslmm "
+      "-predict -calccor options is allowed."
+      << endl;
+    }
+    cPar.a_mode = M_KIN; // default
+    cPar.a_mode = 20 + k_mode;
+
+    cPar.k_mode = k_mode;
+    // code from Batch run:
+
+    return false;
+
+*/
+
+
   // lmm options:
   if (cPar.a_mode != 0) {
     cPar.error = true;
-    cout << "error! only one of -gk -gs -eigen -vc -lm -lmm -bslmm "
+    Rcout << "error! only one of -gk -gs -eigen -vc -lm -lmm -bslmm "
     "-predict -calccor options is allowed."
     << endl;
   }
@@ -161,10 +196,13 @@ bool gemmaMVLMM(CharacterVector genoinputs,
     return EXIT_FAILURE;
   }
 
+
+
   /* The real work:
-   */
+   *
   cGemma.BatchRun(cPar);
 
+*/
   if (cPar.error == true) {
     return EXIT_FAILURE;
   }

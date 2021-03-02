@@ -19,47 +19,9 @@ gemmaGK(
 )
 }
 \arguments{
-\item{genoinputs}{Character vector of input files. It should be either the
-prefix name of PLINK binary ped file, or the 3 BIMBAM files' names (the
-menan genotypes, the phenotyes and SNP annotaiton files)}
-
 \item{gk}{Integer variable for calculating the relatedness matrix. A value
 of 1 (the default) generates a centered matrix. A value of 2 generates a
 standardized matrix}
-
-\item{miss}{Floating point variables for filtering SNPs at
-missingness cutt-off (default 0.05), minor allele frequency (default
-0.01), r2 threshold (default 0.9999) and HWE test p value threshold
-(default 0; no test)}
-
-\item{maf}{Floating point variables for filtering SNPs at
-missingness cutt-off (default 0.05), minor allele frequency (default
-0.01), r2 threshold (default 0.9999) and HWE test p value threshold
-(default 0; no test)}
-
-\item{r2}{Floating point variables for filtering SNPs at
-missingness cutt-off (default 0.05), minor allele frequency (default
-0.01), r2 threshold (default 0.9999) and HWE test p value threshold
-(default 0; no test)}
-
-\item{hwe}{Floating point variables for filtering SNPs at
-missingness cutt-off (default 0.05), minor allele frequency (default
-0.01), r2 threshold (default 0.9999) and HWE test p value threshold
-(default 0; no test)}
-
-\item{notsnp}{Boolean variable to use real values as covariates (minor
-allele frequency cutoff is not used)}
-
-\item{gxe}{Character variable for the file containing a column of
-environmental variables. If provided, GEMMA fits a LMM controlling for
-both the SNP main effect and the environmental main effect while testing
-for interaction effect.}
-
-\item{outprefix}{Character variable for output file prefix}
-
-\item{outdir}{Character variable for output directory path}
-
-\item{license}{Boolean variable for printing GEMMA's license information}
 }
 \description{
 GEMMA is an efficient association testing software of Linear Mixed Models

@@ -6,14 +6,15 @@
 using namespace Rcpp;
 
 // gemmaMVLMM
-bool gemmaMVLMM(CharacterVector genoinputs, std::string kfile, NumericVector colnums, double miss, double maf, double r2, double hwe, bool notsnp, int lmmMode, std::string gxe, std::string outprefix, std::string outdir, bool license);
-RcppExport SEXP _pcgen2_gemmaMVLMM(SEXP genoinputsSEXP, SEXP kfileSEXP, SEXP colnumsSEXP, SEXP missSEXP, SEXP mafSEXP, SEXP r2SEXP, SEXP hweSEXP, SEXP notsnpSEXP, SEXP lmmModeSEXP, SEXP gxeSEXP, SEXP outprefixSEXP, SEXP outdirSEXP, SEXP licenseSEXP) {
+bool gemmaMVLMM(CharacterVector genoinputs, std::string kfile, NumericVector colnums, int k_mode, double miss, double maf, double r2, double hwe, bool notsnp, int lmmMode, std::string gxe, std::string outprefix, std::string outdir, bool license);
+RcppExport SEXP _pcgen2_gemmaMVLMM(SEXP genoinputsSEXP, SEXP kfileSEXP, SEXP colnumsSEXP, SEXP k_modeSEXP, SEXP missSEXP, SEXP mafSEXP, SEXP r2SEXP, SEXP hweSEXP, SEXP notsnpSEXP, SEXP lmmModeSEXP, SEXP gxeSEXP, SEXP outprefixSEXP, SEXP outdirSEXP, SEXP licenseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< CharacterVector >::type genoinputs(genoinputsSEXP);
     Rcpp::traits::input_parameter< std::string >::type kfile(kfileSEXP);
     Rcpp::traits::input_parameter< NumericVector >::type colnums(colnumsSEXP);
+    Rcpp::traits::input_parameter< int >::type k_mode(k_modeSEXP);
     Rcpp::traits::input_parameter< double >::type miss(missSEXP);
     Rcpp::traits::input_parameter< double >::type maf(mafSEXP);
     Rcpp::traits::input_parameter< double >::type r2(r2SEXP);
@@ -24,7 +25,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< std::string >::type outprefix(outprefixSEXP);
     Rcpp::traits::input_parameter< std::string >::type outdir(outdirSEXP);
     Rcpp::traits::input_parameter< bool >::type license(licenseSEXP);
-    rcpp_result_gen = Rcpp::wrap(gemmaMVLMM(genoinputs, kfile, colnums, miss, maf, r2, hwe, notsnp, lmmMode, gxe, outprefix, outdir, license));
+    rcpp_result_gen = Rcpp::wrap(gemmaMVLMM(genoinputs, kfile, colnums, k_mode, miss, maf, r2, hwe, notsnp, lmmMode, gxe, outprefix, outdir, license));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -51,7 +52,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_pcgen2_gemmaMVLMM", (DL_FUNC) &_pcgen2_gemmaMVLMM, 13},
+    {"_pcgen2_gemmaMVLMM", (DL_FUNC) &_pcgen2_gemmaMVLMM, 14},
     {"_pcgen2_gemmaGK", (DL_FUNC) &_pcgen2_gemmaGK, 11},
     {NULL, NULL, 0}
 };

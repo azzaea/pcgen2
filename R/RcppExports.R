@@ -12,6 +12,8 @@
 #'   menan genotypes, the phenotyes and SNP annotaiton files)
 #' @param kfile Character variable for the relatedness matrix file name (can be
 #'   in gzip compressed format)
+#' @param k_mode Integer variable for the type of the kinship/relatedness
+#'   matrix type
 #' @param colnums Numeric vector for specifying column number from the
 #'   phenotypes file used for association testing
 #' @param miss,maf,r2,hwe Floating point variables for filtering SNPs at
@@ -31,8 +33,10 @@
 #' @param outdir Character variable for output directory path
 #' @param license Boolean variable for printing GEMMA's license information
 #'
-gemmaMVLMM <- function(genoinputs, kfile, colnums, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, lmmMode = 1L, gxe = "", outprefix = "out", outdir = "output", license = FALSE) {
-    .Call(`_pcgen2_gemmaMVLMM`, genoinputs, kfile, colnums, miss, maf, r2, hwe, notsnp, lmmMode, gxe, outprefix, outdir, license)
+NULL
+
+gemmaMVLMM <- function(genoinputs, kfile, colnums, k_mode = 1L, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, lmmMode = 1L, gxe = "", outprefix = "out", outdir = "output", license = FALSE) {
+    .Call(`_pcgen2_gemmaMVLMM`, genoinputs, kfile, colnums, k_mode, miss, maf, r2, hwe, notsnp, lmmMode, gxe, outprefix, outdir, license)
 }
 
 #' R interface to 'Genome-wide Efficient Mixed Model Association' (GEMMA)
