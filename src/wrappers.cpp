@@ -69,6 +69,8 @@ bool gemmaMVLMM(CharacterVector genoinputs,
 
   GEMMA cGemma;
   PARAM cPar;
+  clock_t time_begin, time_start;
+  time_begin = clock();
 
   gsl_set_error_handler (&gemma_gsl_error_handler);
 
@@ -118,16 +120,60 @@ bool gemmaMVLMM(CharacterVector genoinputs,
     cPar.maf_level = -1;
 
   // Calculate the kinship matrix if need be
- cPar.file_kin = kfile;
-  Rcout << "kinship file: " << cPar.file_kin <<
-         " and size " << cPar.file_kin.empty() << "\n";
+
 
   if (FILE *file = fopen(kfile.c_str(), "r")) {
+    cPar.file_kin = kfile;
     fclose(file);
     Rcout << "File is ok";
   } else {
     Rcout << "The kinship file provided is empty."
     "GEMMA will calculate the relatedness matrixx" << "\n";
+
+    if (is_check_mode()) enable_segfpe(); // fast NaN checking by default
+
+    // Read Files.
+    Rcout << "Reading Files ... " << endl;
+    cPar.ReadFiles();
+    if (cPar.error == true) {
+      Rcout << "error! fail to read files. " << endl;
+      return EXIT_FAILURE;
+    }
+    cPar.CheckData();
+    if (cPar.error == true) {
+      Rcout << "error! fail to check data. " << endl;
+      return EXIT_FAILURE;
+    }
+
+    Rcout << "Calculating Relatedness Matrix ... " << endl;
+
+    gsl_matrix *G = gsl_matrix_safe_alloc(cPar.ni_total, cPar.ni_total);
+    enforce_msg(G, "allocate G"); // just to be sure
+
+    time_start = clock();
+
+    cPar.CalcKin(G);
+
+    cPar.time_G = (clock() - time_start) / (double(CLOCKS_PER_SEC) * 60.0);
+    if (cPar.error == true) {
+      cout << "error! fail to calculate relatedness matrix. " << endl;
+      return EXIT_FAILURE;
+    }
+
+    // Now we have the Kinship matrix test it
+    validate_K(G);
+
+    if (cPar.a_mode == M_KIN) {
+      cPar.WriteMatrix(G, "cXX");
+      cPar.file_kin = cPar.path_out + "/" + cPar.file_out + ".cXX.txt";
+    } else { // M_KIN2
+      cPar.WriteMatrix(G, "sXX");
+      cPar.file_kin = cPar.path_out + "/" + cPar.file_out + ".sXX.txt";
+    }
+
+    gsl_matrix_safe_free(G);
+
+    Rcout << "Relatedness matrix calculations done. \n"  ;
   }
 
 /*
@@ -193,22 +239,25 @@ bool gemmaMVLMM(CharacterVector genoinputs,
   cPar.CheckParam();
 
   if (cPar.error == true) {
+    Rcout << "Error in checking parameters \n" ;
     return EXIT_FAILURE;
   }
 
 
 
   /* The real work:
-   *
+   */
   cGemma.BatchRun(cPar);
 
-*/
+
   if (cPar.error == true) {
     return EXIT_FAILURE;
   }
   /* Logging:
    cGemma.WriteLog(argc, argv, cPar);
    */
+
+  Rcout << "Exit: " << EXIT_SUCCESS ;
 
   return EXIT_SUCCESS;
 }
@@ -221,7 +270,7 @@ tictoc::tic()
 gemmaMVLMM(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.geno.txt.gz",
                           "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.pheno.txt",
                           "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.anno.txt"),
-           kfile = "/home/p287664/github_repos/GEMMA/output/mouse_hs1940.cXX.txt",
+           kfile = "/home/p287664/github_repos/GEMMA/output/mouse_hs1940.cXX.txt2",
            colnums = c(1, 6), outprefix = "mouse_hs1940_CD8MCH_lmm", outdir = "rgemma")
 tictoc::toc()
 
