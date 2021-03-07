@@ -33,9 +33,7 @@
 #' @param outdir Character variable for output directory path
 #' @param license Boolean variable for printing GEMMA's license information
 #'
-NULL
-
-gemmaMVLMM <- function(genoinputs, kfile, colnums, k_mode = 1L, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, lmmMode = 1L, gxe = "", outprefix = "out", outdir = "output", license = FALSE) {
+gemmaMVLMM <- function(genoinputs, kfile, colnums, k_mode = 1L, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, lmmMode = 1L, gxe = "", outprefix = "result", outdir = "output", license = FALSE) {
     .Call(`_pcgen2_gemmaMVLMM`, genoinputs, kfile, colnums, k_mode, miss, maf, r2, hwe, notsnp, lmmMode, gxe, outprefix, outdir, license)
 }
 
@@ -49,7 +47,7 @@ gemmaMVLMM <- function(genoinputs, kfile, colnums, k_mode = 1L, miss = 0.05, maf
 #'   standardized matrix
 #' @inheritParams gemmaMVLMM
 #'
-gemmaGK <- function(genoinputs, gk, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, gxe = "", outprefix = "out", outdir = "output", license = FALSE) {
-    .Call(`_pcgen2_gemmaGK`, genoinputs, gk, miss, maf, r2, hwe, notsnp, gxe, outprefix, outdir, license)
+gemmaGK <- function(genoinputs, gk, colnums, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, outprefix = "result", outdir = "output", license = FALSE) {
+    .Call(`_pcgen2_gemmaGK`, genoinputs, gk, colnums, miss, maf, r2, hwe, notsnp, outprefix, outdir, license)
 }
 

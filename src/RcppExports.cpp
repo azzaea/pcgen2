@@ -30,23 +30,23 @@ BEGIN_RCPP
 END_RCPP
 }
 // gemmaGK
-bool gemmaGK(CharacterVector genoinputs, int gk, double miss, double maf, double r2, double hwe, bool notsnp, std::string gxe, std::string outprefix, std::string outdir, bool license);
-RcppExport SEXP _pcgen2_gemmaGK(SEXP genoinputsSEXP, SEXP gkSEXP, SEXP missSEXP, SEXP mafSEXP, SEXP r2SEXP, SEXP hweSEXP, SEXP notsnpSEXP, SEXP gxeSEXP, SEXP outprefixSEXP, SEXP outdirSEXP, SEXP licenseSEXP) {
+bool gemmaGK(CharacterVector genoinputs, int gk, NumericVector colnums, double miss, double maf, double r2, double hwe, bool notsnp, std::string outprefix, std::string outdir, bool license);
+RcppExport SEXP _pcgen2_gemmaGK(SEXP genoinputsSEXP, SEXP gkSEXP, SEXP colnumsSEXP, SEXP missSEXP, SEXP mafSEXP, SEXP r2SEXP, SEXP hweSEXP, SEXP notsnpSEXP, SEXP outprefixSEXP, SEXP outdirSEXP, SEXP licenseSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< CharacterVector >::type genoinputs(genoinputsSEXP);
     Rcpp::traits::input_parameter< int >::type gk(gkSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type colnums(colnumsSEXP);
     Rcpp::traits::input_parameter< double >::type miss(missSEXP);
     Rcpp::traits::input_parameter< double >::type maf(mafSEXP);
     Rcpp::traits::input_parameter< double >::type r2(r2SEXP);
     Rcpp::traits::input_parameter< double >::type hwe(hweSEXP);
     Rcpp::traits::input_parameter< bool >::type notsnp(notsnpSEXP);
-    Rcpp::traits::input_parameter< std::string >::type gxe(gxeSEXP);
     Rcpp::traits::input_parameter< std::string >::type outprefix(outprefixSEXP);
     Rcpp::traits::input_parameter< std::string >::type outdir(outdirSEXP);
     Rcpp::traits::input_parameter< bool >::type license(licenseSEXP);
-    rcpp_result_gen = Rcpp::wrap(gemmaGK(genoinputs, gk, miss, maf, r2, hwe, notsnp, gxe, outprefix, outdir, license));
+    rcpp_result_gen = Rcpp::wrap(gemmaGK(genoinputs, gk, colnums, miss, maf, r2, hwe, notsnp, outprefix, outdir, license));
     return rcpp_result_gen;
 END_RCPP
 }
