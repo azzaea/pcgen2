@@ -1,5 +1,3 @@
-
-
 #include <Rcpp.h>
 #include <gsl/gsl_permutation.h>
 #include <gsl/gsl_blas.h>
@@ -26,6 +24,16 @@ using namespace Rcpp;
 using namespace std;
 
 // source using Rcpp::sourceCpp
+/* PKG_CPPFLAGS = -isystem/home/p287664/software/OpenBLAS/include/ -Icontrib/catch-1.9.7 -Isrc
+ * PKG_LIBS = -lopenblas -lgsl -lz -pthread -O3
+ * PKG_CXXFLAGS = -DOPENBLAS -DHAVE_INLINE -std=c++11 -fPIC
+ * Sys.setenv("PKG_CXXFLAGS"="-DOPENBLAS -DHAVE_INLINE -std=c++11 -fPIC")
+ * Sys.setenv("PKG_CPPFLAGS" = "-isystem/home/p287664/software/OpenBLAS/include/ -Icontrib/catch-1.9.7 -Isrc")
+ * Sys.setenv("PKG_LIBS"="-lopenblas -lgsl -lz -pthread -O3")
+ * Rcpp::sourceCpp("src/wrappers.cpp", verbose = T, rebuild = T)
+ */
+
+
 
 //' R interface to 'Genome-wide Efficient Mixed Model Association' (GEMMA)
 //'
@@ -358,25 +366,41 @@ bool gemmaMVLMM(CharacterVector genoinputs,
 
         CalcLambda('L', eval, UtW, &UtY_col.vector, cPar.l_min, cPar.l_max,
                    cPar.n_region, cPar.l_mle_null, cPar.logl_mle_H0);
-        assert(!isnan(UtY->data[0]));
+        //assert(!isnan(UtY->data[0]));
+        if (ISNAN(UtY->data[0]))
+          Rcpp::stop("Nan detected: UtY->data[0]");
 
         CalcLmmVgVeBeta(eval, UtW, &UtY_col.vector, cPar.l_mle_null,
                         cPar.vg_mle_null, cPar.ve_mle_null, &beta.vector,
                         &se_beta.vector);
 
-        assert(!isnan(UtY->data[0]));
+        //assert(!isnan(UtY->data[0]));
+        if (ISNAN(UtY->data[0]))
+          Rcpp::stop("Nan detected: UtY->data[0]");
 
         cPar.beta_mle_null.clear();
         cPar.se_beta_mle_null.clear();
-        assert(!isnan(B->data[0]));
-        assert(!isnan(se_B->data[0]));
+        //assert(!isnan(B->data[0]));
+        if (ISNAN(B->data[0]))
+          Rcpp::stop("Nan detected: B->data[0]");
+
+        //assert(!isnan(se_B->data[0]));
+        if (ISNAN(se_B->data[0]))
+          Rcpp::stop("Nan detected: se_B->data[0]");
+
         for (size_t i = 0; i < B->size2; i++) {
           cPar.beta_mle_null.push_back(gsl_matrix_get(B, 0, i));
           cPar.se_beta_mle_null.push_back(gsl_matrix_get(se_B, 0, i));
         }
-        assert(!isnan(UtY->data[0]));
-        assert(!isnan(cPar.beta_mle_null.front()));
-        assert(!isnan(cPar.se_beta_mle_null.front()));
+        //assert(!isnan(UtY->data[0]));
+        if (ISNAN(UtY->data[0]))
+          Rcpp::stop("Nan detected: UtY->data[0]");
+        // assert(!isnan(cPar.beta_mle_null.front()));
+        if (ISNAN(cPar.beta_mle_null.front()))
+          Rcpp::stop("Nan detected: cPar.beta_mle_null.front()");
+        //assert(!isnan(cPar.se_beta_mle_null.front()));
+        if (ISNAN(cPar.se_beta_mle_null.front()))
+          Rcpp::stop("Nan detected: cPar.se_beta_mle_null.front()");
 
         // the following functions do not modify eval
         CalcLambda('R', eval, UtW, &UtY_col.vector, cPar.l_min, cPar.l_max,
@@ -387,8 +411,12 @@ bool gemmaMVLMM(CharacterVector genoinputs,
 
         cPar.beta_remle_null.clear();
         cPar.se_beta_remle_null.clear();
-        assert(!isnan(B->data[0]));
-        assert(!isnan(se_B->data[0]));
+        //assert(!isnan(B->data[0]));
+        if (ISNAN(B->data[0]))
+          Rcpp::stop("Nan detected: B->data[0]");
+        //assert(!isnan(se_B->data[0]));
+        if (ISNAN(se_B->data[0]))
+          Rcpp::stop("Nan detected: se_B->data[0]");
 
         for (size_t i = 0; i < B->size2; i++) {
           cPar.beta_remle_null.push_back(gsl_matrix_get(B, 0, i));
