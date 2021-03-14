@@ -1,4 +1,4 @@
-pacman::p_load(gemma2, tictoc, tidyverse)
+pacman::p_load(gemma2, tictoc, tidyverse, Matrix)
 
 
 data(d2tsnpsmeans) # G --> Y1 --> Y2

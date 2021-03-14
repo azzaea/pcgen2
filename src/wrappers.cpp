@@ -1,5 +1,7 @@
-#include <Rcpp.h>
+//#include <Rcpp.h>
+#include <RcppGSL.h>
 #include <gsl/gsl_permutation.h>
+#include <gsl/gsl_matrix.h>
 #include <gsl/gsl_blas.h>
 #include "lapack.h"
 
@@ -8,11 +10,6 @@
 #include "lmm.h"
 #include "mathfunc.h"
 #include "mvlmm.h"
-
-// #include <fstream>
-// #include <iostream>
-// #include <sstream>
-// #include <vector>
 
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -27,10 +24,10 @@ using namespace std;
 /* PKG_CPPFLAGS = -isystem/home/p287664/software/OpenBLAS/include/ -Icontrib/catch-1.9.7 -Isrc
  * PKG_LIBS = -lopenblas -lgsl -lz -pthread -O3
  * PKG_CXXFLAGS = -DOPENBLAS -DHAVE_INLINE -std=c++11 -fPIC
- * Sys.setenv("PKG_CXXFLAGS"="-DOPENBLAS -DHAVE_INLINE -std=c++11 -fPIC")
- * Sys.setenv("PKG_CPPFLAGS" = "-isystem/home/p287664/software/OpenBLAS/include/ -Icontrib/catch-1.9.7 -Isrc")
- * Sys.setenv("PKG_LIBS"="-lopenblas -lgsl -lz -pthread -O3")
- * Rcpp::sourceCpp("src/wrappers.cpp", verbose = T, rebuild = T)
+ Sys.setenv("PKG_CXXFLAGS"="-DOPENBLAS -DHAVE_INLINE -std=c++11 -fPIC")
+ Sys.setenv("PKG_CPPFLAGS" = "-isystem/home/p287664/software/OpenBLAS/include/ -Icontrib/catch-1.9.7 -Isrc")
+ Sys.setenv("PKG_LIBS"="-lopenblas -lgsl -lz -pthread -O3")
+ Rcpp::sourceCpp("src/wrappers.cpp", verbose = T, rebuild = T)
  */
 
 
@@ -68,7 +65,7 @@ using namespace std;
 //' @param license Boolean variable for printing GEMMA's license information
 //'
 // [[Rcpp::export]]
-bool gemmaMVLMM(CharacterVector genoinputs,
+Rcpp::List gemmaMVLMM(CharacterVector genoinputs,
                 std::string kfile,
                 NumericVector colnums,
                 int k_mode = 1,
@@ -86,24 +83,18 @@ bool gemmaMVLMM(CharacterVector genoinputs,
   // @param predit Boolean variable to impute missing phenotypes before
   //   association testing (if a small proportion is missing)
 
-  // int main(int argc, char *argv[])
-
   GEMMA cGemma;
   PARAM cPar;
-  clock_t time_begin, time_start;
-  time_begin = clock();
 
   gsl_set_error_handler (&gemma_gsl_error_handler);
 
   if (license) {
     cGemma.PrintHeader();
     cGemma.PrintLicense();
-    return EXIT_SUCCESS;
+    Rcpp::stop("License printed");
   }
 
   // Reading input parameters:
-   // cGemma.Assign(argc, argv, cPar);
-   //
 
   if (genoinputs.size() == 1){
     cPar.file_bfile = genoinputs[0];
@@ -117,7 +108,7 @@ bool gemmaMVLMM(CharacterVector genoinputs,
   if (genoinputs.size() > 3){
     cGemma.PrintHeader();
     cGemma.PrintHelp(0);
-    return EXIT_SUCCESS;
+    Rcpp::stop("Incorrect inputs: Please user either PLINK or BIMBAM standard files");
   }
 
   // set pheno column (list/range)
@@ -144,22 +135,10 @@ bool gemmaMVLMM(CharacterVector genoinputs,
   // lmm options:
   if (cPar.a_mode != 0) {
     cPar.error = true;
-    Rcout << "error! only one of -gk -gs -eigen -vc -lm -lmm -bslmm "
-    "-predict -calccor options is allowed."
-    << endl;
+    Rcpp::stop("error! only one of -gk -gs -eigen -vc -lm -lmm -bslmm "
+    "-predict -calccor options is allowed.");
   }
   cPar.a_mode = lmmMode;
-
-  // Rcout << "-bfile: " << cPar.file_bfile << "\n";
-  // Rcout << "-g: " << cPar.file_geno << "\n";
-  // Rcout << "-p: " << cPar.file_pheno << "\n";
-  // Rcout << "-a: " << cPar.file_anno << "\n";
-  // Rcout << "-n: " << cPar.p_column[i] << "\n";
-  // Rcout << "-gxe: " << cPar.file_gxe << "\n";
-  // Rcout << "-k: " << cPar.file_kin << "\n";
-  // Rcout << "-outdir:" << cPar.path_out << "\n";
-  // Rcout << "-o: " << cPar.file_out << "\n";
-  // Rcout << "-lmm:" << cPar.a_mode << "\n";
 
   ifstream check_dir((cPar.path_out).c_str());
   if (!check_dir) {
@@ -173,9 +152,8 @@ bool gemmaMVLMM(CharacterVector genoinputs,
   if (!is_quiet_mode())
     cGemma.PrintHeader();
 
-  if (cPar.error == true) {
-    return EXIT_FAILURE;
-  }
+  if (cPar.error == true)
+    Rcpp::stop("");
 
   if (is_quiet_mode()) {
     stringstream ss;
@@ -183,14 +161,9 @@ bool gemmaMVLMM(CharacterVector genoinputs,
   }
 
   cPar.CheckParam();
+  if (cPar.error == true)
+    Rcpp::stop("Error in checking parameters \n") ;
 
-  if (cPar.error == true) {
-    Rcout << "Error in checking parameters \n" ;
-    return EXIT_FAILURE;
-  }
-
-  // The real work:
-   //
   //cGemma.BatchRun(cPar);
 
   if (is_check_mode()) enable_segfpe(); // fast NaN checking by default
@@ -198,20 +171,12 @@ bool gemmaMVLMM(CharacterVector genoinputs,
   // Read Files.
   Rcout << "Reading Files ... " << endl;
   cPar.ReadFiles();
-  if (cPar.error == true) {
-    Rcout << "error! fail to read files. " << endl;
-    return EXIT_FAILURE;
-  }
+  if (cPar.error == true)
+    Rcpp::stop("error! fail to read files. ");
+
   cPar.CheckData();
-  if (cPar.error == true) {
-    Rcout << "error! fail to check data. " << endl;
-    return EXIT_FAILURE;
-  }
-
-
-
-
-
+  if (cPar.error == true)
+    Rcpp::stop("error! fail to check data. ");
 
   // LMM or mvLMM or Eigen-Decomposition
   if (cPar.a_mode == M_LMM1 || cPar.a_mode == M_LMM2 || cPar.a_mode == M_LMM3 ||
@@ -245,10 +210,8 @@ bool gemmaMVLMM(CharacterVector genoinputs,
       ReadFile_kin(cPar.file_kin, cPar.indicator_idv, cPar.mapID2num,
                    cPar.k_mode, cPar.error, G);
       debug_msg("Read K/GRM file");
-      if (cPar.error == true) {
-        Rcout << "error! fail to read kinship/relatedness file. " << endl;
-        return EXIT_FAILURE;
-      }
+      if (cPar.error == true)
+        Rcpp::stop("error! failed to read kinship/relatedness file.");
 
       // center matrix G
       CenterMatrix(G);
@@ -278,7 +241,7 @@ bool gemmaMVLMM(CharacterVector genoinputs,
 
       // eigen-decomposition and calculate trace_G - main track
       Rcout << "Start Eigen-Decomposition..." << endl;
-      time_start = clock();
+      clock_t time_start = clock();
 
       if (cPar.a_mode == M_EIGEN) {
         cPar.trace_G = EigenDecomp_Zeroed(G, U, eval, 1);
@@ -304,18 +267,18 @@ bool gemmaMVLMM(CharacterVector genoinputs,
       cPar.time_eigen =
         (clock() - time_start) / (double(CLOCKS_PER_SEC) * 60.0);
 
-    } else {
+    } /*else {  // I'm assuming the kinship matrix is always passed!
+                // It is more economical to pass the eign values, but fitEM
+                // does not use them, so it won't be drop-in replacement!
+                // Azza: add this in smartly
       ReadFile_eigenU(cPar.file_ku, cPar.error, U);
-      if (cPar.error == true) {
-        Rcout << "error! fail to read the U file. " << endl;
-        return EXIT_FAILURE;
-      }
+      if (cPar.error == true)
+        Rcpp::stop("error! fail to read the U file. ");
 
       ReadFile_eigenD(cPar.file_kd, cPar.error, eval);
-      if (cPar.error == true) {
-        Rcout << "error! fail to read the D file. " << endl;
-        return EXIT_FAILURE;
-      }
+      if (cPar.error == true)
+        Rcpp::stop("error! fail to read the D file. ");
+
 
       cPar.trace_G = 0.0;
       for (size_t i = 0; i < eval->size; i++) {
@@ -325,13 +288,13 @@ bool gemmaMVLMM(CharacterVector genoinputs,
         cPar.trace_G += gsl_vector_get(eval, i);
       }
       cPar.trace_G /= (double)eval->size;
-    }
+    }*/
     // write(eval,"eval2");
 
-    if (cPar.a_mode == M_EIGEN) {
-      cPar.WriteMatrix(U, "eigenU");
-      cPar.WriteVector(eval, "eigenD");
-    } else if (!cPar.file_gene.empty()) { // Run with gene file
+    if (cPar.a_mode == M_EIGEN) { // Actually, we shouldn't go here- Not aiming at Eigen decomposition
+      //cPar.WriteMatrix(U, "eigenU");
+      //cPar.WriteVector(eval, "eigenD");
+    /*} else if (!cPar.file_gene.empty()) { // Run with gene file
       // calculate UtW and Uty
       CalcUtX(U, W, UtW);
       CalcUtX(U, Y, UtY);
@@ -349,7 +312,7 @@ bool gemmaMVLMM(CharacterVector genoinputs,
 
       cLmm.WriteFiles();
       cLmm.CopyToParam(cPar);
-    } else {
+    */} else  {
       debug_msg("Main LMM track");
       // calculate UtW and Uty
       CalcUtX(U, W, UtW);
@@ -366,7 +329,7 @@ bool gemmaMVLMM(CharacterVector genoinputs,
 
         CalcLambda('L', eval, UtW, &UtY_col.vector, cPar.l_min, cPar.l_max,
                    cPar.n_region, cPar.l_mle_null, cPar.logl_mle_H0);
-        //assert(!isnan(UtY->data[0]));
+
         if (ISNAN(UtY->data[0]))
           Rcpp::stop("Nan detected: UtY->data[0]");
 
@@ -374,17 +337,15 @@ bool gemmaMVLMM(CharacterVector genoinputs,
                         cPar.vg_mle_null, cPar.ve_mle_null, &beta.vector,
                         &se_beta.vector);
 
-        //assert(!isnan(UtY->data[0]));
         if (ISNAN(UtY->data[0]))
           Rcpp::stop("Nan detected: UtY->data[0]");
 
         cPar.beta_mle_null.clear();
         cPar.se_beta_mle_null.clear();
-        //assert(!isnan(B->data[0]));
+
         if (ISNAN(B->data[0]))
           Rcpp::stop("Nan detected: B->data[0]");
 
-        //assert(!isnan(se_B->data[0]));
         if (ISNAN(se_B->data[0]))
           Rcpp::stop("Nan detected: se_B->data[0]");
 
@@ -392,13 +353,13 @@ bool gemmaMVLMM(CharacterVector genoinputs,
           cPar.beta_mle_null.push_back(gsl_matrix_get(B, 0, i));
           cPar.se_beta_mle_null.push_back(gsl_matrix_get(se_B, 0, i));
         }
-        //assert(!isnan(UtY->data[0]));
+
         if (ISNAN(UtY->data[0]))
           Rcpp::stop("Nan detected: UtY->data[0]");
-        // assert(!isnan(cPar.beta_mle_null.front()));
+
         if (ISNAN(cPar.beta_mle_null.front()))
           Rcpp::stop("Nan detected: cPar.beta_mle_null.front()");
-        //assert(!isnan(cPar.se_beta_mle_null.front()));
+
         if (ISNAN(cPar.se_beta_mle_null.front()))
           Rcpp::stop("Nan detected: cPar.se_beta_mle_null.front()");
 
@@ -411,10 +372,9 @@ bool gemmaMVLMM(CharacterVector genoinputs,
 
         cPar.beta_remle_null.clear();
         cPar.se_beta_remle_null.clear();
-        //assert(!isnan(B->data[0]));
+
         if (ISNAN(B->data[0]))
           Rcpp::stop("Nan detected: B->data[0]");
-        //assert(!isnan(se_B->data[0]));
         if (ISNAN(se_B->data[0]))
           Rcpp::stop("Nan detected: se_B->data[0]");
 
@@ -472,8 +432,6 @@ bool gemmaMVLMM(CharacterVector genoinputs,
           LMM cLmm;
           cLmm.CopyFromParam(cPar); // set parameters
 
-          // if (is_check_mode()) disable_segfpe(); // disable fast NaN checking for now
-
           gsl_vector_view Y_col = gsl_matrix_column(Y, 0);
           gsl_vector_view UtY_col = gsl_matrix_column(UtY, 0);
 
@@ -506,10 +464,6 @@ bool gemmaMVLMM(CharacterVector genoinputs,
           MVLMM cMvlmm;
           cMvlmm.CopyFromParam(cPar); // set parameters
 
-          // if (is_check_mode()) disable_segfpe(); // disable fast NaN checking
-
-          // write(eval,"eval3");
-
           if (!cPar.file_bfile.empty()) {
             if (cPar.file_gxe.empty()) {
               cMvlmm.AnalyzePlink(U, eval, UtW, UtY);
@@ -541,19 +495,38 @@ bool gemmaMVLMM(CharacterVector genoinputs,
     gsl_matrix_safe_free(UtY);
     gsl_vector_safe_free(eval);
     gsl_vector_free(env); // sometimes unused
-
-
   }
 
+  if (cPar.error == true)
+    Rcpp::stop("");
 
-/////////
-  if (cPar.error == true) {
-    return EXIT_FAILURE;
-  }
+  Rcout << "Eigen-Decomposition done in: " <<
+    cPar.time_eigen << " min " << endl;
+  Rcout << "Time spent on optimization iterations: " <<
+    cPar.time_opt << " min " << endl;
 
-  Rcout << "Exit: " << EXIT_SUCCESS ;
-
-  return EXIT_SUCCESS;
+  return Rcpp::List::create(Rcpp::Named("l_mle_null") = cPar.l_mle_null,
+                            Rcpp::Named("l_remle_null") = cPar.l_remle_null,
+                            Rcpp::Named("logl_mle_H0") = cPar.logl_mle_H0,
+                            Rcpp::Named("logl_remle_H0") = cPar.logl_remle_H0,
+                            Rcpp::Named("Vg_remle_null") = cPar.Vg_remle_null,
+                            Rcpp::Named("Ve_remle_null") = cPar.Ve_remle_null,
+                            Rcpp::Named("Vg_mle_null") = cPar.Vg_mle_null,
+                            Rcpp::Named("Ve_mle_null") = cPar.Ve_mle_null,
+                            Rcpp::Named("pve_null") = cPar.pve_null,
+                            Rcpp::Named("pve_total") = cPar.pve_total,
+                            // Rcpp::Named("pve_se_null") = cPar.pve_se_null,
+                            // Rcpp::Named("se_pve_total") = cPar.se_pve_total
+                            Rcpp::Named("v_beta") = cPar.v_beta, // REML estimator for beta.
+                            Rcpp::Named("beta_remle_null") = cPar.beta_remle_null,
+                            Rcpp::Named("beta_mle_null") = cPar.beta_mle_null
+                            // Does not work: Rcpp::Named("mvlmm") = cMvlmm.sumStat.data()
+                            // Rcpp::Named("se_beta_remle_null") = cPar.se_beta_remle_null
+                            // Rcpp::Named("VVg_remle_null") = cPar.VVg_remle_null,
+                            // Rcpp::Named("VVe_remle_null") = cPar.VVe_remle_null,
+                            // Rcpp::Named("VVe_mle_null") = cPar.VVe_mle_null,
+                            // Rcpp::Named("VVg_mle_null") = cPar.VVg_mle_null
+                            );
 }
 
 // for testing and development, this R code will be automatically
@@ -561,10 +534,11 @@ bool gemmaMVLMM(CharacterVector genoinputs,
 
 /*** R
 tictoc::tic()
-gemmaMVLMM(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.geno.txt.gz",
+mv <- gemmaMVLMM(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.geno.txt.gz",
                           "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.pheno.txt",
                           "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.anno.txt"),
-           kfile = "/home/p287664/github_repos/GEMMA/output/mouse_hs1940.cXX.txt",
+           kfile = "/home/p287664/github_repos/GEMMA/example/output/mouse_hs1940.cXX.txt",
+           license = F,
            colnums = c(1, 6), outprefix = "mouse_hs1940_CD8MCH_lmm", outdir = "rgemma")
 tictoc::toc()
 
@@ -582,7 +556,7 @@ tictoc::toc()
 //' @inheritParams gemmaMVLMM
 //'
 //[[Rcpp::export]]
-bool gemmaGK(CharacterVector genoinputs,
+Rcpp::List  gemmaGK(CharacterVector genoinputs,
              int gk,
              NumericVector colnums,
              double miss = 0.05,
@@ -596,18 +570,16 @@ bool gemmaGK(CharacterVector genoinputs,
 
   GEMMA cGemma;
   PARAM cPar;
-  clock_t time_start;
 
   gsl_set_error_handler (&gemma_gsl_error_handler);
 
   if (license) {
     cGemma.PrintHeader();
     cGemma.PrintLicense();
-    return EXIT_SUCCESS;
+    Rcpp::stop("License printed");
   }
 
-  /* Reading input parameters:
-   * cGemma.Assign(argc, argv, cPar);
+  /* Reading input parameters: cGemma.Assign(argc, argv, cPar);
    */
 
   if (genoinputs.size() == 1){
@@ -622,7 +594,7 @@ bool gemmaGK(CharacterVector genoinputs,
   if (genoinputs.size() > 3){
     cGemma.PrintHeader();
     cGemma.PrintHelp(0);
-    return EXIT_SUCCESS;
+    Rcpp::stop("Incorrect inputs: Please user either PLINK or BIMBAM standard files");
   }
 
   // set pheno column (list/range)
@@ -636,9 +608,8 @@ bool gemmaGK(CharacterVector genoinputs,
 
   // SNP QC Options:
   cPar.miss_level = miss;
-  if (cPar.maf_level != -1) {
+  if (cPar.maf_level != -1)
     cPar.maf_level = maf;
-  }
   cPar.hwe_level = hwe;
   cPar.r2_level = r2;
   if (notsnp)
@@ -657,9 +628,8 @@ bool gemmaGK(CharacterVector genoinputs,
   if (!is_quiet_mode())
     cGemma.PrintHeader();
 
-  if (cPar.error == true) {
-    return EXIT_FAILURE;
-  }
+  if (cPar.error == true)
+    Rcpp::stop("Error! Can not compute the Relatedness matrix");
 
   if (is_quiet_mode()) {
     stringstream ss;
@@ -667,43 +637,37 @@ bool gemmaGK(CharacterVector genoinputs,
   }
 
   cPar.CheckParam();
-  if (cPar.error == true) {
-    Rcout << "Error in checking parameters \n" ;
-    return EXIT_FAILURE;
-  }
+  if (cPar.error == true)
+    Rcpp::stop("Error in checking parameters");
 
-  /* The real work:
-  cGemma.BatchRun(cPar); */
+  /* cGemma.BatchRun(cPar); */
 
   if (is_check_mode()) enable_segfpe(); // fast NaN checking by default
 
   // Read Files.
   Rcout << "Reading Files ... " << endl;
   cPar.ReadFiles();
-  if (cPar.error == true) {
-    Rcout << "error! fail to read files. " << endl;
-    return EXIT_FAILURE;
-  }
+  if (cPar.error == true)
+    Rcpp::stop("error! failed to read files. ");
+
   cPar.CheckData();
-  if (cPar.error == true) {
-    Rcout << "error! fail to check data. " << endl;
-    return EXIT_FAILURE;
-  }
+  if (cPar.error == true)
+    Rcpp::stop("error! failed to check data. ");
 
   Rcout << "Calculating Relatedness Matrix ... " << endl;
 
-  gsl_matrix *G = gsl_matrix_safe_alloc(cPar.ni_total, cPar.ni_total);
+  //gsl_matrix *G = gsl_matrix_safe_alloc(cPar.ni_total, cPar.ni_total);
+  RcppGSL::matrix<double> G(cPar.ni_total, cPar.ni_total);
   enforce_msg(G, "allocate G"); // just to be sure
 
-  time_start = clock();
+  clock_t time_start = clock();
 
   cPar.CalcKin(G);
 
   cPar.time_G = (clock() - time_start) / (double(CLOCKS_PER_SEC) * 60.0);
-  if (cPar.error == true) {
-    Rcout << "error! fail to calculate relatedness matrix. " << endl;
-    return EXIT_FAILURE;
-  }
+
+  if (cPar.error == true)
+    Rcpp::stop("error! failed to calculate relatedness matrix. ");
 
   // Now we have the Kinship matrix test it
   validate_K(G);
@@ -714,25 +678,22 @@ bool gemmaGK(CharacterVector genoinputs,
     cPar.WriteMatrix(G, "sXX");
   }
 
-  gsl_matrix_safe_free(G);
+  Rcout << "Relatedness matrix calculations done in: " <<
+           cPar.time_G << " min " << endl;
 
-  Rcout << "Relatedness matrix calculations done. \n"  ;
-
-  Rcout << "##      time on calculating relatedness matrix = "
-          << cPar.time_G << " min " << endl;
-
-  return true;
-
+  return Rcpp::List::create(Rcpp::Named("kinship") = G);
 }
 
 
 
 /*** R
 tictoc::tic()
-gemmaGK(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.geno.txt.gz",
+k = gemmaGK(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.geno.txt.gz",
                        "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.pheno.txt",
                        "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.anno.txt"),
         gk = 1, colnums = c(1), outprefix = "mouse_hs1940_k", outdir = "rgemma")
 tictoc::toc()
+str(k)
 
 */
+

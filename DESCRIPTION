@@ -38,5 +38,6 @@ Depends:
     R (>= 2.10)
 Config/testthat/edition: 3
 LinkingTo: 
-    Rcpp
+    Rcpp,
+    RcppGSL
 SystemRequirements: GNU make 
