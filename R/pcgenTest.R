@@ -98,7 +98,7 @@ pcgenTest <- function(x, y, S, suffStat, covariates = NULL, QTLs = integer(), K 
     }
 
   }
-  ## Type A* CI test: Trait \perp QTL | {Traits +/- G +/- QTL} ----------------
+  ## Type D CI test: Trait \perp QTL | {Traits +/- G +/- QTL} ----------------
 
   if (any(QTLs %in% c(x,y))) {
     if (y %in% QTLs) { # make x the QTL, not y (just to simplify the code)

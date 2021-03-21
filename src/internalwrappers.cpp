@@ -227,7 +227,7 @@ Rcpp::List MvLMM(CharacterVector genoinputs,
 tictoc::tic()
 file.remove("rgemma/mouse_hs1940.assoc.txt")
 Gmat <- readRDS(file = "tmpscr/mouse_hs1940.cXX.rds")
-mv <- MvLMM(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.geno.txt.gz",
+mv <- MvLMM(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.1snp.txt2",
                            "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.pheno.txt",
                            "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.anno.txt"),
             kfile = "/home/p287664/github_repos/GEMMA/output/mouse_hs1940.cXX.txt",
