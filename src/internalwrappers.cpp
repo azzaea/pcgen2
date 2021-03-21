@@ -12,6 +12,7 @@
 #include "mathfunc.h"
 #include "mvlmm.h"
 
+
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -71,6 +72,7 @@ using namespace std;
 Rcpp::List MvLMM(CharacterVector genoinputs,
                  std::string kfile,
                  NumericVector colnums,
+                 NumericMatrix Gmat,
                  int k_mode = 1,
                  double miss = 0.05,
                  double maf = 0.01,
@@ -136,34 +138,40 @@ Rcpp::List MvLMM(CharacterVector genoinputs,
   cPar.CheckData();
 
   // LMM or mvLMM or Eigen-Decomposition
-  gsl_matrix *Y = gsl_matrix_safe_alloc(cPar.ni_test, cPar.n_ph);
-  enforce_msg(Y, "allocate Y"); // just to be sure
-  gsl_matrix *W = gsl_matrix_safe_alloc(Y->size1, cPar.n_cvt);
-
-
-  //gsl_matrix *G = gsl_matrix_safe_alloc(cPar.ni_total, cPar.ni_total);
-  //RcppGSL::matrix<double> G(Y->size1, Y->size1);
-
-  gsl_matrix *G = gsl_matrix_safe_alloc(Y->size1, Y->size1); // ReadFile_Kin
-
-
+  RcppGSL::Matrix Y(cPar.ni_test, cPar.n_ph); // Advantage of RcppGSL types
+  RcppGSL::Matrix W(Y->size1, cPar.n_cvt);    // is ease of exchange with R
+  RcppGSL::Matrix G(Y->size1, Y->size1);      // compared with gsl_matrix
   gsl_matrix *U = gsl_matrix_safe_alloc(Y->size1, Y->size1);
   gsl_matrix *UtW = gsl_matrix_calloc(Y->size1, W->size2);
   gsl_matrix *UtY = gsl_matrix_calloc(Y->size1, Y->size2);
   gsl_vector *eval = gsl_vector_calloc(Y->size1);
   assert_issue(is_issue(26), UtY->data[0] == 0.0);
 
+  // Remove missing individuals from W, Y, and G:
+
   // set covariates matrix W and phenotype matrix Y
   // an intercept should be included in W,
   cPar.CopyCvtPhen(W, Y, 0);
+  //gsl_matrix *G = gsl_matrix_alloc(Y->size1, Y->size1);
 
-  // read relatedness matrix G and do eigen decomposition
-  // Azza: Eignvalues should be passed directly instead
-  ReadFile_kin(cPar.file_kin, cPar.indicator_idv, cPar.mapID2num,
-               cPar.k_mode, cPar.error, G);
+  int row=0; int col=0;
+  for (int i=0; i<Gmat.nrow(); i++) {// row index
+    if (cPar.indicator_idv[i] == 0) continue;
+    for (int j=0; j<Gmat.ncol(); ++j){ // col index
+      if (cPar.indicator_idv[j] == 0) continue; // both row and column should not be put in G
+      G(row, col) =  Gmat(i,j);
+      col++;
+    }
+    row++;
+    col = 0;
+  }
+
   CenterMatrix(G); // center matrix G
   validate_K(G);
+
   // eigen-decomposition and calculate trace_G - main track
+  // Azza: Eignvalues should be passed directly instead. This does
+  // not work in this version of GEMMA anyway!
   cPar.trace_G = EigenDecomp_Zeroed(G, U, eval, 0);
 
   // calculate UtW and Uty
@@ -175,14 +183,11 @@ Rcpp::List MvLMM(CharacterVector genoinputs,
   Rcout << "fit mvLMM (multiple phenotypes)" << endl;
   MVLMM cMvlmm;
   cMvlmm.CopyFromParam(cPar); // set parameters
-  cMvlmm.AnalyzeBimbam(U, eval, UtW, UtY);
+  cMvlmm.AnalyzeBimbam2(U, eval, UtW, UtY);
   cMvlmm.WriteFiles();
   cMvlmm.CopyToParam(cPar);
 
   // release all matrices and vectors
-  gsl_matrix_safe_free(Y);
-  gsl_matrix_safe_free(W);
-  gsl_matrix_warn_free(G);
   gsl_matrix_safe_free(U);
   gsl_matrix_safe_free(UtW);
   gsl_matrix_safe_free(UtY);
@@ -221,10 +226,12 @@ Rcpp::List MvLMM(CharacterVector genoinputs,
 /*** R
 tictoc::tic()
 file.remove("rgemma/mouse_hs1940.assoc.txt")
+Gmat <- readRDS(file = "tmpscr/mouse_hs1940.cXX.rds")
 mv <- MvLMM(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.geno.txt.gz",
                            "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.pheno.txt",
                            "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.anno.txt"),
             kfile = "/home/p287664/github_repos/GEMMA/output/mouse_hs1940.cXX.txt",
+            Gmat = Gmat,
             colnums = c(1, 6))
 tictoc::toc()
 
@@ -380,7 +387,31 @@ k = gemmaGK(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs194
                            "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.anno.txt"),
             gk = 1, colnums = c(1), outprefix = "mouse_hs1940_k", outdir = "rgemma")
 tictoc::toc()
+saveRDS(k$kinship, file = "tmpscr/mouse_hs1940.cXX.rds")
 str(k)
 
 */
 
+
+// [[Rcpp::export]]
+int sum_gsl_vector_int(const RcppGSL::vector<int> & vec){
+  int res = std::accumulate(vec.begin(), vec.end(), 0);
+  return res;
+}
+
+// [[Rcpp::export]]
+int sum_gsl_matrix_int( RcppGSL::matrix<int> & mat){
+  int res = 0;
+  for (int i = 0; i < mat.nrow(); i++ )
+    for (int j = 0; j < mat.ncol(); j++)
+      res = res + mat(i,j);
+  return res;
+}
+
+
+// [[Rcpp::export]]
+void predictPhenos(){
+  // The bulk is in the gemma.BatchRun function, corresponding to cPar.a_mode=43
+  // This will need the MVLMM::CalcMvLmmVgVeBeta (for multi-traits) or LMM::CalcLambda
+  return;
+  }

@@ -80,6 +80,8 @@ public:
   void CopyToParam(PARAM &cPar);
   void AnalyzeBimbam(const gsl_matrix *U, const gsl_vector *eval,
                      const gsl_matrix *UtW, const gsl_matrix *UtY);
+  void AnalyzeBimbam2(const gsl_matrix *U, const gsl_vector *eval,
+                     const gsl_matrix *UtW, const gsl_matrix *UtY);
   void AnalyzePlink(const gsl_matrix *U, const gsl_vector *eval,
                     const gsl_matrix *UtW, const gsl_matrix *UtY);
   void Analyzebgen(const gsl_matrix *U, const gsl_vector *eval,

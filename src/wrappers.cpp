@@ -534,12 +534,12 @@ Rcpp::List gemmaMVLMM(CharacterVector genoinputs,
 
 /*** R
 tictoc::tic()
-mv <- gemmaMVLMM(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.geno.txt.gz",
+gmmv <- gemmaMVLMM(genoinputs = c("/home/p287664/github_repos/GEMMA/example/mouse_hs1940.geno.txt.gz",
                           "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.pheno.txt",
                           "/home/p287664/github_repos/GEMMA/example/mouse_hs1940.anno.txt"),
            kfile = "/home/p287664/github_repos/GEMMA/example/output/mouse_hs1940.cXX.txt",
            license = F,
-           colnums = c(1, 6), outprefix = "mouse_hs1940_CD8MCH_lmm", outdir = "rgemma")
+           colnums = c(1, 6), outprefix = "gemmaMVLMM", outdir = "rgemma")
 tictoc::toc()
 
 */

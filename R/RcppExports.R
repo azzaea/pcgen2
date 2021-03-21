@@ -36,8 +36,8 @@
 #'
 NULL
 
-MvLMM <- function(genoinputs, kfile, colnums, k_mode = 1L, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, lmmMode = 1L) {
-    .Call(`_pcgen2_MvLMM`, genoinputs, kfile, colnums, k_mode, miss, maf, r2, hwe, notsnp, lmmMode)
+MvLMM <- function(genoinputs, kfile, colnums, Gmat, k_mode = 1L, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, lmmMode = 1L) {
+    .Call(`_pcgen2_MvLMM`, genoinputs, kfile, colnums, Gmat, k_mode, miss, maf, r2, hwe, notsnp, lmmMode)
 }
 
 #' R interface to 'Genome-wide Efficient Mixed Model Association' (GEMMA)
@@ -52,6 +52,18 @@ MvLMM <- function(genoinputs, kfile, colnums, k_mode = 1L, miss = 0.05, maf = 0.
 #'
 CalcKin <- function(genoinputs, gk, colnums, miss = 0.05, maf = 0.01, r2 = 0.9999, hwe = 0, notsnp = FALSE, outprefix = "result", outdir = "output", license = FALSE) {
     .Call(`_pcgen2_CalcKin`, genoinputs, gk, colnums, miss, maf, r2, hwe, notsnp, outprefix, outdir, license)
+}
+
+sum_gsl_vector_int <- function(vec) {
+    .Call(`_pcgen2_sum_gsl_vector_int`, vec)
+}
+
+sum_gsl_matrix_int <- function(mat) {
+    .Call(`_pcgen2_sum_gsl_matrix_int`, mat)
+}
+
+predictPhenos <- function() {
+    invisible(.Call(`_pcgen2_predictPhenos`))
 }
 
 #' R interface to 'Genome-wide Efficient Mixed Model Association' (GEMMA)
