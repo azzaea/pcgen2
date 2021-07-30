@@ -1,5 +1,6 @@
 #' @importFrom Matrix Matrix
 #' @importFrom stats manova as.formula anova lm
+#' @export
 
 gen.covar.test <- function(x, y, G, Z.t = NULL,
                            X = as.data.frame(matrix(0,length(x),0)),

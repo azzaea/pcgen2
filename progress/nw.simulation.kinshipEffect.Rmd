@@ -1,0 +1,102 @@
+---
+title: 'Complete simulation: effect of kinship matrix'
+author: "Azza Ahmed"
+date: "7/29/2021"
+output: 
+  html_document:
+    code_folding: hide
+editor_options: 
+  chunk_output_type: console
+bibliography: bibliography.bib  
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(igraph)#, tidygraph, ggraph) # tidygraph for powerful plotting functions
+# pacman::p_load(dagitty, ggdag)
+pacman::p_load(dscrutils, tidyverse)
+devtools::load_all("~/github_repos/pcgen2/")
+```
+
+
+## Used kinships:
+
+Here, I'm using a K matrix from: 
+
+1. Mouse dataset (@nicod2016genome)
+<!-- kinship matrix available in: `/home/azza/github_repos/pcgen2/results/mouse/kinship.cXX.txt` -->
+    - 1789 individuals, done in 4 replicates.
+    - 2 genetic traits set up, with identical variance:
+    <!-- `mouse.simulation.2gtrait.identicalvar.dsc`:  -->
+```{r warning=FALSE, message=FALSE,error=FALSE,prompt=FALSE,results='hide', cache=TRUE}
+dscout.2gtrait.identicalvar <- dscquery(dsc.outdir =
+                                        "~/github_repos/pcgen2/progress/mouse.simulation.2gtrait.identicalvar//",
+                                        targets = c("simulate.dagcoeff", "simulate.rangeGenVar",
+                                                    "simulate.rangeEnvVar", "simulate.true_dag",
+                                                    "simulate.data", "simulate.cor_traits",
+                                                    "learn", "learn.learnt_dag", "learn.cor_residuals",
+                                                    "learn.dagfit_tpr", "learn.dagfit_fpr",
+                                                    "learn.dagfit_tdr", "learn.dagfit_shd",
+                                                    "learn.genfit_tpr", "learn.genfit_fpr",
+                                                    "learn.genfit_tdr" ))  %>% as_tibble()
+
+```
+
+```{r}
+dscout.2gtrait.identicalvar %>% filter(learn == "pcgen") %>% 
+  select(simulate.cor_traits, DSC, learn.cor_residuals, simulate.dagcoeff, simulate.rangeGenVar, simulate.rangeEnvVar) %>% 
+  mutate(dagcoeff = factor(simulate.dagcoeff),
+         cor_residuals = learn.cor_residuals %>% map_dbl(3),
+         cor_traits = simulate.cor_traits,
+         replicate = factor(DSC)) %>%
+  ggplot(aes(x = cor_traits, y = cor_residuals, group = replicate)) + 
+  geom_point(aes(color = dagcoeff)) +
+  geom_abline(aes(slope =1, intercept = 0)) +
+  # geom_smooth(se = FALSE) +
+  theme_classic() + facet_grid(rows = vars(simulate.rangeEnvVar), cols = vars(simulate.rangeGenVar))
+
+plot.performance(dscout.2gtrait.identicalvar, "vanilla")
+plot.performance(dscout.2gtrait.identicalvar, "pcres")
+plot.performance(dscout.2gtrait.identicalvar, "pcgen")
+```
+    - 1 genetic trait set up: `mouse.simulation.1gtrait.identicalvar.dsc`: identical variance
+
+```{r warning=FALSE, message=FALSE,error=FALSE,prompt=FALSE,results='hide', cache=TRUE}
+dscout.1gtrait.identicalvar <- dscquery(dsc.outdir =
+                                          "~/github_repos/pcgen2/progress/mouse.simulation.1gtrait.identicalvar/",                    targets = c("simulate.dagcoeff", "simulate.rangeGenVar",
+                               "simulate.rangeEnvVar", "simulate.true_dag",
+                               "simulate.data", "simulate.cor_traits",
+                               "learn", "learn.learnt_dag", "learn.cor_residuals",
+                               "learn.dagfit_tpr", "learn.dagfit_fpr",
+                               "learn.dagfit_tdr", "learn.dagfit_shd",
+                               "learn.genfit_tpr", "learn.genfit_fpr",
+                               "learn.genfit_tdr" ))  %>% as_tibble()
+
+```
+
+```{r}
+dscout.1gtrait.identicalvar %>% filter(learn == "pcgen") %>% 
+  select(simulate.cor_traits, DSC, learn.cor_residuals, simulate.dagcoeff, simulate.rangeGenVar, simulate.rangeEnvVar) %>% 
+  mutate(dagcoeff = factor(simulate.dagcoeff),
+         cor_residuals = learn.cor_residuals %>% map_dbl(3),
+         cor_traits = simulate.cor_traits,
+         replicate = factor(DSC)) %>%
+  ggplot(aes(x = cor_traits, y = cor_residuals, group = replicate)) + 
+  geom_point(aes(color = dagcoeff)) +
+  geom_abline(aes(slope =1, intercept = 0)) +
+  # geom_smooth(se = FALSE) +
+  theme_classic() + facet_grid(rows = vars(simulate.rangeEnvVar), cols = vars(simulate.rangeGenVar))
+
+plot.performance(dscout.1gtrait.identicalvar, "vanilla")
+plot.performance(dscout.1gtrait.identicalvar, "pcres")
+plot.performance(dscout.1gtrait.identicalvar, "pcgen")
+```
+
+
+2. Human dataset:
+    - (e.g use the 1kgp data, and re-evaluate for settings 1 and 2)
+```{r}
+
+```
+
+## References

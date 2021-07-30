@@ -1,0 +1,265 @@
+---
+title: "Complete simulation setting"
+author: "Azza Ahmed"
+date: "7/25/2021"
+output: 
+  html_document:
+    code_folding: hide
+editor_options: 
+  chunk_output_type: inline
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+pacman::p_load(igraph)
+# pacman::p_load(dagitty, ggdag)
+pacman::p_load(dscrutils, tidyverse)
+devtools::load_all("~/github_repos/pcgen2/")
+```
+
+## The ideal simulation(s)
+
+We choose to simulate simple 3 traits networks, in two scenarios as below. For 
+each, we are looking for the best learning conditions, and the worst for each
+network learning method.
+
+For evaluation, we:
+
+1. Check the correlations between traits 1 and 2, or the residuals of these 2 traits. 
+2. define the following metrics:
+    * $FPR=\frac{incorrect.estimated.edges}{true.gaps}=\frac{FP}{TN+FP}$
+    * $TDR=\frac{correct.estimated.edges}{total.estimated.edges}=\frac{TP}{TP+FP}$
+    * $TPR = \frac{correct.estimated.edges}{true.edges}= \frac{TP}{TP+FN}$
+
+
+
+For the simulations reported below, the *kinship matrix* used is for plants. It
+is possible that *mouse* or *human* relations in a typical GWAS be different, so 
+the effect of these need to be invistigated too.
+
+### The 2 genetic traits model:
+
+<!-- $G \rightarrow Trait1; G \rightarrow Trait2; Trait1 \rightarrow Trait2$ -->
+
+```{r echo=FALSE}
+
+plot(graph_from_literal( Genotype-+Trait1, Genotype-+Trait2, Trait1-+Trait2, Trait3 ), 
+     vertex.size = 50)
+
+# ggdag(dagitty('dag {Genotye -> {Trait1 Trait2}; Trait1 -> Trait2}')) +
+#   theme_dag() + labs(title = "Two genetic traits model")
+```
+
+1. we chose the strength of correlation between traits, `dagcoeff`
+2. we choose the amount of variances; 
+
+#### a) All traits have identical variances:
+<!-- The corresponding simulation parameters are in: `progress/simulation.2gtrait.identicalvar.dsc` -->
+
+```{r read2g_idvar, warning=FALSE, message=FALSE,error=FALSE,prompt=FALSE,results='hide'}
+dscout.2gtrait.identicalvar <- dscquery(dsc.outdir= "~/github_repos/pcgen2/progress/debug/", 
+                   targets = c("simulate.dagcoeff", "simulate.rangeGenVar", 
+                               "simulate.rangeEnvVar", "simulate.true_dag",
+                               "simulate.data", "simulate.cor_traits",
+                               "learn", "learn.learnt_dag", "learn.cor_residuals",
+                               "learn.dagfit_tpr", "learn.dagfit_fpr", 
+                               "learn.dagfit_tdr", "learn.dagfit_shd", 
+                               "learn.genfit_tpr", "learn.genfit_fpr", 
+                               "learn.genfit_tdr" ))  %>% as_tibble()
+```
+
+
+
+```{r }
+dscout.2gtrait.identicalvar %>% filter(learn == "pcgen") %>% 
+  select(simulate.cor_traits, DSC, learn.cor_residuals, simulate.dagcoeff, simulate.rangeGenVar, simulate.rangeEnvVar) %>% 
+  mutate(dagcoeff = factor(simulate.dagcoeff),
+         cor_residuals = learn.cor_residuals %>% map_dbl(3),
+         cor_traits = simulate.cor_traits,
+         replicate = factor(DSC)) %>%
+  ggplot(aes(x = cor_traits, y = cor_residuals, group = replicate)) + 
+  geom_point(aes(color = dagcoeff)) +
+  geom_abline(aes(slope =1, intercept = 0)) +
+  # geom_smooth(se = FALSE) +
+  theme_classic() + facet_grid(rows = vars(simulate.rangeEnvVar), cols = vars(simulate.rangeGenVar))
+```
+
+
+In the figure above, `rangeGenVar` varies across columns, and `rangeEnvVar` varies 
+across rows. The plots on the left bottom corner (low `rangeGenVar` (<0.1), and
+rather high `rangeEvnVar` (>0.5))  suggest that the traits and residuals 
+could possibly be used interchangeably for learning a network- i.e, one would expect 
+both `pcRes` and `vaniall pc` to work similarly with these values (regardless of the 
+strength of correlation between traits). For other combinations, only when `dagcoeff` is
+large (>=2 in these figures) do we get similar patterns from both traits and residuals.
+
+
+Now, let's see what this means for each of the 3 learning methods: `pcgen`, `pcRes` 
+and `pc`. 
+
+```{r}
+plot.performance(dscout.2gtrait.identicalvar, "vanilla")
+plot.performance(dscout.2gtrait.identicalvar, "pcres")
+plot.performance(dscout.2gtrait.identicalvar, "pcgen")
+
+```
+
+These plots make me think:
+
+* (in terms of traits networks):
+    * SHD is the best with `pcgen`. With the other 2, there is not really big 
+    difference
+    * FPR is almost always the same, ~0, so we don't need to worry about it
+    further
+    * TDR has the same patterns with both `pcres` and `pcgen`, and are 
+    comparable to `vanilla`. At larger `dagcoeff`, the methods are ideal.
+    * TPR is almost the same with both `pcres` and `pcgen`. For a sufficiently
+    large `dagcoeff`, they both outperform `vanilla`. However, if it is low (eg 
+    0.1) they both do worst
+* (in terms of genotype --> trait network):
+    * Only `pcgen` learns this pattern
+    * It's a lot of interaction between the simulation parameters, but in general, 
+    the ideal conditions seem: small `rangeGenVar`, large `rangeEnvVar` and any `dagcoeff`
+
+#### b) Different variances between traits
+
+i.e, for each trait, the variances are chosen at random: $\in \{0, var\}$. 
+<!-- The corresponding simulation parameters are in: `simulation.2gtrait.diffvar.dsc` -->
+
+```{r read2g_difvar, warning=FALSE, message=FALSE,error=FALSE,prompt=FALSE,results='hide'}
+dscout.2gtrait.diffvar <- dscquery(dsc.outdir= "~/github_repos/pcgen2/progress/simulation.2gtrait.diffvar/", 
+                   targets = c("simulate.dagcoeff", "simulate.rangeGenVar", 
+                               "simulate.rangeEnvVar", "simulate.true_dag",
+                               "simulate.data", "simulate.cor_traits",
+                               "learn", "learn.learnt_dag", "learn.cor_residuals",
+                               "learn.dagfit_tpr", "learn.dagfit_fpr", 
+                               "learn.dagfit_tdr", "learn.dagfit_shd", 
+                               "learn.genfit_tpr", "learn.genfit_fpr", 
+                               "learn.genfit_tdr" ))  %>% as_tibble()
+```
+
+Similarly, we check the correlations between traits and residuals- and we see 
+similarity with the trends we obtained when the variance was the same for the traits.
+
+```{r }
+dscout.2gtrait.diffvar %>% filter(learn == "pcgen") %>% 
+  select(simulate.cor_traits, DSC, learn.cor_residuals, simulate.dagcoeff, simulate.rangeGenVar, simulate.rangeEnvVar) %>% 
+  mutate(dagcoeff = factor(simulate.dagcoeff),
+         cor_residuals = learn.cor_residuals %>% map_dbl(3),
+         cor_traits = simulate.cor_traits,
+         replicate = factor(DSC)) %>%
+  ggplot(aes(x = cor_traits, y = cor_residuals, group = replicate)) + 
+  geom_point(aes(color = dagcoeff)) +
+  geom_abline(aes(slope =1, intercept = 0)) +
+  # geom_smooth(se = FALSE) +
+  theme_classic() + facet_grid(rows = vars(simulate.rangeEnvVar), cols = vars(simulate.rangeGenVar))
+```
+
+And in terms of performance, the trend is also similar:
+
+
+```{r}
+plot.performance(dscout.2gtrait.diffvar, "vanilla")
+plot.performance(dscout.2gtrait.diffvar, "pcres")
+plot.performance(dscout.2gtrait.diffvar, "pcgen")
+```
+
+### The 1 genetic trait model:
+
+<!-- $G \rightarrow Trait3; Trait1 \rightarrow Trait2$ -->
+
+```{r echo=FALSE}
+plot(graph_from_literal( Genotype-+Trait3, Trait1-+Trait2 ), 
+     vertex.size = 50)
+
+# ggdag(dagitty('dag {Genotye -> {Trait3}; Trait1 -> Trait2}')) +
+#   theme_dag() + labs(title = "One genetic trait model")
+```
+
+1. we chose the strength of correlation between traits, `dagcoeff`
+2. we choose the amount of variances
+
+#### a) All traits have identical variances.
+
+<!-- The corresponding simulation parameters are in: `progress/simulation.1gtrait.identicalvar.dsc` -->
+
+```{r read1g_idvar, warning=FALSE, message=FALSE,error=FALSE,prompt=FALSE,results='hide'}
+dscout.1gtrait.identicalvar <- dscquery(dsc.outdir =
+                                          "~/github_repos/pcgen2/progress/simulation.1gtrait.identicalvar/", 
+                   targets = c("simulate.dagcoeff", "simulate.rangeGenVar", 
+                               "simulate.rangeEnvVar", "simulate.true_dag",
+                               "simulate.data", "simulate.cor_traits",
+                               "learn", "learn.learnt_dag", "learn.cor_residuals",
+                               "learn.dagfit_tpr", "learn.dagfit_fpr", 
+                               "learn.dagfit_tdr", "learn.dagfit_shd", 
+                               "learn.genfit_tpr", "learn.genfit_fpr", 
+                               "learn.genfit_tdr" ))  %>% as_tibble()
+```
+
+In terms of correlations:
+
+```{r}
+dscout.1gtrait.identicalvar %>% filter(learn == "pcgen") %>% 
+  select(simulate.cor_traits, DSC, learn.cor_residuals, simulate.dagcoeff, simulate.rangeGenVar, simulate.rangeEnvVar) %>% 
+  mutate(dagcoeff = factor(simulate.dagcoeff),
+         cor_residuals = learn.cor_residuals %>% map_dbl(3),
+         cor_traits = simulate.cor_traits%>% map_dbl(3),  #we saved this as a matrix
+         replicate = factor(DSC)) %>%
+  ggplot(aes(x = cor_traits, y = cor_residuals, group = replicate)) + 
+  geom_point(aes(color = dagcoeff)) +
+  geom_abline(aes(slope =1, intercept = 0)) +
+  # geom_smooth(se = FALSE) +
+  theme_classic() + facet_grid(rows = vars(simulate.rangeEnvVar), cols = vars(simulate.rangeGenVar))
+```
+
+And the performance:
+
+
+```{r}
+plot.performance(dscout.1gtrait.identicalvar, "vanilla")
+plot.performance(dscout.1gtrait.identicalvar, "pcres")
+plot.performance(dscout.1gtrait.identicalvar, "pcgen")
+```
+
+So, one may say that compared with the first scenario, `pcgen` and `pcRes` do a 
+better job of learning for a network of this nature.
+
+
+#### b) Different variances between traits 
+
+<!-- The corresponding simulation parameters are in: `simulation.1gtrait.diffvar.dsc` -->
+
+```{r read1g_diffvar, warning=FALSE, message=FALSE,error=FALSE,prompt=FALSE,results='hide'}
+dscout.1gtrait.diffvar <- dscquery(dsc.outdir= "~/github_repos/pcgen2/progress/simulation.1gtrait.diffvar/", 
+                   targets = c("simulate.dagcoeff", "simulate.rangeGenVar", 
+                               "simulate.rangeEnvVar", "simulate.true_dag",
+                               "simulate.data", "simulate.cor_traits",
+                               "learn", "learn.learnt_dag", "learn.cor_residuals",
+                               "learn.dagfit_tpr", "learn.dagfit_fpr", 
+                               "learn.dagfit_tdr", "learn.dagfit_shd", 
+                               "learn.genfit_tpr", "learn.genfit_fpr", 
+                               "learn.genfit_tdr" ))  %>% as_tibble()
+```
+
+
+And similarly, in terms of correlations:
+```{r}
+ dscout.1gtrait.diffvar%>% filter(learn == "pcgen") %>% 
+  select(simulate.cor_traits, DSC, learn.cor_residuals, simulate.dagcoeff, simulate.rangeGenVar, simulate.rangeEnvVar) %>% 
+  mutate(dagcoeff = factor(simulate.dagcoeff),
+         cor_residuals = learn.cor_residuals %>% map_dbl(3),
+         cor_traits = simulate.cor_traits %>% map_dbl(3),
+         replicate = factor(DSC)) %>%
+  ggplot(aes(x = cor_traits, y = cor_residuals, group = replicate)) + 
+  geom_point(aes(color = dagcoeff)) +
+  geom_abline(aes(slope =1, intercept = 0)) +
+  # geom_smooth(se = FALSE) +
+  theme_classic() + facet_grid(rows = vars(simulate.rangeEnvVar), cols = vars(simulate.rangeGenVar))
+```
+
+And the performance:
+```{r}
+plot.performance(dscout.1gtrait.diffvar, "vanilla")
+plot.performance(dscout.1gtrait.diffvar, "pcres")
+plot.performance(dscout.1gtrait.diffvar, "pcgen")
+```

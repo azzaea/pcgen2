@@ -4,13 +4,19 @@
 \alias{getResiduals}
 \title{Residuals from GBLUP}
 \usage{
-getResiduals(suffStat, covariates = NULL, cov.method = "uni", K = NULL)
+getResiduals(
+  suffStat,
+  covariates = NULL,
+  cov.method = "uni",
+  K = NULL,
+  verbose = FALSE
+)
 }
 \arguments{
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
-factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
-and optionally some QTLs. The name of the first column should be G. Should not
-contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is
+the factor G (genotype, i.e samples' IDs) and subsequent columns contain
+the traits, and optionally some QTLs. The name of the first column should
+be G. Should not contain covariates.}
 
 \item{covariates}{A data.frame containing covariates that should always be
 used in each conditional independence test. Should be either \code{NULL}
@@ -23,14 +29,17 @@ the G-BLUP. Options are \code{"us"} (unstructured multi-trait model fitted
 using \code{sommer}) and \code{"uni"} (based on univariate GBLUPs).
 (Default \code{"uni"})}
 
-\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based relatedness
-(kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the number of unique genotypes
-in the first column in \code{suffStat}. If \code{suffStat} contains replicates, this
-argument should be set to \code{NULL} (the default).
-If \code{NULL} (the default), independent  genetic effects are assumed.
-In case of replicates, the resulting relatedness of the
-observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
-plants to genotypes.}
+\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based
+relatedness (kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the
+number of unique genotypes in the first column in \code{suffStat}. If
+\code{suffStat} contains replicates, this argument should be set to
+\code{NULL} (the default). If \code{NULL} (the default), independent
+genetic effects are assumed. In case of replicates, the resulting
+relatedness of the observations will be \eqn{Z K Z^t}, where \eqn{Z} is the
+incidence matrix assigning plants to genotypes.}
+
+\item{verbose}{If \code{TRUE}, p-values for the conditional independence
+tests are printed}
 }
 \value{
 A data-frame with the residuals

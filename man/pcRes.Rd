@@ -6,22 +6,51 @@
 \usage{
 pcRes(
   suffStat,
-  alpha = 0.01,
   K = NULL,
-  m.max = Inf,
-  verbose = FALSE,
   covariates = NULL,
   QTLs = integer(),
   cov.method = "uni",
   use.GBLUP = FALSE,
-  return.pvalues = FALSE
+  alpha = 0.01,
+  m.max = Inf,
+  return.pvalues = FALSE,
+  verbose = FALSE
 )
 }
 \arguments{
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
-factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
-and optionally some QTLs. The name of the first column should be G. Should not
-contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is
+the factor G (genotype, i.e samples' IDs) and subsequent columns contain
+the traits, and optionally some QTLs. The name of the first column should
+be G. Should not contain covariates.}
+
+\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based
+relatedness (kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the
+number of unique genotypes in the first column in \code{suffStat}. If
+\code{suffStat} contains replicates, this argument should be set to
+\code{NULL} (the default). If \code{NULL} (the default), independent
+genetic effects are assumed. In case of replicates, the resulting
+relatedness of the observations will be \eqn{Z K Z^t}, where \eqn{Z} is the
+incidence matrix assigning plants to genotypes.}
+
+\item{covariates}{A data.frame containing covariates that should always be
+used in each conditional independence test. Should be either \code{NULL}
+(default) or a data.frame with the same number of rows as \code{suffStat}.
+An intercept is already included for each trait in suffStat; covariates
+should not contain a column of ones.}
+
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
+may be partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y}
+cannot be both QTLs. Note: the factor genotype (column number 1) may occur
+in S, as well as x and y}
+
+\item{cov.method}{A string, specifying which method should be used to compute
+the G-BLUP. Options are \code{"us"} (unstructured multi-trait model fitted
+using \code{sommer}) and \code{"uni"} (based on univariate GBLUPs).
+(Default \code{"uni"})}
+
+\item{use.GBLUP}{Use the GBLUP itself (ie the fitted value from the linear
+mixed model), instead of the residuals (as in Topner et al). #These are the
+fitted values from the lmm (Y^)}
 
 \item{alpha}{The significance level used in each conditional independence
 test. Default is 0.01. The test itself of course does not depend on this,
@@ -30,80 +59,66 @@ precisely, the EM-algorithm is stopped once the P value is below the
 significance level. This can be done because the PC algorithm only needs an
 accept/ reject decision.}
 
-\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based relatedness
-(kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the number of unique genotypes
-in the first column in \code{suffStat}. If \code{suffStat} contains replicates, this
-argument should be set to \code{NULL} (the default).
-If \code{NULL} (the default), independent  genetic effects are assumed.
-In case of replicates, the resulting relatedness of the
-observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
-plants to genotypes.}
-
 \item{m.max}{maximum size of the conditioning set, in the pc-algorithm on the
 residuals}
 
-\item{verbose}{If \code{TRUE}, p-values for the conditional independence
-tests are printed}
-
-\item{covariates}{A data.frame containing covariates that should always be
-used in each conditional independence test. Should be either \code{NULL}
-(default) or a data.frame with the same number of rows as \code{suffStat}.
-An intercept is already included for each trait in suffStat; covariates
-should not contain a column of ones.}
-
-\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These may be
-partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
-Note: the factor genotype (column number 1) may occur in S, as well as x and y}
-
-\item{cov.method}{A string, specifying which method should be used to compute
-the G-BLUP. Options are \code{"us"} (unstructured multi-trait model fitted
-using \code{sommer}) and \code{"uni"} (based on univariate GBLUPs).
-(Default \code{"uni"})}
-
-\item{use.GBLUP}{Use the GBLUP itself, instead of the residuals (as in Topner
-et al)}
-
 \item{return.pvalues}{If \code{TRUE}, the maximal p-value for each edge is
 returned.}
+
+\item{verbose}{If \code{TRUE}, p-values for the conditional independence
+tests are printed}
 }
 \value{
-If \code{return.pvalues = FALSE}, the output is a graph (an object
-with S3 class \code{"pcgen"}). If \code{return.pvalues = TRUE}, the output
-is a list with elements \code{gr} (the graph) and \code{pMax} (a matrix
-with the p-values).
+If \code{return.pvalues = FALSE}, the output is a graph (an object with S3
+class \code{"pcgen"}). If \code{return.pvalues = TRUE}, the output is a list
+with elements \code{gr} (the graph) and \code{pMax} (a matrix with the p-values).
 }
 \description{
-The pc algorithm applied to residuals, assuming there are replicates, and K =
-Z Z^t.
+The pc algorithm applied to residuals of a linear mixed model, assuming there
+are replicates, and K = Z Z^t.
 }
 \details{
-If \code{use.GBLUP = FALSE}, GBLUP residuals are used as input for the
-pc-stable algorithm of Colombo and Maathuis (2014). This closely resembles
-the residual networks of Valente et al., (2010) and Topner et al., (2017)
-(who used different ways to predict the genetic effects, and applied other
-causal inference algorithms to the residuals). When \code{use.GBLUP = TRUE},
-pc-stable is applied to the GBLUP itself, which resembles the genomic
-networks of Topner et al., (2017). If \code{cov.method = "uni"}, the GBLUP
-and the residuals are computed separately for each trait in suffStat. The
-covariance of each trait is assumed to be \deqn{\sigma_G^2 Z K Z^t +
-\sigma_E^2 I_n} where \eqn{Z} is a binary incidence matrix, assigning plants
-or plots to genotypes. \eqn{Z} is based on the first column in suffStat. If
-there is a single observation per genotype (typically a genotypic mean),
-\eqn{Z} is the identity matrix, and the relatedness matrix \eqn{K} should be
-specified. If there are replicates for at least some of the genotypes, and no
-\eqn{K} is provided, independent genetic effects are assumed (\eqn{K} will be
-the identity matrix). It is also possible to have replicates and specify a
-non-diagonal \eqn{K}. Whenever  \eqn{K} is specified, sommer (mmer2) will be
-used; otherwise lmer (lme4). mmer2 is also used when \code{cov.method =
-"us"}, in which case the multivariate GBLUP is computed, for all traits in
-suffStat simultaneously. This is only possible for a limited number of
-traits.
+If \code{use.GBLUP = FALSE}, GBLUP residuals are used as input for the pc-stable
+algorithm of Colombo and Maathuis (2014).
+
+This closely resembles the residual networks of Valente et al., (2010) and
+Topner et al., (2017) (who used different ways to predict the genetic
+effects, and applied other causal inference algorithms to the residuals).
+
+When \code{use.GBLUP = TRUE}, pc-stable is applied to the GBLUP itself (i.e the
+fitted or predicted genetic values, not the residuals), which resembles the
+genomic networks of Topner et al., (2017).
+
+If \verb{cov.method = "uni"\\}, the GBLUP and the residuals are computed separately
+for each trait in \code{suffStat}. The covariance of each trait is assumed to be
+\deqn{\sigma_G^2 Z K Z^t + \sigma_E^2 I_n} where \eqn{Z} is a binary
+incidence matrix, assigning plants or plots to genotypes. \eqn{Z} is based on
+the first column in suffStat. If there is a single observation per genotype
+(typically a genotypic mean), \eqn{Z} is the identity matrix, and the
+relatedness matrix \eqn{K} should be specified. If there are replicates for
+at least some of the genotypes, and no \eqn{K} is provided, independent
+genetic effects are assumed (\eqn{K} will be the identity matrix). It is also
+possible to have replicates and specify a non-diagonal \eqn{K}. Whenever
+\eqn{K} is specified, sommer (mmer2) will be used; otherwise lmer (lme4).
+mmer2 is also used when \code{cov.method = "us"}, in which case the multivariate
+GBLUP is computed, for all traits in suffStat simultaneously. This is only
+possible for a limited number of traits.
+
+Finally, also note that some \code{pc} function parameters are fixed here:
+\code{skel.method = "stable"}, \code{conservative = FALSE}, \code{maj.rule = TRUE} and
+\code{solve.confl = TRUE}. As a results, the resulting graph is fully
+order-independent (see Colombo and Maathuis 2014). Additionally, we fixed
+\code{u2pd = "relaxed"}, so that that an invalid CPDAG is output in case of
+conflicting orientation information. Labels (defining the names of the nodes
+of the graph) are derived from the data-frame \code{suffStat}, containing the
+data.
 }
 \examples{
 \dontrun{
 data(simdata)
 out <- pcRes(suffStat = simdata, alpha = 0.01, verbose= FALSE)
 }
+
 
 }
 \references{
@@ -126,11 +141,12 @@ Bayesian networks illustrate genomic and residual trait connections in
 maize (Zea mays L.). \emph{G3: Genes, Genomes, Genetics}, 7(8), 2779-2789.
 }
 
-Valente, B. D., Rosa, G. J., de los Campos, G., Gianola, D., &
+\itemize{
+\item Valente, B. D., Rosa, G. J., de los Campos, G., Gianola, D., &
 Silva, M. A. (2010). Searching for recursive causal structures in
-multivariate quantitative genetics mixed models. \emph{Genetics}, 185(2), 633-644.
-
-A paper on arxiv and Topner et al (2017)
+multivariate quantitative genetics mixed models. \emph{Genetics}, 185(2),
+633-644.
+}
 }
 \author{
 Willem Kruijer and Pariya Behrouzi. Maintainers: Willem Kruijer

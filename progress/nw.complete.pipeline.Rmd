@@ -1,0 +1,304 @@
+---
+title: "Complete pcRes pcgen pipeline"
+author: "Azza Ahmed"
+date: "7/2/2021"
+output: html_document
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = T)
+pacman::p_load(tidyverse, cowplot)
+devtools::load_all(path = "/home/azza/github_repos/pcgen2/")
+```
+
+## Simulate data
+
+We are simulating data with traits models tha tfollows:
+
+$Y = XB +  \lambda Y + G + E$, where 
+   $G \sim MVN (0, K, \Sigma_G): vec(G) \sim N (0,  \Sigma_G \bigotimes K)$
+   $E \sim MVN (0, I_n, \Sigma_E): vec(E) \sim N(0,  \Sigma_E\bigotimes I_n )$
+
+Or, by rearranging:
+$Y = XB\Gamma +  G\Gamma +  E\Gamma$
+$vec(Y) \sim N(vec(XB), \Gamma^t\Sigma_G\Gamma \bigotimes K + \Gamma^t\Sigma_E\Gamma \bigotimes I_n) \sim N(vec(XB), V_G \bigotimes K + V_E \bigotimes I_n)$
+
+
+```{r}
+library(GraphPhenoSimulator)
+load("~/github_repos/GraphPhenoSimulator/data/simdata1.RData")
+X <- as.matrix(dm[, -c(1:3)])
+K <- X %*% t(X) / sqrt(ncol(X))
+rm(list = c("d", "dm", "X"))
+K <- K + 0.005 *diag(nrow(K))
+ng <- nrow(K)    # number of genotypes
+reps <- 1                # number of (genetically identical) replicates of each genotype
+randomizeSamples <- F # reorder the kinship matrix rows and columns?
+negative <- FALSE     # Create a DAG with negative edge weights?
+topsort <- T          # If TRUE, non-genetic traits are chosen from nodes with highest topological order
+fixngen <- TRUE       # If TRUE, Number of traits with 0 genetic effects = ((1-pgen) * ntraits).
+# If FALSE, the number is random with probability = 1 - pgen
+useK <- TRUE          # use a marker-based kinship matrix
+simulateQTLs <- T     # simulate QTLs, explaining part of the genetic variance ?
+alphaQTL <- 0         # The proportion of genetic variance explained by the QTLs
+fixnumber <- T        # If TRUE, Number of QTLs = lambdaQTL
+# If FALSE, number is drawn from Poisson with lambdaQTL
+lambdaQTL <- 2        # Number of QTLs or the Poisson parameter for their number
+pQTL <- 0.5           # The probability a QTL has an effect on a trait
+noise <- F       # Add noise to the simulated graph data?
+extranoise <- 0.2 # Additional noise amount
+
+
+
+
+## Are these values standard? Or are they arbitrary..
+ntraits <- 3         # number of traits
+dagcoeff <- c(1, 1) # Lower and upper limits of DAG edge weights -------------> try with 1 edge, change its weight
+######################################### Is it the strength of correlation? when it is large/small
+######################################### Have an ideal data with strong relations between the data
+rangeGenVar <- c(.1,.2) # Range of variances of direct genetic effects  ---------------> make it low
+pgen <- 10           # Probability a trait has non-zero genetic variance.
+rangeEnvVar <- c(.1,.2) # Range of error variances (environment effects) ------------------> make it low
+
+
+if (randomizeSamples) {
+  genotype.sample <-  sample(1:ng, size = ng) # if looking for randomness!
+  K <- K[genotype.sample, genotype.sample]
+}
+p.edge <- 1 * min(1, 1/(ntraits-1)) # probability of an edge, in the randomDAG
+```
+
+## Learn the effects of changing parameters
+
+1. how are the learnt networks different?
+
+```{r}
+runs <- 8
+trait.data <- list()
+bench.dag <- tibble::tibble(tpr = numeric(runs), fpr = numeric(runs),
+                            tdr = numeric(runs), shd = numeric(runs))
+
+bench.dag <- cbind(matrix(0, ncol = 3, nrow = runs), bench.dag)
+names(bench.dag)[1:3] <- c("dagcoeff", "rangeGenVar", "rangeEnvVar")
+
+bench.gdag <- tibble::tibble(tpr = numeric(runs), fpr = numeric(runs),
+                             tdr = numeric(runs))
+
+counter <- 1
+for (dagcoeff in c(1, 10)){
+  for (rangeGenVar in c(.1, 1))
+    for (rangeEnvVar in c(.1, 1)){
+      # generate data:
+      print(counter)
+      dag <- matrix(0, ntraits, ntraits)
+      
+      dag[1, 2] <- dagcoeff
+      rownames(dag) <- colnames(dag) <- paste("Trait", 1: ntraits)
+    
+      
+      geneticCovMatrix <- clusterGeneration::genPositiveDefMat(covMethod = "onion",
+                                                               dim=ntraits, alphad=1,
+                                                               rangeVar=c(rangeGenVar, rangeGenVar))$Sigma
+      rownames(geneticCovMatrix) <- colnames(geneticCovMatrix) <- colnames(dag)
+      
+      traits.without.direct.gen.effect <- rownames(dag)[3]
+      
+      geneticCovMatrix[traits.without.direct.gen.effect, ] <- 0
+      geneticCovMatrix[ ,traits.without.direct.gen.effect] <- 0
+      
+      errorVars <- runif(min = rangeEnvVar[1], max = rangeEnvVar[1], n = ntraits)
+      names(errorVars) <- names(dag)
+      
+      gsem <- create.gsem(dag.adj = dag, genCovMatrix = geneticCovMatrix,
+                          errorVars = errorVars)
+      Rgraphviz::plot(gsem[['gdag']], main = "Simulated  genetic network")
+      
+      test <- rmvDAG_H2(ng = ng, r = r, gsem = gsem, simulate.QTLs = simulateQTLs,
+                        lambda.QTL = lambdaQTL, fix.number = fixnumber,
+                        alpha.QTL = alphaQTL, p.QTL = pQTL,
+                        K = K, use.K.names = TRUE, use.marker.matrix = T, M = M)
+      
+      nw.data <- test$fulldata[, 1:(ntraits+1)]
+      
+      trait.data[[counter]] <- cor(nw.data[, -1])["Trait.1", "Trait.2"]
+      
+      learnt.dag <- pcRes(nw.data, K = K,
+                          cov.method = "uni", m.max = Inf, verbose = F, alpha = 1e-2)
+      plot.nw(learnt.dag, "pcRes learnt network", fontsize = 20)
+      
+      cor <- cor(getResiduals(nw.data, cov.method = "uni", K = K))
+      learnt.gdag <- pcgen(nw.data, K = K, res.cor = cor, use.res = T, verbose = F, alpha = 1e-2)
+      plot.nw(learnt.gdag, "pcgen learnt network", fontsize = 20)
+      
+      bench.dag[counter, c("tpr", "fpr", "tdr")] <- t(pcalg::compareGraphs(learnt.dag@graph, gsem$dag))
+      bench.dag[counter, "shd"] <- pcalg::shd(learnt.dag@graph, gsem$dag)
+      bench.dag[counter, 1:3] <- c(dagcoeff, rangeGenVar, rangeEnvVar)
+      
+      plot.nw(learnt.dag, "pcRes learnt network", fontsize = 25)
+      
+      bench.gdag[counter, c("tpr", "fpr", "tdr")] <-
+        t(GraphPhenoSimulator::compareGeneticEffects(learnt.gdag@graph, gsem$gdag))
+      counter <- counter + 1
+    }
+}
+
+```
+
+
+```{r}
+bench.dag <- cbind(matrix(0, ncol = 3, nrow = 6), bench.dag)
+names(bench.dag)[1:3] <- c("dagcoeff", "rangeGenVar", "rangeEnvVar")
+counter <- 1
+
+for (dagcoeff in c(.1, .5, 1, 5, 10))
+  for (rangeGenVar in c(.01, .1, 1, 10))
+    for (rangeEnvVar in c(.01, .1, 1, 10)){
+      bench.dag[counter, 1:3] <- c(dagcoeff, rangeGenVar, rangeEnvVar)
+      counter <- counter + 1
+    }
+
+```
+
+
+```{r plotParameterEffects}
+g1 <- bench.dag %>% pivot_longer(-shd, names_to = "metric", values_to = "value") %>%
+  ggplot() +
+  geom_point(aes(x = metric, y = value)) +
+  geom_boxplot(aes(x = metric, y = value)) + theme_bw() +
+  labs(title = "Comparing traints-only network")
+
+g2 <- bench.dag %>% pivot_longer(shd, names_to = "metric", values_to = "value") %>%
+  ggplot(aes(x = metric, y = value)) +
+  geom_point() + geom_boxplot() + theme_bw() + theme(axis.title.y = element_blank())
+
+g3 <- bench.gdag %>% pivot_longer(everything(), names_to = "metric", values_to = "value") %>%
+  ggplot() +
+  geom_point(aes(x = metric, y = value)) +
+  geom_boxplot(aes(x = metric, y = value)) + theme_bw() +
+  labs(title = "Comparing genetic effects only")
+
+
+
+plot_grid( g1, g2 , g3, rel_widths = c(2, 1, 2))
+```
+
+
+
+## Now, test with strong network
+
+```{r tstParameterMeaning}
+runs <- 10
+
+bench.dag <- tibble::tibble(tpr = numeric(runs), fpr = numeric(runs),
+                            tdr = numeric(runs), shd = numeric(runs))
+
+bench.gdag <- tibble::tibble(tpr = numeric(runs), fpr = numeric(runs),
+                             tdr = numeric(runs))
+for (i in 1:runs){
+  print("---------------------------------------------------------------------")
+  print(i)
+  print("---------------------------------------------------------------------")
+  
+  ## Generate the data
+  { dag <- randomDAG2(n = ntraits, prob = p.edge, lB = dagcoeff[1], uB = dagcoeff[2],
+                      V = paste0('Trait', 1:ntraits), negative = negative)
+    Rgraphviz::plot(dag, main =
+                      paste("Simulated Traits only network- Erdoes-Renyi: p.edge =",
+                            p.edge, "weights range = ", dagcoeff[1], dagcoeff[2]))
+    
+    geneticCovMatrix <- clusterGeneration::genPositiveDefMat(covMethod = "onion",
+                                                             dim=ntraits, alphad=1,
+                                                             rangeVar=rangeGenVar)$Sigma
+    rownames(geneticCovMatrix) <- colnames(geneticCovMatrix) <- graph::nodes(dag)
+    
+    if (pgen < 1) {
+      if (fixngen == TRUE) {
+        if (topsort == TRUE) {
+          traits.without.direct.gen.effect <-
+            rev(match(names(igraph::topological.sort(igraph::graph_from_graphnel (dag))),
+                      names(graph::edgeL(dag)))) [1:(round((1 - pgen) * ntraits))]
+        } else  # topsort == FALSE
+          traits.without.direct.gen.effect <-
+            sample(1:ntraits, size = round((1 - pgen)*ntraits))
+      } else  # fixngen == F
+        traits.without.direct.gen.effect <-
+          which(rbinom(p = 1 - pgen, size=1, n = ntraits) == 1)
+    } else  # pgen >=1
+      traits.without.direct.gen.effect <- integer()
+    
+    geneticCovMatrix[traits.without.direct.gen.effect, ] <- 0
+    geneticCovMatrix[ ,traits.without.direct.gen.effect] <- 0
+    
+    errorVars <- runif(min = rangeEnvVar[1], max = rangeEnvVar[2], n = ntraits)
+    names(errorVars) <- graph::nodes(dag)
+    
+    gsem <- create.gsem(dag.adj = dag, genCovMatrix = geneticCovMatrix,
+                        errorVars = errorVars)
+    Rgraphviz::plot(gsem[['gdag']], main = "Simulated  genetic network")
+    
+    test <- rmvDAG_H2(ng = ng, r = r, gsem = gsem, simulate.QTLs = simulateQTLs,
+                      lambda.QTL = lambdaQTL, fix.number = fixnumber,
+                      alpha.QTL = alphaQTL, p.QTL = pQTL,
+                      K = K, use.K.names = TRUE, use.marker.matrix = T, M = M)
+    
+    nw.data <- test$fulldata[, 1:(ntraits+1)]
+    if (noise == T) {
+      for (j in (2:(ntraits+1)))
+        nw.data[,j] <- nw.data[,j] + rnorm(n = nrow(d),
+                                           sd = sqrt(extranoise * gsem$Ve[j-1,j-1]))
+    }
+  }
+  
+  ## Learn the networks
+  learnt.dag <- pcRes(nw.data, K = K,
+                      cov.method = "uni", m.max = Inf, verbose = F, alpha = 1e-3)
+  
+  cor <- cor(getResiduals(nw.data, cov.method = "uni", K = K))
+  
+  learnt.gdag <- pcgen(nw.data, K = K, res.cor = cor, use.res = T, verbose = F)
+  
+  ## Evaluate the learning:
+  
+  bench.dag[i, c("tpr", "fpr", "tdr")] <- t(pcalg::compareGraphs(learnt.dag@graph, gsem$dag))
+  bench.dag[i, "shd"] <- pcalg::shd(learnt.dag@graph, gsem$dag)
+  
+  
+  bench.gdag[i, c("tpr", "fpr", "tdr")] <-
+    t(GraphPhenoSimulator::compareGeneticEffects(learnt.gdag@graph, gsem$gdag))
+}
+```
+
+
+
+
+
+
+
+## Learning with pcRes
+
+```{r}
+
+par(mfrow=c(1,3))
+plot.nw(gsem$gdag, "True Genetic and traits network", fontsize = 20)
+plot.nw(gsem$dag, "True traits-only network", fontsize = 20)
+plot.nw(learnt.dag, "pcRes learnt network", fontsize = 25)
+
+
+# eval.nw(runs = 5, gsem$dag, suffStat = nw.data,
+#         K = K, cov.method = "uni", m.max = Inf)
+
+```
+## Learning with pcgen
+
+```{r}
+
+par(mfrow=c(2, 2))
+plot.nw(gsem$gdag, "True Genetic and traits network", fontsize = 20)
+plot.nw(gsem$dag, "True traits-only network", fontsize = 20)
+
+plot.nw(learnt.dag, "pcRes learnt network", fontsize = 25)
+
+```
+

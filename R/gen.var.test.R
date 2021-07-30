@@ -1,8 +1,6 @@
 #' @importFrom stats lm as.formula anova coefficients
 #'
 gen.var.test <- function(y, X = data.frame(), G, K = NULL, return.fitted = FALSE) {
-  # y=d[,2]; X=d[,3]; G=d[,1] # previous set up
-  # y = dm[, 2]; X = dm[,3]; G=dm[,1]; K = K # new contribution
 
   if (is.null(K)) { # Old code: suitable for plant data with replicates (K = ZZ^t)
     X <- as.data.frame(X)
@@ -22,12 +20,12 @@ gen.var.test <- function(y, X = data.frame(), G, K = NULL, return.fitted = FALSE
       fitted.values <- as.numeric(as.matrix(X) %*% matrix(as.numeric(coefficients(lm.obj))[2:(ncol(X)+1)]))
   } else {  # !(is.null(K)) Generic K = A
     X <- as.matrix(X)
-    if (ncol(X) == 0) { # Y_S = \phi
-      X <-  matrix(1, nrow = length(y))
-    } else {  # Y_S \ne \phi
+    #if (ncol(X) == 0) { # Y_S = \phi
+      #X <-  matrix(1, nrow = length(y))
+    #} else {  # Y_S \ne \phi
       X <- cbind(1, X)
-    }
-    lm.obj <- gaston::lmm.aireml(Y = y , X = X, K = K, verbose = F)
+    #}
+    lm.obj <- gaston::lmm.aireml(Y = as.matrix(y) , X = X, K = K, verbose = F)
     lrt <- max(2*(lm.obj$logL - lm.obj$logL0), 0)
     pvalue <- pchisq(lrt, df = 1, lower.tail = F)
     if (return.fitted == TRUE)

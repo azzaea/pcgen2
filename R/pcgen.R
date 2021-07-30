@@ -7,25 +7,29 @@
 #'
 #' The \code{pcgen} function is based on the \code{pc} function from the pcalg
 #' package (Kalisch et al. (2012) and Hauser and Buhlmann (2012)), with a
-#' different conditional independence test (see pcgenTest), as well as modified
-#' orientation rules.
+#' different conditional independence test (see \code{pcgenTest}), as well as
+#' modified orientation rules.
 #'
-#' Some parameters from the original pc function are fixed here: skel.method =
-#' "stable", u2pd = "relaxed", conservative = FALSE, maj.rule = TRUE and
-#' solve.confl = TRUE, while the user can set the "NAdelete" parameter (defaults
-#' to FALSE). Labels (defining the names of the nodes of the graph) is derived
-#' from the data-frame suffStat, containing the data
 #'
-#' pcgen requires phenotypic observations on multiple traits, measured on the
+#' Some \code{pc} function parameters are fixed here: `skel.method = "stable"`,
+#' `conservative = FALSE`, `maj.rule = TRUE` and `solve.confl = TRUE`. As a
+#' results, the resulting graph is fully order-independent (see Colombo and
+#' Maathuis 2014). Additionally, we fixed `u2pd = "relaxed"`, so that that an
+#' invalid CPDAG is output in case of conflicting orientation information.
+#' Labels (defining the names of the nodes of the graph) are derived from the
+#' data-frame `suffStat`, containing the data.
+#'
+#'
+#' `pcgen` requires phenotypic observations on multiple traits, measured on the
 #' same samples. The current implementation extends the genetic relatedness
 #' matrix definition from K = Z Z^t, Z being the incidence matrix assigning
 #' plants to genotypes (as is common in plants data) to a a marker-based
 #' relatedness matrix definition (appropriate for human data).
 #'
 #' The test for conditional independence between Yj and Yk given a set of traits
-#' YS can be based either on a bivariate mixed model (put res.cor = NULL) or on
-#' partial correlations among the residuals. In the latter case, res.cor should
-#' be the correlation matrix of the residuals, obtained with getResiduals.
+#' YS can be based either on a bivariate mixed model (put `res.cor = NULL`) or on
+#' partial correlations among the residuals. In the latter case, `res.cor` should
+#' be the correlation matrix of the residuals, obtained with \code{getResiduals}.
 #'
 #' @references * Kruijer, W., Behrouzi, P., Bustos-Korts, D., Rodríguez-Álvarez,
 #'   M. X., Mahmoudi, S. M., Yandell, B., ... & van Eeuwijk, F. A. (2020).
@@ -46,10 +50,10 @@
 #'   \email{willem.kruijer@wur.nl} and Pariya Behrouzi
 #'   \email{pariya.behrouzi@gmail.com}
 #'
-#' @param suffStat A data.frame with \eqn{(p+1)} columns, the first of which is the
-#'   factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
-#'   and optionally some QTLs. The name of the first column should be G. Should not
-#'   contain covariates.
+#' @param suffStat A data.frame with \eqn{(p+1)} columns, the first of which is
+#'   the factor G (genotype, i.e samples' IDs) and subsequent columns contain
+#'   the traits, and optionally some QTLs. The name of the first column should
+#'   be G. Should not contain covariates.
 #'
 #' @param covariates A data.frame containing covariates that should always be
 #'   used in each conditional independence test. Should be either \code{NULL}
@@ -57,24 +61,26 @@
 #'   An intercept is already included for each trait in suffStat; covariates
 #'   should not contain a column of ones.
 #'
-#' @param QTLs Column numbers in \code{suffStat} that correspond to QTLs. These may be
-#'   partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
-#'   Note: the factor genotype (column number 1) may occur in S, as well as x and y
+#' @param QTLs Column numbers in \code{suffStat} that correspond to QTLs. These
+#'   may be partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y}
+#'   cannot be both QTLs. Note: the factor genotype (column number 1) may occur
+#'   in S, as well as x and y
 #'
-#' @param K The kinship (i.e genetic relatedness matrix). It's a marker-based relatedness
-#'   (kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the number of unique genotypes
-#'   in the first column in \code{suffStat}. If \code{suffStat} contains replicates, this
-#'   argument should be set to \code{NULL} (the default).
-#'   If \code{NULL} (the default), independent  genetic effects are assumed.
-#'   In case of replicates, the resulting relatedness of the
-#'   observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
-#'   plants to genotypes.
+#' @param K The kinship (i.e genetic relatedness matrix). It's a marker-based
+#'   relatedness (kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the
+#'   number of unique genotypes in the first column in \code{suffStat}. If
+#'   \code{suffStat} contains replicates, this argument should be set to
+#'   \code{NULL} (the default). If \code{NULL} (the default), independent
+#'   genetic effects are assumed. In case of replicates, the resulting
+#'   relatedness of the observations will be \eqn{Z K Z^t}, where \eqn{Z} is the
+#'   incidence matrix assigning plants to genotypes.
 #'
-#' @param replicates Logical. Set to \code{TRUE} if your data (experimental design) is
-#'   balanced, and there are replicates. In this case, MANOVA will set starting values
-#'   for fitting and the kinship matrix \code{K} should not be provided. If there are
-#'   no replicates (unique genotypes), set \code{replicates = FALSE} and provide the
-#'   kinship matrix \code{K} parameter. Default is \code{TRUE}
+#' @param replicates Logical. Set to \code{TRUE} if your data (experimental
+#'   design) is balanced, and there are replicates. In this case, MANOVA will
+#'   set starting values for fitting and the kinship matrix \code{K} should not
+#'   be provided. If there are no replicates (unique genotypes), set
+#'   \code{replicates = FALSE} and provide the kinship matrix \code{K}
+#'   parameter. Default is \code{TRUE}
 #'
 #' @param use.manova Set to \code{TRUE} to let MANOVA set starting values for
 #'   fitting (Default). This is only valid if your experimental design is
@@ -93,10 +99,11 @@
 #'
 #' @param fixedEdges A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 #'   where \eqn{p} is the number of traits. The first row and column refer to
-#'   the genotype node \code{G}, and subsequent rows and columns to the traits. As in
-#'   the \code{pcalg} package, the edge \eqn{[i - j]} is never considered for removal if
-#'   the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
-#'   case, the edge is guaranteed to be present in the resulting graph.
+#'   the genotype node \code{G}, and subsequent rows and columns to the traits.
+#'   As in the \code{pcalg} package, the edge \eqn{[i - j]} is never considered
+#'   for removal if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are
+#'   \code{TRUE}. In that case, the edge is guaranteed to be present in the
+#'   resulting graph.
 #'
 #' @param fixedGaps  A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 #'   where \eqn{p} is the number of traits. The first row and column refer to
@@ -114,11 +121,12 @@
 #'   GBLUP. If \code{FALSE} (the default), it is based on bivariate mixed
 #'   models.
 #'
+#'
 #' @param res.cor If \code{use.res = TRUE}, \code{res.cor} should be the
 #'   correlation matrix of the residuals of the GBLUP- the residuals can be
 #'   obtained using the \code{getResiduals} function. If \code{res.cor} is
 #'   provided, it is based on partial correlations among the residuals, tested
-#'   using the gaussCItest function from pcalg. In case \code{res.cor} is
+#'   using the \code{\link[pcalg]{gaussCItest}} function. In case \code{res.cor} is
 #'   \code{NULL} (the default), the test for conditional independence between Yj
 #'   and Yk given a set of traits YS is based on a bivariate mixed model.
 #'
@@ -158,18 +166,14 @@
 #'
 #' @export
 #'
-pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, replicates = TRUE,
-                  use.manova = TRUE,
-                  alpha = 0.01, m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL,
-                  verbose = FALSE, use.res = FALSE, res.cor = NULL, max.iter = 50,
-                  stop.if.significant = TRUE, NAdelete = FALSE, return.pvalues = FALSE) {
+pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL,
+                  replicates = TRUE, use.manova = TRUE, alpha = 0.01,
+                  m.max = Inf,  fixedEdges = NULL, fixedGaps = NULL,
+                  use.res = FALSE, res.cor = NULL, max.iter = 50,
+                  stop.if.significant = TRUE, NAdelete = FALSE,
+                  verbose = FALSE, return.pvalues = FALSE) {
 
   cl <- match.call()
-
-  # if (is.null(K))
-  #   stopifnot(replicates)
-  # if (!is.null(K))
-  #   stopifnot(!replicates)
 
   if (is.null(alpha)) alpha = 0.01
 
@@ -193,52 +197,21 @@ pcgen <- function(suffStat, covariates = NULL, QTLs = integer(), K = NULL, repli
     non.collider.nodes <- 1
   }
 
+  if (use.res == TRUE)
+    stopifnot(!is.null(res.cor))
+
   ###
 
   labels <- colnames(suffStat)
-  p      <- ncol(suffStat)
+  p <- ncol(suffStat)
 
-
-  ##################################
-  # Azza: this comment block is confusing. remove it?
-  # The following chunk is (i) not in the original pcalg function
-  #                        (ii) ALSO in the skeleton2 function
-  #                             (which now can also deal with QTLs by itself)
-
-  #if (is.null(fixedEdges)) {
-  #  stopifnot(identical(dim(fixedEdges), c(p, p)))
-  #}
-
-  #if (is.null(fixedGaps)) {
-  #  gapMatrix <- matrix(FALSE, p, p)
-  #} else {
-  #  #stopifnot(identical(dim(fixedGaps), c(p, p)))
-  #  stopifnot(identical(dim(fixedGaps), c(p, p)))
-  #  gapMatrix <- as.matrix(fixedGaps)
-  #}
-
-  #if (length(QTLs) > 0) {
-  #  gapMatrix[c(1,QTLs),c(1,QTLs)] <- TRUE
-  #}
-
-  #fixedGaps <- gapMatrix
-
-  ##########################
-
-  skel <- skeleton2(suffStat = suffStat, QTLs = QTLs, K = K, alpha = alpha,
-                    labels = labels, p = p, m.max = m.max, replicates = replicates,
-                    use.manova = use.manova,
-                    fixedGaps = fixedGaps, fixedEdges = fixedEdges, NAdelete = NAdelete,
-                    covariates = covariates, max.iter = max.iter, use.res = use.res,
+  skel <- skeleton2(suffStat = suffStat, QTLs = QTLs, covariates = covariates,
+                    K = K, labels = labels, p = p, alpha = alpha, m.max = m.max,
+                    replicates = replicates, use.manova = use.manova,
+                    fixedGaps = fixedGaps, fixedEdges = fixedEdges,
+                    NAdelete = NAdelete,  max.iter = max.iter, use.res = use.res,
                     res.cor = res.cor, verbose = verbose,
                     stop.if.significant = stop.if.significant)
-  # Infer an order-independent skeleton (pcalg:: with skel.method = "stable")
-
-  # Azza: more old comments- delete?
-  ##16-1-18## : added Vg = Vg, Ve = Ve, dec = dec
-  #genVar <- skel[['genVar']]
-  #qtlVar <- skel[['qtlVar']]
-  #skel   <- skel[['skel.out']]
 
   skel@call <- cl
 

@@ -8,10 +8,10 @@ significance}
 gencovTest(suffStat, max.iter = 200, out.cor = TRUE)
 }
 \arguments{
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
-factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
-and optionally some QTLs. The name of the first column should be G. Should not
-contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is
+the factor G (genotype, i.e samples' IDs) and subsequent columns contain
+the traits, and optionally some QTLs. The name of the first column should
+be G. Should not contain covariates.}
 
 \item{max.iter}{Maximum number of iterations in the EM-algorithm, used to fit
 the bivariate mixed model (when \code{use.res = FALSE)}.}

@@ -1,0 +1,241 @@
+---
+title: "Tuning simulaiton parameters"
+author: "Azza Ahmed"
+date: "7/22/2021"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+pacman::p_load(dscrutils, tidyverse)
+```
+
+## Set up
+
+We are trying to see the effect of the simulation parameters in the learnt network, 
+i.e, which combination of parameters lead `pcgen` and `pcRes` to infer the correct network
+So, we:
+1. test with parameter combinations: 
+    * `dagcoeff`: 0.01, 0.1, .5, 1, 5
+    * `rangeGenVar`: c(.1, .2), c(1,2), c(4,5), c(9,10) # try using the same value lb and up; the tendency should be larger range, results in larger genetic effects.
+    * `rangeEnvVar`: c(.1, .2), c(1,2), c(4,5), c(9,10)
+2. learn without genotype
+
+
+## Simulation 1:
+
+We simulate a simple 3 node network using the script: `simulation_tuning.dsc`.
+Here, *Trait1* causes *Trait2* (with `dagcoeff`), and both are genetic, while 
+*Trait3* is indepenent of all.
+
+The expectation here is that:
+1. `pcRes` should learn the skeleton: $Trait1 \longleftrightarrow Trait2$
+2. `pcgen` should learn the skeleton: $G \rightarrow Trait1; G \rightarrow Trait2; Trait1 \longleftrightarrow Trait2 $
+
+
+```{r}
+
+dscout <- dscquery(dsc.outdir= "progress/simulation_tuning/", 
+                   targets = c("simulate.dagcoeff", "simulate.rangeGenVar", 
+                               "simulate.rangeEnvVar", "simulate.true_dag",
+                               "simulate.data", "simulate.cor_traits",
+                               "learn", "learn.learnt_dag", "learn.cor_residuals",
+                               "learn.dagfit_tpr", "learn.dagfit_fpr", 
+                               "learn.dagfit_tdr", "learn.dagfit_shd", 
+                               "learn.genfit_tpr", "learn.genfit_fpr", 
+                               "learn.genfit_tdr" ))  %>% as_tibble()
+```
+
+### Zoom-in to 1 simulation
+So, we investigate a bit the networks visually, before looking into summary stats:
+
+```{r}
+nw.pc.vanilla <- pcalg::pc(suffStat = list(C = cor(dscout$simulate.data[[1]][, -1]), 
+                                           n = nrow(dscout$simulate.data[[1]])),
+                       indepTest = pcalg::gaussCItest, alpha = 0.01,
+                        labels = names(dscout$simulate.data[[1]][,-1]), m.max = Inf, # for pcRes
+                       skel.method = "stable", u2pd = "relaxed", NAdelete = FALSE,
+                       conservative = FALSE, maj.rule = TRUE, solve.confl = TRUE)
+
+par(mfrow = c(2, 3))
+
+plot.nw(dscout$simulate.true_dag[[2]]$dag, "Simulated traits-only network", fontsize = 20)
+plot.nw(dscout[dscout$learn == "learntraits", ]$learn.learnt_dag[[1]], "pcRes learnt network", fontsize = 20)
+plot.nw(nw.pc.vanilla, "pcalg::pc network", fontsize = 8)
+
+
+plot.nw(dscout$simulate.true_dag[[2]]$gdag, "Complete simulated  Genetic network", fontsize = 20)
+plot.nw(dscout[dscout$learn == "learngtraits", ]$learn.learnt_dag[[1]], "pcgen learnt network", fontsize = 20)
+
+```
+
+
+### Residuals
+
+Q: Would vanilla `pc` act similarly to `pcRes`?
+Guess: This depends on the relation between traits vs residulas
+
+```{r}
+dscout %>% filter(learn == "learngtraits") %>% 
+  select(simulate.cor_traits, DSC, learn.cor_residuals) %>% 
+  mutate(cor_residuals = learn.cor_residuals %>% map_dbl(3),
+         cor_traits = simulate.cor_traits,
+         replicate = factor(DSC)) %>%
+  ggplot(aes(x = cor_traits, y = cor_residuals, group = replicate)) + geom_point(aes(, color = replicate)) +
+  geom_smooth(
+               se = FALSE) +
+  theme_classic()
+  
+```
+
+
+### Aggregate results
+
+```{r }
+dscout <- dscout %>% 
+  group_by(simulate.dagcoeff,simulate.rangeGenVar,simulate.rangeEnvVar, learn) %>% 
+  summarise(across(learn.dagfit_tpr:learn.genfit_tdr, mean)) 
+
+dscout %>% ggplot() + 
+  geom_jitter(aes(x = simulate.dagcoeff, y = learn.dagfit_tpr, 
+                  color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, width = 0.02, alpha = .6)+  theme_classic()
+
+dscout %>% ggplot() + 
+  geom_jitter(aes(x = simulate.dagcoeff, y = learn.dagfit_fpr, 
+                  color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, width = 0.02, alpha = .6)+  theme_classic()
+
+dscout %>% ggplot() + 
+  geom_jitter(aes(x = simulate.dagcoeff, y = learn.dagfit_tdr, 
+                  color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, width = 0.02, alpha = .6)+  theme_classic()
+
+dscout %>% ggplot() + 
+  geom_jitter(aes(x = simulate.dagcoeff, y = learn.dagfit_shd, 
+                  color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, width = 0.02, alpha = .6)+  theme_classic()
+
+dscout %>% filter(learn == "learngtraits") %>% ggplot() + 
+  geom_jitter(aes(x = simulate.dagcoeff, y = learn.genfit_tpr, 
+                  color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, width = 0.02, alpha = .6)+  theme_classic()
+
+dscout %>% filter(learn == "learngtraits") %>% ggplot() + 
+  geom_jitter(aes(x = simulate.dagcoeff, y = learn.genfit_fpr, 
+                  color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, width = 0.02, alpha = .6)+  theme_classic()
+
+dscout %>% filter(learn == "learngtraits") %>% ggplot() + 
+  geom_jitter(aes(x = simulate.dagcoeff, y = learn.genfit_tdr, 
+                  color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, width = 0.02, alpha = .6)+  theme_classic()
+
+
+dscout %>% filter(learn == "learngtraits") %>% ggplot() + 
+  geom_contour_filled(aes( z = learn.genfit_tdr, 
+                  x = as.numeric(as.factor(simulate.rangeGenVar)), y = as.numeric(as.factor(simulate.rangeEnvVar)))
+               )+  theme_classic()
+
+```
+
+
+## Simulation 2:
+
+This is a simple 3 nodes network where *Trait1* causes *Trait2* (with `dagcoeff`),
+while only *Trait3* has direct genetic effect. The simulation script used here is:
+`simulation_tuning_3genetic.dsc`
+
+The expectation here is that:
+1. `pcRes` should learn the skeleton: $Trait1 \longleftrightarrow Trait2$
+2. `pcgen` should learn the skeleton: $G \rightarrow Trait3;  Trait1 \longleftrightarrow Trait2 $
+
+```{r}
+pacman::p_load(dscrutils, tidyverse)
+
+dscout_3g_simplified <- dscquery(dsc.outdir= "progress/simulation_tuning_3genetic/", 
+                   targets = c("simulate.dagcoeff", "simulate.rangeGenVar", 
+                               "simulate.rangeEnvVar", "learn",
+                               "learn.dagfit_tpr", "learn.dagfit_fpr", 
+                               "learn.dagfit_tdr", "learn.dagfit_shd", 
+                               "learn.genfit_tpr", "learn.genfit_fpr", 
+                               "learn.genfit_tdr", 
+                                "simulate.cor_traits", "learn.cor_residuals",
+                               "simulate.true_dag", "learn.learnt_dag", "learn.learnt_gdag",
+                               "simulate.genvar"))  
+
+dscout_3g_simplified$simulate.dagcoeff[[1]]
+plot.nw(dscout_3g_simplified$learn.learnt_dag[[1]], "DAG", fontsize = 10)
+
+dscout_3g_simplified$simulate.dagcoeff[[4]]
+dscout_3g_simplified$simulate.genvar[[4]]
+plot.nw(dscout_3g_simplified$learn.learnt_gdag[[3]], "DAG", fontsize = 10)
+
+
+index <- which(dscout_3g$simulate.dagcoeff == .1)
+dscout_3g$simulate.cor_traits[index]
+
+dscout_3g$learn.dagfit_tpr[[1]]
+C=dscout_3g_simplified$learn.cor_residuals[4]
+
+dscout_3g$simulate.rangeGenVar[index][50]
+dscout_3g$simulate.rangeEnvVar[index][50]
+Rgraphviz::plot(pcalg::pc(suffStat = list(C = C, n = 500), labels = rownames(C), 
+                          indepTest = gaussCItest, alpha = .01))
+
+
+pdf("jitters_3gen.pdf")
+dscout_3g %>% ggplot() + geom_point(aes(x = simulate.dagcoeff, y = learn.dagfit_tpr, 
+                                      color = simulate.rangeGenVar, shape = simulate.rangeEnvVar)
+                                  )+ theme_classic()
+
+dscout_3g %>% ggplot() + geom_jitter(aes(x = simulate.dagcoeff, y = learn.dagfit_fpr, 
+                                      color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, alpha = .6)+  theme_classic()
+
+dscout_3g %>% ggplot() + geom_jitter(aes(x = simulate.dagcoeff, y = learn.dagfit_tdr, 
+                                      color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, alpha = .6)+  theme_classic()
+
+dscout_3g %>% ggplot() + geom_jitter(aes(x = simulate.dagcoeff, y = learn.dagfit_shd, 
+                                      color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, alpha = .6)+  theme_classic()
+
+dscout_3g %>% ggplot() + geom_jitter(aes(x = simulate.dagcoeff, y = learn.genfit_tpr, 
+                                      color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, alpha = .6)+  theme_classic()
+
+dscout_3g %>% ggplot() + geom_jitter(aes(x = simulate.dagcoeff, y = learn.genfit_fpr, 
+                                      color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, alpha = .6)+  theme_classic()
+
+dscout_3g %>% ggplot() + geom_jitter(aes(x = simulate.dagcoeff, y = learn.genfit_tdr, 
+                                      color = simulate.rangeGenVar, shape = simulate.rangeEnvVar),
+              height = .02, alpha = .6)+  theme_classic()
+dev.off()
+
+
+
+pdf("lines_3gen.pdf")
+dscout_3g %>% ggplot() + geom_line(aes(x = simulate.dagcoeff, y = learn.dagfit_tpr, 
+                                    color = simulate.rangeGenVar, linetype = simulate.rangeEnvVar)) + theme_classic()
+dscout_3g %>% ggplot() + geom_line(aes(x = simulate.dagcoeff, y = learn.dagfit_fpr, 
+                                    color = simulate.rangeGenVar, linetype = simulate.rangeEnvVar)) + theme_classic()
+dscout_3g %>% ggplot() + geom_line(aes(x = simulate.dagcoeff, y = learn.dagfit_tdr, 
+                                    color = simulate.rangeGenVar, linetype = simulate.rangeEnvVar)) + theme_classic()
+dscout_3g %>% ggplot() + geom_line(aes(x = simulate.dagcoeff, y = learn.dagfit_shd, 
+                                    color = simulate.rangeGenVar, linetype = simulate.rangeEnvVar)) + theme_classic()
+dscout_3g %>% ggplot() + geom_line(aes(x = simulate.dagcoeff, y = learn.genfit_tpr, 
+                                    color = simulate.rangeGenVar, linetype = simulate.rangeEnvVar)) + theme_classic()
+dscout_3g %>% ggplot() + geom_line(aes(x = simulate.dagcoeff, y = learn.genfit_fpr, 
+                                    color = simulate.rangeGenVar, linetype = simulate.rangeEnvVar)) + theme_classic()
+dscout_3g %>% ggplot() + geom_line(aes(x = simulate.dagcoeff, y = learn.genfit_tdr, 
+                                    color = simulate.rangeGenVar, linetype = simulate.rangeEnvVar)) + theme_classic()
+dev.off()
+
+
+```
+
+

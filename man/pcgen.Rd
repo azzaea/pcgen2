@@ -15,20 +15,20 @@ pcgen(
   m.max = Inf,
   fixedEdges = NULL,
   fixedGaps = NULL,
-  verbose = FALSE,
   use.res = FALSE,
   res.cor = NULL,
   max.iter = 50,
   stop.if.significant = TRUE,
   NAdelete = FALSE,
+  verbose = FALSE,
   return.pvalues = FALSE
 )
 }
 \arguments{
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
-factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
-and optionally some QTLs. The name of the first column should be G. Should not
-contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is
+the factor G (genotype, i.e samples' IDs) and subsequent columns contain
+the traits, and optionally some QTLs. The name of the first column should
+be G. Should not contain covariates.}
 
 \item{covariates}{A data.frame containing covariates that should always be
 used in each conditional independence test. Should be either \code{NULL}
@@ -36,24 +36,26 @@ used in each conditional independence test. Should be either \code{NULL}
 An intercept is already included for each trait in suffStat; covariates
 should not contain a column of ones.}
 
-\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These may be
-partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
-Note: the factor genotype (column number 1) may occur in S, as well as x and y}
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
+may be partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y}
+cannot be both QTLs. Note: the factor genotype (column number 1) may occur
+in S, as well as x and y}
 
-\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based relatedness
-(kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the number of unique genotypes
-in the first column in \code{suffStat}. If \code{suffStat} contains replicates, this
-argument should be set to \code{NULL} (the default).
-If \code{NULL} (the default), independent  genetic effects are assumed.
-In case of replicates, the resulting relatedness of the
-observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
-plants to genotypes.}
+\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based
+relatedness (kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the
+number of unique genotypes in the first column in \code{suffStat}. If
+\code{suffStat} contains replicates, this argument should be set to
+\code{NULL} (the default). If \code{NULL} (the default), independent
+genetic effects are assumed. In case of replicates, the resulting
+relatedness of the observations will be \eqn{Z K Z^t}, where \eqn{Z} is the
+incidence matrix assigning plants to genotypes.}
 
-\item{replicates}{Logical. Set to \code{TRUE} if your data (experimental design) is
-balanced, and there are replicates. In this case, MANOVA will set starting values
-for fitting and the kinship matrix \code{K} should not be provided. If there are
-no replicates (unique genotypes), set \code{replicates = FALSE} and provide the
-kinship matrix \code{K} parameter. Default is \code{TRUE}}
+\item{replicates}{Logical. Set to \code{TRUE} if your data (experimental
+design) is balanced, and there are replicates. In this case, MANOVA will
+set starting values for fitting and the kinship matrix \code{K} should not
+be provided. If there are no replicates (unique genotypes), set
+\code{replicates = FALSE} and provide the kinship matrix \code{K}
+parameter. Default is \code{TRUE}}
 
 \item{use.manova}{Set to \code{TRUE} to let MANOVA set starting values for
 fitting (Default). This is only valid if your experimental design is
@@ -72,10 +74,11 @@ accept/ reject decision.}
 
 \item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 where \eqn{p} is the number of traits. The first row and column refer to
-the genotype node \code{G}, and subsequent rows and columns to the traits. As in
-the \code{pcalg} package, the edge \eqn{[i - j]} is never considered for removal if
-the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
-case, the edge is guaranteed to be present in the resulting graph.}
+the genotype node \code{G}, and subsequent rows and columns to the traits.
+As in the \code{pcalg} package, the edge \eqn{[i - j]} is never considered
+for removal if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are
+\code{TRUE}. In that case, the edge is guaranteed to be present in the
+resulting graph.}
 
 \item{fixedGaps}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 where \eqn{p} is the number of traits. The first row and column refer to
@@ -84,9 +87,6 @@ the pcalg package, the edge \eqn{[i - j]} is removed before starting the
 algorithm if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are
 \code{TRUE}. In that case, the edge is guaranteed to be absent in the
 resulting graph.}
-
-\item{verbose}{If \code{TRUE}, p-values for the conditional independence
-tests are printed}
 
 \item{use.res}{If \code{TRUE}, the test for conditional independence of 2
 traits given a set of other traits and \eqn{G} is based on residuals from
@@ -116,6 +116,9 @@ interest.}
 TRUE deletes the edge corresponding to the conditional independence test
 when it returns NA. Default is FALSE}
 
+\item{verbose}{If \code{TRUE}, p-values for the conditional independence
+tests are printed}
+
 \item{return.pvalues}{If \code{TRUE}, the maximal p-value for each edge is
 returned.}
 }
@@ -134,25 +137,27 @@ replicates, assuming independent genetic effects.
 \details{
 The \code{pcgen} function is based on the \code{pc} function from the pcalg
 package (Kalisch et al. (2012) and Hauser and Buhlmann (2012)), with a
-different conditional independence test (see pcgenTest), as well as modified
-orientation rules.
+different conditional independence test (see \code{pcgenTest}), as well as
+modified orientation rules.
 
-Some parameters from the original pc function are fixed here: skel.method =
-"stable", u2pd = "relaxed", conservative = FALSE, maj.rule = TRUE and
-solve.confl = TRUE, while the user can set the "NAdelete" parameter (defaults
-to FALSE). Labels (defining the names of the nodes of the graph) is derived
-from the data-frame suffStat, containing the data
+Some \code{pc} function parameters are fixed here: \code{skel.method = "stable"},
+\code{conservative = FALSE}, \code{maj.rule = TRUE} and \code{solve.confl = TRUE}. As a
+results, the resulting graph is fully order-independent (see Colombo and
+Maathuis 2014). Additionally, we fixed \code{u2pd = "relaxed"}, so that that an
+invalid CPDAG is output in case of conflicting orientation information.
+Labels (defining the names of the nodes of the graph) are derived from the
+data-frame \code{suffStat}, containing the data.
 
-pcgen requires phenotypic observations on multiple traits, measured on the
+\code{pcgen} requires phenotypic observations on multiple traits, measured on the
 same samples. The current implementation extends the genetic relatedness
 matrix definition from K = Z Z^t, Z being the incidence matrix assigning
 plants to genotypes (as is common in plants data) to a a marker-based
 relatedness matrix definition (appropriate for human data).
 
 The test for conditional independence between Yj and Yk given a set of traits
-YS can be based either on a bivariate mixed model (put res.cor = NULL) or on
-partial correlations among the residuals. In the latter case, res.cor should
-be the correlation matrix of the residuals, obtained with getResiduals.
+YS can be based either on a bivariate mixed model (put \code{res.cor = NULL}) or on
+partial correlations among the residuals. In the latter case, \code{res.cor} should
+be the correlation matrix of the residuals, obtained with \code{getResiduals}.
 }
 \examples{
 \dontrun{

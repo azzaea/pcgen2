@@ -53,203 +53,112 @@
 #'
 
 getResiduals <- function(suffStat, covariates=NULL, cov.method = 'uni',
-                         K = NULL) {
+                         K = NULL, verbose = FALSE) {
 
-  #suffStat = dr[, 1:10]; covariates = dr[, 37:38]; cov.method = 'uni'; K = NULL
+  stopifnot(cov.method %in% c('uni','us'))
 
-# cov.method :
-#           'us' (fit an unstructured multi-trait model using sommer)
-#           and 'uni' (univariate : single trait models with lme4)
+  names(suffStat)[1] <- 'G'
 
-# to do: * further (i.e. nongenetic) covariates
-#        * incorporate K
+  max.rep <- max(table(suffStat$G))
 
-# suffStat = d; cov.method = 'us'; covariates = NULL
-
-    stopifnot(cov.method %in% c('uni','us'))
-
-    names(suffStat)[1] <- 'G'
-
-    max.rep <- max(table(suffStat$G))
-
-    if (max.rep==1 & is.null(K)) {
-      if (!is.null(covariates)) {
-        covariates <- NULL
-        cat('covariates is set to NULL, as the data seem to contain genotypic means', '\n')
-      }
-    }
-
-    #if (max(as.numeric(unlist(lapply(cbind(suffStat, covariates), function(x){sum(is.na(x))})))) > 0.001) {
-    if (max(as.numeric(unlist(lapply(suffStat, function(x){sum(is.na(x))})))) > 0.001) {
-      if (cov.method == 'us') {stop('Missing values detected. Choose cov.method = uni')}
-    }
-
-    p           <- ncol(suffStat)
-
-    res         <- matrix(NA, nrow(suffStat), p-1)
-
-    if (p==2 & cov.method!='uni') {
-      cov.method <- 'uni'
-      cat('Warning: there seems to be only 1 trait; cov.method is put to uni')
-    }
-
+  if (max.rep==1 & is.null(K)) {
     if (!is.null(covariates)) {
-      covariates        <- as.data.frame(covariates)
-      names(covariates) <- paste0('CoVaRiaTe_',1:ncol(covariates))
-      stopifnot(nrow(covariates)==nrow(suffStat))
-      suffStat          <- cbind(suffStat, covariates)
-      cv                <- paste('~', paste(names(covariates), collapse ='+'), '+')
-      cv2               <- cv
-      cv3               <- paste0('cbind(',paste(names(suffStat)[2:p], collapse=','),')~', paste(names(covariates), collapse ='+'))
+      covariates <- NULL
+      cat('covariates is set to NULL, as the data seem to contain genotypic means', '\n')
+    }
+  }
+
+  # Limit missingness to < 0.001 if using multi-trait model fitting
+  if (max(as.numeric(unlist(lapply(suffStat, function(x){sum(is.na(x))})))) > 0.001) {
+    if (cov.method == 'us') {stop('Missing values detected. Choose cov.method = uni')}
+  }
+
+  p           <- ncol(suffStat)
+  res         <- matrix(NA, nrow(suffStat), p-1)
+
+  if (p==2 & cov.method!='uni') {
+    cov.method <- 'uni'
+    cat('Warning: there seems to be only 1 trait; cov.method is put to uni')
+  }
+
+  if (!is.null(covariates)) {
+    # covariates        <- as.data.frame(covariates)
+    # names(covariates) <- paste0('CoVaRiaTe_',1:ncol(covariates))
+    stopifnot(nrow(covariates) == nrow(suffStat))
+
+    cv        <- paste('~', paste(names(covariates), collapse ='+'), '')
+    cv.matrix <- model.matrix(formula(cv), data = covariates)
+    #cv2      <- cv
+    cv3       <- paste0('cbind(',paste(names(suffStat)[2:p], collapse=','),')~', paste(names(covariates), collapse ='+'))
+  } else {
+    cv.matrix <- matrix(1, nrow = nrow(suffStat))
+    cv                <- '~'
+    #cv2               <- '~ 1'
+    cv3               <- paste0('cbind(',paste(names(suffStat)[2:p], collapse=','),')~ 1')
+  }
+
+  if (cov.method != 'uni' | !is.null(K)) {
+    Z.t <- as.matrix(make.Z.matrix(suffStat$G))
+
+    # define Ks, the kinship to be used by sommer
+    if (is.null(K)) {
+      Ks <- round(Z.t %*% t(Z.t))
+    } else
+      Ks <- Z.t %*% as.matrix(K) %*% t(Z.t)
+
+    rownames(Ks) <- colnames(Ks) <- rownames(suffStat) <-
+      paste0(suffStat$G, '_', 1:nrow(suffStat))
+    suffStat$id <- rownames(suffStat)
+  } # end: if (cov.method != 'uni' | !is.null(K))
+
+  ## Finding the residuals: --------------------------------------------------
+  eiK <- eigen(K)
+  if (cov.method=='us') {
+    # Azza: specifying the constraints is a bit strange... for unstructured covariance
+    # it should be: unsm(# of traits). Not clear why here it says unsm(ncol(suffStat)-2)
+    # it seems that this assumes 1 covariate, and 1 column of suffStat is G.
+    # We could have more than 1 covariate, so this won't work. Also, there is an id column
+    # added to suffStat too, and it should be removed
+    out <- mmer(fixed  = as.formula(cv3),
+                random = ~ vs(id, Gu = Ks, Gtc = unsm(ncol(suffStat) -2) ),
+                rcov   = ~ vs(units, Gtc = unsm(ncol(suffStat) -2)),
+                data   =  cbind(suffStat, covariates))
+
+    if (out$convergence == TRUE) {
+      gb <- matrix(NA, nrow(suffStat), p-1)
+      for (j in 2:p)
+        gb[,j-1] <- out$U[[1]][[j-1]][suffStat$id]
+      res <- suffStat[,2:p] - gb
     } else {
-      cv                <- '~'
-      cv2               <- '~ 1'
-      cv3               <- paste0('cbind(',paste(names(suffStat)[2:p], collapse=','),')~ 1')
+      cov.method <- 'uni'
+      cat('Warning: no convergence. cov.method is set to uni','\n')
     }
+  } # end: if (cov.method=='us')
 
-    if (cov.method != 'uni' | !is.null(K)) {
-
-      Z.t <- as.matrix(make.Z.matrix(suffStat$G))
-
-      # define Ks, the kinship to be used by sommer
-      if (is.null(K)) {
-        Ks <- round(Z.t %*% t(Z.t))
-      } else {
-        Ks <- Z.t %*% as.matrix(K) %*% t(Z.t)
+  if (cov.method=='uni') {
+    if (is.null(K)) {
+      lmer.cv <- paste(cv, '+(1|G)')
+      for (j in 2:p) {
+        out      <- lmer(as.formula(paste0(names(suffStat)[j], lmer.cv)),
+                         data = suffStat)
+        res[which(!is.na(suffStat[,j])), j - 1] <- as.numeric(residuals(out))
       }
+    } else {#if (!is.null(K))
+      for (j in 2:p) {
+        # out.s <- mmer(fixed  = as.formula(paste0(names(suffStat)[j], cv2)),
+        #              random = ~vs(id, Gu = Ks),
+        #              rcov   = ~vs(units), data=suffStat)
+        # res[which(!is.na(suffStat[,j])), j - 1] <-  suffStat[,j][[1]]- out$U[[1]][[1]][suffStat$id]
+        out <- gaston::lmm.diago(Y = suffStat[[j]], X = cv.matrix,
+                                 eigenK = eiK, verbose = verbose)
+        # limit to non-missing values:
+        res[which(!is.na(suffStat[,j])), j - 1] <-  suffStat[,j]- out$BLUP_omega - out$Xbeta
+      } # end for (j in 2:p)
+    } # end else [i.e, if (!is.null(K))]
+    rownames(res) <- rownames(suffStat)
+  } # end if (cov.method=='uni')
 
-      rownames(Ks) <- colnames(Ks) <- rownames(suffStat) <- paste0(suffStat$G,'_', 1:nrow(suffStat))
+  colnames(res) <- names(suffStat)[2:p]
 
-      suffStat$id <- rownames(suffStat)
-
-    }
-
-
-
-    if (cov.method=='us') {
-
-      #out <- mmer2(fixed = as.formula(cv3), random=~us(trait):g(id),
-      #                     rcov=~us(trait):units, data=suffStat, draw = F,
-      #                     silent = T, G = list(id = Ks))
-
-      out <- mmer(fixed  = as.formula(cv3),
-                  random = ~ vs(id, Gu = Ks, Gtc = unsm(ncol(suffStat) -2) ),
-                  rcov   = ~ vs(units, Gtc = unsm(ncol(suffStat) -2)),
-                  data   =  suffStat)
-
-      if (out$convergence == TRUE) {
-
-        gb <- matrix(NA, nrow(suffStat), p-1)
-        for (j in 2:p) {
-          gb[,j-1] <- out$U[[1]][[j-1]][suffStat$id]
-        }
-
-        #res <- out$residuals - gb
-        res <- suffStat[,2:p] - gb
-      } else {
-        cov.method <- 'uni'
-        cat('Warning: no convergence. cov.method is set to uni','\n')
-      }
-    }
-
-    if (cov.method=='uni') {
-
-      if (is.null(K)) {
-
-        lmer.cv <- paste(cv, '(1|G)')
-
-        for (j in 2:p) {
-
-          out      <- lmer(as.formula(paste0(names(suffStat)[j], lmer.cv)),
-                           data = suffStat)
-
-          res[which(!is.na(suffStat[,j])), j - 1] <- as.numeric(residuals(out))
-
-        }
-
-      } else {
-
-        for (j in 2:p) {
-
-          #out <- mmer2(fixed = as.formula(paste0(names(suffStat)[j], cv2)),
-          #             random = ~ g(id),
-          #             data = suffStat, draw = F,
-          #             silent = T, G = list(id = Ks))
-
-          out <- mmer(fixed  = as.formula(paste0(names(suffStat)[j], cv2)),
-                      random = ~vs(id, Gu = Ks),
-                      rcov   = ~vs(units), data=suffStat)
-
-          #res[which(!is.na(suffStat[,j])), j - 1] <- as.numeric(out$residuals) - out$U[[1]][[1]][suffStat$id]
-          res[which(!is.na(suffStat[,j])), j - 1] <-  suffStat[,j]- out$U[[1]][[1]][suffStat$id]
-        }
-      }
-      rownames(res) <- rownames(suffStat)
-    }
-
-    colnames(res) <- names(suffStat)[2:p]
-
-return(as.data.frame(res))
+  return(as.data.frame(res))
 }
-
-# if (cov.method=='fe') {
-#
-#   Vg <- Ve <- matrix(0, p - 1, p - 1)
-#
-#   if (is.null(covariates)) {
-#     cv <- '~ (1|G)'
-#     X.t <- Matrix(rep(1, nrow(suffStat)))
-#   } else {
-#     stopifnot(nrow(suffStat)==nrow(covariates))
-#     covariates        <- as.data.frame(covariates)
-#     names(covariates) <- paste0('covariate_', 1:ncol(covariates))
-#     suffStat          <- cbind(suffStat, covariates)
-#     cv <- paste('~',paste(names(covariates), collapse ='+'), '+ (1|G)')
-#     X.t <- Matrix(cbind(rep(1, nrow(suffStat)), as.matrix(covariates)))
-#   }
-#
-#   for (j in 1:(p-1)) {
-#
-#     out      <- lmer(as.formula(paste0(names(suffStat)[j+1], cv)), data = suffStat)
-#
-#     temp <- as.data.frame(VarCorr(out))[,'vcov']
-#
-#     Vg[j,j] <- temp[1]
-#
-#     Ve[j,j] <- temp[2]
-#
-#   }
-#
-#   for (j in 1:(p-2)) {
-#
-#     for (k in (j+1):(p-1)) {
-#
-#       em.vec        <- c(suffStat[,j+1], suffStat[,k+1])
-#       names(em.vec) <- rep(as.character(suffStat$G), 2)
-#
-#       out <- fitEM(y = em.vec, X.t = X.t, Z.t = Z.t, max.iter = 300)
-#
-#       Vg[j,k] <- Vg[k,j] <- out$variances$Vg[3]
-#
-#       Ve[j,k] <- Ve[k,j] <- out$variances$Ve[3]
-#
-#     }
-#   }
-#
-#   Vg <- as.matrix(nearPD(Vg, keepDiag=T)$mat)
-#
-#   Ve <- as.matrix(nearPD(Ve, keepDiag=T, maxit=500)$mat)
-#
-#   ###
-#
-#   if (!is.null(covariates)) {
-#     cv.sommer <- paste0('cbind(',paste(names(suffStat)[2:p], collapse=','),')~', paste(names(covariates), collapse ='+'))
-#   } else {
-#     cv.sommer <- paste0('cbind(',paste(names(suffStat)[2:p], collapse=','),')~ 1')
-#   }
-#
-#   out <- mmer2(fixed = as.formula(cv.sommer), random = ~ G, data=suffStat,
-#                draw = F, silent = T, forced = list(`g(id)` = Vg, units = Ve))
-#
-#   res <- out$cond.residuals
-# }

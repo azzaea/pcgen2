@@ -10,10 +10,10 @@ checkG(pcgen.output, suffStat, alpha = 0.01, covariates = NULL)
 \item{pcgen.output}{a graph with nodes G (genotype) and a number of traits.
 Typically output from \code{pcgen} or \code{pcgenFast}.}
 
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
-factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
-and optionally some QTLs. The name of the first column should be G. Should not
-contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is
+the factor G (genotype, i.e samples' IDs) and subsequent columns contain
+the traits, and optionally some QTLs. The name of the first column should
+be G. Should not contain covariates.}
 
 \item{alpha}{The significance level used in each conditional independence
 test. Default is 0.01. The test itself of course does not depend on this,

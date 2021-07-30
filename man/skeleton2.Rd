@@ -26,29 +26,31 @@ skeleton2(
 )
 }
 \arguments{
-\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is the
-factor G (genotype, i.e samples' IDs) and subsequent columns contain the traits,
-and optionally some QTLs. The name of the first column should be G. Should not
-contain covariates.}
+\item{suffStat}{A data.frame with \eqn{(p+1)} columns, the first of which is
+the factor G (genotype, i.e samples' IDs) and subsequent columns contain
+the traits, and optionally some QTLs. The name of the first column should
+be G. Should not contain covariates.}
 
-\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These may be
-partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y} cannot be both QTLs.
-Note: the factor genotype (column number 1) may occur in S, as well as x and y}
+\item{QTLs}{Column numbers in \code{suffStat} that correspond to QTLs. These
+may be partly in \eqn{S} and \eqn{x} and \eqn{y}, but \eqn{x} and \eqn{y}
+cannot be both QTLs. Note: the factor genotype (column number 1) may occur
+in S, as well as x and y}
 
-\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based relatedness
-(kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the number of unique genotypes
-in the first column in \code{suffStat}. If \code{suffStat} contains replicates, this
-argument should be set to \code{NULL} (the default).
-If \code{NULL} (the default), independent  genetic effects are assumed.
-In case of replicates, the resulting relatedness of the
-observations will be \eqn{Z K Z^t}, where \eqn{Z} is the incidence matrix assigning
-plants to genotypes.}
+\item{K}{The kinship (i.e genetic relatedness matrix). It's a marker-based
+relatedness (kinship) matrix of dimension \eqn{n x n}, \eqn{n} being the
+number of unique genotypes in the first column in \code{suffStat}. If
+\code{suffStat} contains replicates, this argument should be set to
+\code{NULL} (the default). If \code{NULL} (the default), independent
+genetic effects are assumed. In case of replicates, the resulting
+relatedness of the observations will be \eqn{Z K Z^t}, where \eqn{Z} is the
+incidence matrix assigning plants to genotypes.}
 
-\item{replicates}{Logical. Set to \code{TRUE} if your data (experimental design) is
-balanced, and there are replicates. In this case, MANOVA will set starting values
-for fitting and the kinship matrix \code{K} should not be provided. If there are
-no replicates (unique genotypes), set \code{replicates = FALSE} and provide the
-kinship matrix \code{K} parameter. Default is \code{TRUE}}
+\item{replicates}{Logical. Set to \code{TRUE} if your data (experimental
+design) is balanced, and there are replicates. In this case, MANOVA will
+set starting values for fitting and the kinship matrix \code{K} should not
+be provided. If there are no replicates (unique genotypes), set
+\code{replicates = FALSE} and provide the kinship matrix \code{K}
+parameter. Default is \code{TRUE}}
 
 \item{use.manova}{Set to \code{TRUE} to let MANOVA set starting values for
 fitting (Default). This is only valid if your experimental design is
@@ -82,10 +84,11 @@ resulting graph.}
 
 \item{fixedEdges}{A logical matrix of dimension \eqn{(p+1) \times (p+1)},
 where \eqn{p} is the number of traits. The first row and column refer to
-the genotype node \code{G}, and subsequent rows and columns to the traits. As in
-the \code{pcalg} package, the edge \eqn{[i - j]} is never considered for removal if
-the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are \code{TRUE}. In that
-case, the edge is guaranteed to be present in the resulting graph.}
+the genotype node \code{G}, and subsequent rows and columns to the traits.
+As in the \code{pcalg} package, the edge \eqn{[i - j]} is never considered
+for removal if the entry \eqn{[i, j]} or \eqn{[j, i]} (or both) are
+\code{TRUE}. In that case, the edge is guaranteed to be present in the
+resulting graph.}
 
 \item{NAdelete}{Logical, and is the NAdelete option in pcalg::pc function:
 TRUE deletes the edge corresponding to the conditional independence test
