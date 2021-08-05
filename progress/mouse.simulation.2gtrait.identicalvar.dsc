@@ -19,9 +19,9 @@ simulate: datamaker.R
   pgen: 10           # Probability a trait has non-zero genetic variance.
   ## Are these values standard? Or are they arbitrary..
   ntraits: 3         # number of traits
-  dagcoeff:   0.1, .25, .5   # Lower and upper limits of DAG edge weights 
-  rangeGenVar: .01, .1, .5   # Range of variances of direct genetic effects  ---------------> make it low
-  rangeEnvVar: .1, .5, 1   # Range of error variances (environment effects) ------------------> make it low
+  dagcoeff:   .25, .5, .75, 1   # Lower and upper limits of DAG edge weights 
+  rangeGenVar: .01, .1, .5, 1   # Range of variances of direct genetic effects  ---------------> make it low
+  rangeEnvVar: .01, .1, .5, 1   # Range of error variances (environment effects) ------------------> make it low
   diffVar: FALSE 
   $true_dag: gsem 
   $data: nw.data 

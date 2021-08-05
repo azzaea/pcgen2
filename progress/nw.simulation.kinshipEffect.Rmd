@@ -59,18 +59,20 @@ plot.performance(dscout.2gtrait.identicalvar, "vanilla")
 plot.performance(dscout.2gtrait.identicalvar, "pcres")
 plot.performance(dscout.2gtrait.identicalvar, "pcgen")
 ```
+    
     - 1 genetic trait set up: `mouse.simulation.1gtrait.identicalvar.dsc`: identical variance
 
 ```{r warning=FALSE, message=FALSE,error=FALSE,prompt=FALSE,results='hide', cache=TRUE}
 dscout.1gtrait.identicalvar <- dscquery(dsc.outdir =
-                                          "~/github_repos/pcgen2/progress/mouse.simulation.1gtrait.identicalvar/",                    targets = c("simulate.dagcoeff", "simulate.rangeGenVar",
-                               "simulate.rangeEnvVar", "simulate.true_dag",
-                               "simulate.data", "simulate.cor_traits",
-                               "learn", "learn.learnt_dag", "learn.cor_residuals",
-                               "learn.dagfit_tpr", "learn.dagfit_fpr",
-                               "learn.dagfit_tdr", "learn.dagfit_shd",
-                               "learn.genfit_tpr", "learn.genfit_fpr",
-                               "learn.genfit_tdr" ))  %>% as_tibble()
+                                         "~/github_repos/pcgen2/progress/mouse.simulation.1gtrait.identicalvar/",
+                                        targets = c("simulate.dagcoeff", "simulate.rangeGenVar",
+                                                    "simulate.rangeEnvVar", "simulate.true_dag",
+                                                    "simulate.data", "simulate.cor_traits",
+                                                    "learn", "learn.learnt_dag", "learn.cor_residuals",
+                                                    "learn.dagfit_tpr", "learn.dagfit_fpr",
+                                                    "learn.dagfit_tdr", "learn.dagfit_shd",
+                                                    "learn.genfit_tpr", "learn.genfit_fpr",
+                                                    "learn.genfit_tdr" ))  %>% as_tibble()
 
 ```
 
@@ -86,6 +88,8 @@ dscout.1gtrait.identicalvar %>% filter(learn == "pcgen") %>%
   geom_abline(aes(slope =1, intercept = 0)) +
   # geom_smooth(se = FALSE) +
   theme_classic() + facet_grid(rows = vars(simulate.rangeEnvVar), cols = vars(simulate.rangeGenVar))
+
+
 
 plot.performance(dscout.1gtrait.identicalvar, "vanilla")
 plot.performance(dscout.1gtrait.identicalvar, "pcres")

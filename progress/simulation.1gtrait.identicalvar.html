@@ -2740,13 +2740,14 @@ Prism.languages.yaml={scalar:{pattern:/([\-:]\s*(![^\s]+)?[ \t]*[|>])[ \t]*(?:((
 !function(){function e(e){this.defaults=r({},e)}function n(e){return e.replace(/-(\w)/g,function(e,n){return n.toUpperCase()})}function t(e){for(var n=0,t=0;t<e.length;++t)e.charCodeAt(t)=="	".charCodeAt(0)&&(n+=3);return e.length+n}if("undefined"!=typeof self&&self.Prism&&self.document){var r=Object.assign||function(e,n){for(var t in n)n.hasOwnProperty(t)&&(e[t]=n[t]);return e};e.prototype={setDefaults:function(e){this.defaults=r(this.defaults,e)},normalize:function(e,t){t=r(this.defaults,t);for(var i in t){var o=n(i);"normalize"!==i&&"setDefaults"!==o&&t[i]&&this[o]&&(e=this[o].call(this,e,t[i]))}return e},leftTrim:function(e){return e.replace(/^\s+/,"")},rightTrim:function(e){return e.replace(/\s+$/,"")},tabsToSpaces:function(e,n){return n=0|n||4,e.replace(/\t/g,new Array(++n).join(" "))},spacesToTabs:function(e,n){return n=0|n||4,e.replace(new RegExp(" {"+n+"}","g"),"	")},removeTrailing:function(e){return e.replace(/\s*?$/gm,"")},removeInitialLineFeed:function(e){return e.replace(/^(?:\r?\n|\r)/,"")},removeIndent:function(e){var n=e.match(/^[^\S\n\r]*(?=\S)/gm);return n&&n[0].length?(n.sort(function(e,n){return e.length-n.length}),n[0].length?e.replace(new RegExp("^"+n[0],"gm"),""):e):e},indent:function(e,n){return e.replace(/^[^\S\n\r]*(?=\S)/gm,new Array(++n).join("	")+"$&")},breakLines:function(e,n){n=n===!0?80:0|n||80;for(var r=e.split("\n"),i=0;i<r.length;++i)if(!(t(r[i])<=n)){for(var o=r[i].split(/(\s+)/g),a=0,s=0;s<o.length;++s){var l=t(o[s]);a+=l,a>n&&(o[s]="\n"+o[s],a=l)}r[i]=o.join("")}return r.join("\n")}},Prism.plugins.NormalizeWhitespace=new e({"remove-trailing":!0,"remove-indent":!0,"left-trim":!0,"right-trim":!0}),Prism.hooks.add("before-highlight",function(e){var n=e.element.parentNode,t=/\bno-whitespace-normalization\b/;if(!(!e.code||!n||"pre"!==n.nodeName.toLowerCase()||e.settings&&e.settings["whitespace-normalization"]===!1||t.test(n.className)||t.test(e.element.className))){for(var r=n.childNodes,i="",o="",a=!1,s=Prism.plugins.NormalizeWhitespace,l=0;l<r.length;++l){var c=r[l];c==e.element?a=!0:"#text"===c.nodeName&&(a?o+=c.nodeValue:i+=c.nodeValue,n.removeChild(c),--l)}if(e.element.children.length&&Prism.plugins.KeepMarkup){var u=i+e.element.innerHTML+o;e.element.innerHTML=s.normalize(u,e.settings),e.code=e.element.textContent}else e.code=i+e.code+o,e.code=s.normalize(e.code,e.settings)}})}}();
 </script></head><body><h2>DSC <a class="various" href="#dsc_conf">configuration script</a> and module summary</h2>
 <div style="display:none"><div id="dsc_conf"><pre><code class="language-yaml; line-numbers; left-trim; right-trim;">
-simulate: datamaker_3genetic.R
+simulate: datamaker_er_model.R
   reps: 1                # number of (genetically identical) replicates of each genotype
   randomizeSamples: FALSE # reorder the kinship matrix rows and columns?
   negative: FALSE     # Create a DAG with negative edge weights?
   topsort: TRUE         # If TRUE, non-genetic traits are chosen from nodes with highest topological order
   fixngen: TRUE       # If TRUE, Number of traits with 0 genetic effects = ((1-pgen) * ntraits).
                       # If FALSE, the number is random with probability = 1 - pgen
+  target: "mouse"
   useK: TRUE          # use a marker-based kinship matrix
   simulateQTLs: TRUE  # simulate QTLs, explaining part of the genetic variance ?
   alphaQTL: 0         # The proportion of genetic variance explained by the QTLs
@@ -2759,9 +2760,9 @@ simulate: datamaker_3genetic.R
   pgen: 10           # Probability a trait has non-zero genetic variance.
   ## Are these values standard? Or are they arbitrary..
   ntraits: 3         # number of traits
-  dagcoeff:   0.1, .25, .5, .75,  1, 2   # Lower and upper limits of DAG edge weights
-  rangeGenVar: .01, .05, .1, .5, 1, 1.5, 3, 6   # Range of variances of direct genetic effects  ---------------> make it low
-  rangeEnvVar: .01, .05, .1, .5, 1, 1.5, 3, 6   # Range of error variances (environment effects) ------------------> make it low
+  dagcoeff:  c(.1, 1), c(.5, 2)    # Lower and upper limits of DAG edge weights
+  rangeGenVar: c(.01, .1), c(.5, 1)   # Range of variances of direct genetic effects  ---------------> make it low
+  rangeEnvVar: c(.01, .1), c(.5, 1)   # Range of error variances (environment effects) ------------------> make it low
   diffVar: FALSE
   $true_dag: gsem
   $data: nw.data
@@ -2783,7 +2784,7 @@ pcres, pcgen, vanilla: pcresbuilder.R, pcgenbuilder.R, vanillapc.R
 DSC:
     define:
       learn: pcres, pcgen, vanilla
-    run: simulate * learn
+    run: simulate #* learn
     exec_path: bin
     output: simulation.1gtrait.identicalvar
     replicte: 5
@@ -2804,21 +2805,21 @@ DSC:
         <td></td>
         <td>K, data, true_dag</td>
         <td>cor_residuals, dagfit_fpr, dagfit_shd, dagfit_tdr, dagfit_tpr, genfit_fpr, genfit_tdr, genfit_tpr, learnt_dag</td>
-        <td>R</td>
+        <td>unused</td>
     </tr>
     <tr>
         <td>pcgen</td>
         <td></td>
         <td>K, data, true_dag</td>
         <td>cor_residuals, dagfit_fpr, dagfit_shd, dagfit_tdr, dagfit_tpr, genfit_fpr, genfit_tdr, genfit_tpr, learnt_dag</td>
-        <td>R</td>
+        <td>unused</td>
     </tr>
     <tr>
         <td>vanilla</td>
         <td></td>
         <td>K, data, true_dag</td>
         <td>cor_residuals, dagfit_fpr, dagfit_shd, dagfit_tdr, dagfit_tpr, genfit_fpr, genfit_tdr, genfit_tpr, learnt_dag</td>
-        <td>R</td>
+        <td>unused</td>
     </tr>
 </table><hr><table>
     <tr>
@@ -2833,7 +2834,7 @@ DSC:
     </tr>
     <tr>
         <td>simulate</td>
-        <td>alphaQTL, dagcoeff, diffVar, extranoise, fixngen, fixnumber, lambdaQTL, negative, noise, ntraits, pQTL, pgen, randomizeSamples, rangeEnvVar, rangeGenVar, reps, simulateQTLs, topsort, useK</td>
+        <td>alphaQTL, dagcoeff, diffVar, extranoise, fixngen, fixnumber, lambdaQTL, negative, noise, ntraits, pQTL, pgen, randomizeSamples, rangeEnvVar, rangeGenVar, reps, simulateQTLs, target, topsort, useK</td>
         <td></td>
         <td>K, cor_traits, data, true_dag</td>
         <td>R</td>
@@ -2841,22 +2842,30 @@ DSC:
 </table><h2>DSC pipelines</h2>
 <div class="accordion">
 <div class="accodion-section">
-<a class="accordion-section-title" href="#simulate-pcres">simulate->pcres</a>
-<div id=simulate-pcres class="accordion-section-content">
+<a class="accordion-section-title" href="#simulate">simulate</a>
+<div id=simulate class="accordion-section-content">
 <div class="tabs">
 <ul class="tab-links">
-<li class="active"><a href="#simulate-pcres_simulate-datamaker_3geneticr-f91ee253">simulate (datamaker_3genetic.R f91ee253)</a></li>
-<li><a href="#simulate-pcres_pcres-pcresbuilderr-d3c7eda2">pcres (pcresbuilder.R d3c7eda2)</a></li>
+<li class="active"><a href="#simulate_simulate-datamaker_er_modelr-a6f85c9e">simulate (datamaker_er_model.R a6f85c9e)</a></li>
 </ul>
 <div class="tab-content">
-<div id="simulate-pcres_simulate-datamaker_3geneticr-f91ee253" class="tab active">
+<div id="simulate_simulate-datamaker_er_modelr-a6f85c9e" class="tab active">
 <pre><code class="language-r; line-numbers; left-trim; right-trim;">
 library(GraphPhenoSimulator)
 library(GraphPhenoSimulator)
-load("~/github_repos/GraphPhenoSimulator/data/simdata1.RData")
-X <- as.matrix(dm[, -c(1:3)])
-K <- X %*% t(X) / sqrt(ncol(X))
-rm(list = c("d", "dm", "X"))
+if (target == "mouse") {
+  results.dir <- "/home/azza/github_repos/pcgen2/results/mouse"
+  K <- as.matrix(data.table::fread(file.path(results.dir, "kinship.cXX.txt"),
+                                   sep = "\t", header = F) )
+  use.K.names <- FALSE
+} else if (target == "human") {
+} else {
+  load("~/github_repos/GraphPhenoSimulator/data/simdata1.RData")
+  X <- as.matrix(dm[, -c(1:3)])
+  K <- X %*% t(X) / sqrt(ncol(X))
+  rm(list = c("d", "dm", "X"))
+  use.K.names <- TRUE
+}
 K <- K + 0.005 *diag(nrow(K))
 ng <- nrow(K)    # number of genotypes
 if (randomizeSamples) {
@@ -2864,9 +2873,8 @@ if (randomizeSamples) {
   K <- K[genotype.sample, genotype.sample]
 }
 p.edge <- 1 * min(1, 1/(ntraits-1)) # probability of an edge, in the randomDAG
-dag <- matrix(0, ntraits, ntraits)
-dag[1, 2] <- dagcoeff
-rownames(dag) <- colnames(dag) <- paste("Trait", 1: ntraits)
+dag <- randomDAG2(n=ntraits, prob=p.edge, lB = dagcoeff[1], uB = dagcoeff[2],
+                  V= paste0('Trait', 1:ntraits), negative = negative)
 if (diffVar == TRUE) {
   geneticCovMatrix <- clusterGeneration::genPositiveDefMat(covMethod = "onion",
                                                            dim=ntraits, alphad=1,
@@ -2874,180 +2882,45 @@ if (diffVar == TRUE) {
 } else
   geneticCovMatrix <- clusterGeneration::genPositiveDefMat(covMethod = "onion",
                                                            dim=ntraits, alphad=1,
-                                                           rangeVar=c(rangeGenVar, rangeGenVar))$Sigma
-rownames(geneticCovMatrix) <- colnames(geneticCovMatrix) <- colnames(dag)
-traits.without.direct.gen.effect <- rownames(dag)[1: 2]
-geneticCovMatrix[traits.without.direct.gen.effect, ] <- 0
-geneticCovMatrix[ ,traits.without.direct.gen.effect] <- 0
-if (diffVar == TRUE) {
-  errorVars <- runif(min = 0, max = rangeEnvVar, n = ntraits)
-} else
-  errorVars <- runif(min = rangeEnvVar, max = rangeEnvVar, n = ntraits)
-names(errorVars) <- names(dag)
-gsem <- create.gsem(dag.adj = dag, genCovMatrix = geneticCovMatrix,
-                    errorVars = errorVars)
-test <- rmvDAG_H2(ng = ng, r = reps, gsem = gsem, simulate.QTLs = simulateQTLs,
-                  lambda.QTL = lambdaQTL, fix.number = fixnumber,
-                  alpha.QTL = alphaQTL, p.QTL = pQTL,
-                  K = K, use.K.names = TRUE, use.marker.matrix = T)
-nw.data <- test$fulldata[, 1:(ntraits+1)]
-cor.traits <- cor(nw.data[, -1])
-</code></pre></div>
-<div id="simulate-pcres_pcres-pcresbuilderr-d3c7eda2" class="tab">
-<pre><code class="language-r; line-numbers; left-trim; right-trim;">
-library(pcalg)
-devtools::load_all(path = "/home/azza/github_repos/pcgen2/")
-library(pcalg)
-learnt.nw <- pcRes(data, K = K,
-                    cov.method = "uni", m.max = Inf, verbose = F, alpha = 1e-2)
-dag.results <- c(compareGraphs.order(learnt.nw@graph, gsem$dag),
-                 "shd" = shd.order(learnt.nw@graph, gsem$dag))
-gen.results <- rep(NA, 3)
-names(gen.results) <- c('tpr', 'fpr', 'tdr')
-cor.residuals <- NA
-</code></pre></div>
-</div></div></div></div>
-<div class="accodion-section">
-<a class="accordion-section-title" href="#simulate-pcgen">simulate->pcgen</a>
-<div id=simulate-pcgen class="accordion-section-content">
-<div class="tabs">
-<ul class="tab-links">
-<li class="active"><a href="#simulate-pcgen_simulate-datamaker_3geneticr-f91ee253">simulate (datamaker_3genetic.R f91ee253)</a></li>
-<li><a href="#simulate-pcgen_pcgen-pcgenbuilderr-ca868309">pcgen (pcgenbuilder.R ca868309)</a></li>
-</ul>
-<div class="tab-content">
-<div id="simulate-pcgen_simulate-datamaker_3geneticr-f91ee253" class="tab active">
-<pre><code class="language-r; line-numbers; left-trim; right-trim;">
-library(GraphPhenoSimulator)
-library(GraphPhenoSimulator)
-load("~/github_repos/GraphPhenoSimulator/data/simdata1.RData")
-X <- as.matrix(dm[, -c(1:3)])
-K <- X %*% t(X) / sqrt(ncol(X))
-rm(list = c("d", "dm", "X"))
-K <- K + 0.005 *diag(nrow(K))
-ng <- nrow(K)    # number of genotypes
-if (randomizeSamples) {
-  genotype.sample <-  sample(1:ng, size = ng) # if looking for randomness!
-  K <- K[genotype.sample, genotype.sample]
+                                                           rangeVar=c(rangeGenVar[1], rangeGenVar[2]))$Sigma
+rownames(geneticCovMatrix) <- colnames(geneticCovMatrix) <- graph::nodes(dag)
+if (pgen < 1) {
+  if (fixngen) {
+    if (topsort == TRUE) {
+      traits.without.direct.gen.effect <-
+        rev(match(names(topological.sort(igraph.from.graphNEL(dag))),
+                  names(edgeL(dag)))) [1:(round((1 - pgen)*ntraits))]
+    } else { # topsort == FALSE
+      traits.without.direct.gen.effect <-
+        sample(1:ntraits, size = round((1 - pgen)*ntraits))
+    }
+  } else { # fixngen == F
+    traits.without.direct.gen.effect <-
+      which(rbinom(p=1-pgen, size=1, n=ntraits)==1)
+  }
+} else { # pgen >=1
+  traits.without.direct.gen.effect <- integer()
 }
-p.edge <- 1 * min(1, 1/(ntraits-1)) # probability of an edge, in the randomDAG
-dag <- matrix(0, ntraits, ntraits)
-dag[1, 2] <- dagcoeff
-rownames(dag) <- colnames(dag) <- paste("Trait", 1: ntraits)
-if (diffVar == TRUE) {
-  geneticCovMatrix <- clusterGeneration::genPositiveDefMat(covMethod = "onion",
-                                                           dim=ntraits, alphad=1,
-                                                           rangeVar=c(0, rangeGenVar))$Sigma
-} else
-  geneticCovMatrix <- clusterGeneration::genPositiveDefMat(covMethod = "onion",
-                                                           dim=ntraits, alphad=1,
-                                                           rangeVar=c(rangeGenVar, rangeGenVar))$Sigma
-rownames(geneticCovMatrix) <- colnames(geneticCovMatrix) <- colnames(dag)
-traits.without.direct.gen.effect <- rownames(dag)[1: 2]
 geneticCovMatrix[traits.without.direct.gen.effect, ] <- 0
 geneticCovMatrix[ ,traits.without.direct.gen.effect] <- 0
 if (diffVar == TRUE) {
   errorVars <- runif(min = 0, max = rangeEnvVar, n = ntraits)
 } else
-  errorVars <- runif(min = rangeEnvVar, max = rangeEnvVar, n = ntraits)
-names(errorVars) <- names(dag)
+  errorVars <- runif(min = rangeEnvVar[1], max = rangeEnvVar[2], n = ntraits)
+names(errorVars) <- graph::nodes(dag)
 gsem <- create.gsem(dag.adj = dag, genCovMatrix = geneticCovMatrix,
                     errorVars = errorVars)
 test <- rmvDAG_H2(ng = ng, r = reps, gsem = gsem, simulate.QTLs = simulateQTLs,
                   lambda.QTL = lambdaQTL, fix.number = fixnumber,
                   alpha.QTL = alphaQTL, p.QTL = pQTL,
-                  K = K, use.K.names = TRUE, use.marker.matrix = T)
+                  K = K, use.K.names = use.K.names, use.marker.matrix = T)
 nw.data <- test$fulldata[, 1:(ntraits+1)]
-cor.traits <- cor(nw.data[, -1])
-</code></pre></div>
-<div id="simulate-pcgen_pcgen-pcgenbuilderr-ca868309" class="tab">
-<pre><code class="language-r; line-numbers; left-trim; right-trim;">
-library(pcalg)
-library(graph)
-library(GraphPhenoSimulator)
-devtools::load_all(path = "/home/azza/github_repos/pcgen2/")
-library(pcalg)
-library(graph)
-library(GraphPhenoSimulator)
-cor.residuals <- cor(getResiduals(data, cov.method = "uni", K = K))
-learnt.nw <- pcgen(data, K = K, res.cor = cor.residuals, use.res = T, verbose = F, alpha = 1e-2)
-gen.results <- compareGeneticEffects(QTL_to_G(learnt.nw@graph), gsem$gdag)
-fitted.subgraph <-
-  subGraph(snodes = setdiff(nodes(learnt.nw@graph),
-                            c('G', names(data)[grep(pattern='qtl_', x=names(data))])),
-           learnt.nw@graph)
-dag.results <- c(compareGraphs.order(fitted.subgraph, gsem$dag),
-                 "shd" = shd.order(fitted.subgraph, gsem$dag))
-</code></pre></div>
-</div></div></div></div>
-<div class="accodion-section">
-<a class="accordion-section-title" href="#simulate-vanilla">simulate->vanilla</a>
-<div id=simulate-vanilla class="accordion-section-content">
-<div class="tabs">
-<ul class="tab-links">
-<li class="active"><a href="#simulate-vanilla_simulate-datamaker_3geneticr-f91ee253">simulate (datamaker_3genetic.R f91ee253)</a></li>
-<li><a href="#simulate-vanilla_vanilla-vanillapcr-c7d7da5b">vanilla (vanillapc.R c7d7da5b)</a></li>
-</ul>
-<div class="tab-content">
-<div id="simulate-vanilla_simulate-datamaker_3geneticr-f91ee253" class="tab active">
-<pre><code class="language-r; line-numbers; left-trim; right-trim;">
-library(GraphPhenoSimulator)
-library(GraphPhenoSimulator)
-load("~/github_repos/GraphPhenoSimulator/data/simdata1.RData")
-X <- as.matrix(dm[, -c(1:3)])
-K <- X %*% t(X) / sqrt(ncol(X))
-rm(list = c("d", "dm", "X"))
-K <- K + 0.005 *diag(nrow(K))
-ng <- nrow(K)    # number of genotypes
-if (randomizeSamples) {
-  genotype.sample <-  sample(1:ng, size = ng) # if looking for randomness!
-  K <- K[genotype.sample, genotype.sample]
+if (noise == T) {
+  for (j in (2:(ntraits+1)))
+    nw.data[,j] <- nw.data[,j] + rnorm(n = nrow(nw.data),
+                           sd = sqrt(extranoise * gsem$Ve[j-1,j-1]))
 }
-p.edge <- 1 * min(1, 1/(ntraits-1)) # probability of an edge, in the randomDAG
-dag <- matrix(0, ntraits, ntraits)
-dag[1, 2] <- dagcoeff
-rownames(dag) <- colnames(dag) <- paste("Trait", 1: ntraits)
-if (diffVar == TRUE) {
-  geneticCovMatrix <- clusterGeneration::genPositiveDefMat(covMethod = "onion",
-                                                           dim=ntraits, alphad=1,
-                                                           rangeVar=c(0, rangeGenVar))$Sigma
-} else
-  geneticCovMatrix <- clusterGeneration::genPositiveDefMat(covMethod = "onion",
-                                                           dim=ntraits, alphad=1,
-                                                           rangeVar=c(rangeGenVar, rangeGenVar))$Sigma
-rownames(geneticCovMatrix) <- colnames(geneticCovMatrix) <- colnames(dag)
-traits.without.direct.gen.effect <- rownames(dag)[1: 2]
-geneticCovMatrix[traits.without.direct.gen.effect, ] <- 0
-geneticCovMatrix[ ,traits.without.direct.gen.effect] <- 0
-if (diffVar == TRUE) {
-  errorVars <- runif(min = 0, max = rangeEnvVar, n = ntraits)
-} else
-  errorVars <- runif(min = rangeEnvVar, max = rangeEnvVar, n = ntraits)
-names(errorVars) <- names(dag)
-gsem <- create.gsem(dag.adj = dag, genCovMatrix = geneticCovMatrix,
-                    errorVars = errorVars)
-test <- rmvDAG_H2(ng = ng, r = reps, gsem = gsem, simulate.QTLs = simulateQTLs,
-                  lambda.QTL = lambdaQTL, fix.number = fixnumber,
-                  alpha.QTL = alphaQTL, p.QTL = pQTL,
-                  K = K, use.K.names = TRUE, use.marker.matrix = T)
-nw.data <- test$fulldata[, 1:(ntraits+1)]
 cor.traits <- cor(nw.data[, -1])
-</code></pre></div>
-<div id="simulate-vanilla_vanilla-vanillapcr-c7d7da5b" class="tab">
-<pre><code class="language-r; line-numbers; left-trim; right-trim;">
-library(pcalg)
-devtools::load_all(path = "/home/azza/github_repos/pcgen2/")
-library(pcalg)
-learnt.nw <- pcalg::pc(suffStat = list(C = cor(data[,-1]), n = nrow(data)),
-                       indepTest = pcalg::gaussCItest, alpha = 0.01,
-                       labels = names(data[,-1]), m.max = Inf, # for pcRes
-                       skel.method = "stable", u2pd = "relaxed", NAdelete = FALSE,
-                       conservative = FALSE, maj.rule = TRUE, solve.confl = TRUE)
-dag.results <- c(compareGraphs.order(learnt.nw@graph, gsem$dag),
-                 "shd" = shd.order(learnt.nw@graph, gsem$dag))
-gen.results <- rep(NA, 3)
-names(gen.results) <- c('tpr', 'fpr', 'tdr')
-cor.residuals <- NA
 </code></pre></div>
 </div></div></div></div>
 
